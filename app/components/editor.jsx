@@ -1,16 +1,20 @@
-import React from 'react';     
+import React from 'react'; 
 
-class Editor extends React.Component{
+import PlazaSelect from './plazaselect/plazaselect.jsx';    
+
+class EditorPage extends React.Component{
 	constructor() {
 		super();
 	}
 
 	render () {
 	    return (
-	      <div id="editor">editor</div>
+	      <div id="editor">
+						<PlazaSelect />
+				</div>
 	    );
 	  }
 }
 
-export default Editor;
+export default EditorPage;
 
