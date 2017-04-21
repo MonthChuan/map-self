@@ -93,3 +93,14 @@ ul, li,  dl, dt, dd {
 .pf {
     position: fixed;
 }
+
+.clearfix:after {
+    content: ".";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+}
+.clearfix {
+    display: block;
+}
