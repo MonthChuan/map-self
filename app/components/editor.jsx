@@ -2,11 +2,11 @@ import './editorpage.css';
 import 'antd/dist/antd.css';
 import React from 'react'; 
 
-
 import PlazaSelect from './plazaselect/plazaselect.jsx';  
 import Control from './control/control.jsx';  
 import Detail from './detail/detail.jsx';
 import Submit from './submit/submit.jsx';
+import SaveConfirm from './utils/saveConfirm.jsx';
 
 class EditorPage extends React.Component{
 	constructor(props) {
@@ -32,7 +32,7 @@ class EditorPage extends React.Component{
 	editStart() {
 		this.state.ffmap.on('featureClick', event => {
 			if(!this.state.isMerge && this.state.store) {
-				console.log('正在编辑')
+				this.refs.saveConfirm.showConfirm();
 			}
 			else {
 				event.store.toggleEdit();
@@ -71,6 +71,8 @@ class EditorPage extends React.Component{
 					<Detail state={this.state} editStore={this.editStore.bind(this)} />
 				</div>
 				<Submit state={this.state} editStart={this.editStart.bind(this)} />
+
+				<SaveConfirm ref="saveConfirm" />
 			</div>
 	    );
 	  }
