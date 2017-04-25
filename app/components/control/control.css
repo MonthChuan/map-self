@@ -3,6 +3,12 @@
   float: left;
 }
 
-.control button {
+.control .ant-btn-primary {
   margin-bottom: 15px;
+}
+
+.upload-wrap {
+  display: block;
+  width: 100px;
+  margin-top: 15px;
 }

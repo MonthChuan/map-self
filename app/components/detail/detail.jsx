@@ -3,6 +3,7 @@ import React from 'react';
 import { Input, Select } from 'antd'; 
 const Option = Select.Option;
 const typelist = [
+	{name : "便利店", code : "060401"},
 	{name : "礼品店", code : "060403"},
 	{name : "儿童用品店", code : "060404"},
 	{name : "购物中心", code : "060405"},
@@ -12,33 +13,39 @@ const typelist = [
 export default class Detail extends React.Component{
 	constructor(props) {
 		super(props);
-		this.state = {
-			store : this.props.store,
-			map : null
-		};
+		this.state = this.props.state;
+
+		this.selectChange = this.selectChange.bind(this);
+		this.selectChangeName = this.selectChangeName.bind(this);
 	}
 
-	//先获取map对象
-	setValue(option) {
-		if(!this.state.map) {
-			this.setState(this.props.getData());
-		}
+
+	selectChangeName(event) {
+		const { value } = event.target;
+
+		this.props.editStore({'name' : value});
 	}
 
-	selectChange() {}
+	selectChange(value) {
+		this.props.editStore({ 'regionType' : value});
+	}
+
 	render() {
-		// console.log(this.props.store)
+		const typelistTpl = typelist.map(function(item) {
+			return <Option key={item.code} value={item.code}>{item.name}</Option>
+		});
+
 		return (
 			<div className="detail-wrapper">
 				<p className="title">编辑器</p>
 				<div className="line">
 					<label>名称：</label>
-					<Input style={{ width: 130 }} placeholder="店铺名称" value={this.state.store._name || "defaultvalue"} onChange={this.selectChange} />
+					<Input style={{ width: 130 }} placeholder="店铺名称" value={(this.props.state.store && this.props.state.store.name) || "店铺名称"} onChange={this.selectChangeName} />
 				</div>
 				<div className="line">
 					<label>类型：</label>
-					<Select defaultValue="dd" style={{ width: 130 }} onChange={this.selectChange}>
-						<Option value="Yiminghe">yiminghe</Option>
+					<Select value={(this.props.state.store && this.props.state.store.regionType) || "店铺类型"}  style={{ width: 130 }} onChange={this.selectChange}>
+						{typelistTpl}
 					</Select>
 				</div>
 			</div>

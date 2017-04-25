@@ -13,39 +13,42 @@ class EditorPage extends React.Component{
 		super(props);
 		this.state = {
 			ffmap : null,
-			store : {},
-			plazaId : ''
+			store : null,
+			plazaId : '',
+			isMerge : false
 		};
 	}
 
 	//DOM加载完毕之后，初始化map
 	componentDidMount() {
-		console.log(this.state.plazaId)
 		this.state.ffmap = new FFanMap('map', {
 			zoom : 20,
 			editable : true,
 			regionInteractive : true
 		});
-		// this.state.ffmap.loadBuilding(this.state.plazaId);
-		this.state.ffmap.loadBuilding(1000772)
-	}
-
-	getMap() {
-		return this.state.ffmap;
-	}
-
-	getData() {
-		return this.state;
+		this.state.ffmap.loadBuilding(this.state.plazaId); //1000772
 	}
 
 	editStart() {
 		this.state.ffmap.on('featureClick', event => {
-			event.store.toggleEdit();
-			// console.log(event)
-			// console.log(event.store)
-			// console.log(event.store.getOriginalLatlng());
-			this.setState({store : event.store});
+			if(!this.state.isMerge && this.state.store) {
+				console.log('正在编辑')
+			}
+			else {
+				event.store.toggleEdit();
+				this.setState({store : event.store});
+			}
 		});
+	}
+
+	editStore(update) {
+		if(update.name) {
+			//name要在地图上更新，所以要单独调用set
+			this.state.store.name = update.name;
+		}
+	
+		let newStore = Object.assign(this.state.store, update);
+		this.setState({store : newStore});
 	}
 
 	getPlazaId(id) {
@@ -59,15 +62,15 @@ class EditorPage extends React.Component{
 	render () {
 	    return (
 			<div className="page" id="editor">
-				<PlazaSelect getData={this.getData.bind(this)} getPlazaId={this.getPlazaId.bind(this)} />
+				<PlazaSelect getPlazaId={this.getPlazaId.bind(this)} />
 				<div className="content-wrapper clearfix">
-					<Control getData={this.getData.bind(this)} />
+					<Control state={this.state} />
 					<div className="map-wrapper">
 						<div className="map" id="map" style={{height:600}}></div>
 					</div>
-					<Detail store={this.state.store} getData={this.getData.bind(this)} />
+					<Detail state={this.state} editStore={this.editStore.bind(this)} />
 				</div>
-				<Submit getData={this.getData.bind(this)} editStart={this.editStart.bind(this)} />
+				<Submit state={this.state} editStart={this.editStart.bind(this)} />
 			</div>
 	    );
 	  }

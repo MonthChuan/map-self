@@ -15,12 +15,11 @@ export default class PlazaSelect extends React.Component{
 	}
 
 	handleChange(value) {
-		// console.log(`selected ${value}`);
 		this.props.getPlazaId(value);
 	}
 
 	render() {
-		const list = plazalist.map(function(item) {
+		const plazalistTpl = plazalist.map(function(item) {
 			return <Option key={item.plazaId} value={item.plazaId}>{item.plazaName}</Option>
 		});
 
@@ -35,7 +34,7 @@ export default class PlazaSelect extends React.Component{
 					onChange={this.handleChange}
 					filterOption={(input, option) => option.props.value.toLowerCase().indexOf(input.toLowerCase()) >= 0}
 				>
-					{list}
+					{plazalistTpl}
 				</Select>
 			</div>
 		);
