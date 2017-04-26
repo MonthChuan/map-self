@@ -12,6 +12,7 @@ export default class Control extends React.Component{
 		this.drawPloy = this.drawPloy.bind(this);
 		this.seachStore = this.seachStore.bind(this);
 		this.uploadChange = this.uploadChange.bind(this);
+		this.setMerge = this.setMerge.bind(this);
 	}
 
 	//画线
@@ -25,6 +26,9 @@ export default class Control extends React.Component{
 	}
 
 	//合并
+	setMerge() {
+		this.props.setMerge();
+	}
 	//搜索店铺
 	seachStore(value) {
 		let stores = [];
@@ -47,7 +51,7 @@ export default class Control extends React.Component{
 			<div className="control">
 				<Button type="primary" onClick={this.drawLine}>线</Button><br />
 				<Button type="primary" onClick={this.drawPloy}>面</Button><br />
-				<Button type="primary">合并</Button><br />
+				<Button type="primary" onClick={this.setMerge}>合并</Button> <Button type="primary" onClick={this.props.mergeStore}>开始合并</Button><br />
 				<Search
 					placeholder="搜索店铺"
 					style={{ width: 100 }}

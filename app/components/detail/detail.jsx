@@ -40,11 +40,11 @@ export default class Detail extends React.Component{
 				<p className="title">编辑器</p>
 				<div className="line">
 					<label>名称：</label>
-					<Input style={{ width: 130 }} placeholder="店铺名称" value={(this.props.state.store && this.props.state.store.name) || "店铺名称"} onChange={this.selectChangeName} />
+					<Input style={{ width: 130 }} placeholder="店铺名称" value={(this.props.state.store[0] && this.props.state.store[0].name) || "店铺名称"} onChange={this.selectChangeName} />
 				</div>
 				<div className="line">
 					<label>类型：</label>
-					<Select value={(this.props.state.store && this.props.state.store.regionType) || "店铺类型"}  style={{ width: 130 }} onChange={this.selectChange}>
+					<Select value={(this.props.state.store[0] && this.props.state.store[0].regionType) || "店铺类型"}  style={{ width: 130 }} onChange={this.selectChange}>
 						{typelistTpl}
 					</Select>
 				</div>
