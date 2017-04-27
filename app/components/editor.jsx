@@ -88,6 +88,9 @@ class EditorPage extends React.Component{
 
 	//合并店铺
 	setMerge() {
+		if(this.state.store.length > 0) {
+			this.refs.saveConfirm.showConfirm();
+		}
 		this.setState({isMerge : true});
 	}
 	mergeStore(store) {
