@@ -32,7 +32,7 @@ export default class PlazaSelect extends React.Component{
 					placeholder="选择广场"
 					optionFilterProp="children"
 					onChange={this.handleChange}
-					filterOption={(input, option) => option.props.value.toLowerCase().indexOf(input.toLowerCase()) >= 0}
+					filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
 				>
 					{plazalistTpl}
 				</Select>

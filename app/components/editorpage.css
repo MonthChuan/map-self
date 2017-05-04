@@ -1,21 +1,35 @@
 .page {
-    padding: 20px 0;
-    width: 1240px;
-    overflow: hidden;
-    margin: 0 auto;
+  position: relative;
+  min-width: 1200px;
+}
+.mid {
+  width: 1200px;
+  margin: 0 auto;
+}
+
+.topbar {
+  height: 65px;
+  width: 100%;
+  border-bottom: 1px solid #e5e5e5;
+}
+.e-content {
+  height: 530px;
+  margin: 10px auto;
+}
+.bottom {
+  border: 1px solid #e5e5e5;
+  height: 60px;
 }
 
 .map-wrapper {
   float: left;
-  margin: 0 200px 0 100px;
-  background: #555;
-  width: 900px;
-  height: 600px;
-  margin: 0 20px;
-  overflow: hidden
+  width: 918px;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
 }
 
 .map-wrapper .map {
-  width: 900px;
-  height: 600px;
+  width: 918px;
+  height: 100%;
 }

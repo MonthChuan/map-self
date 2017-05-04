@@ -7,6 +7,7 @@ import Control from './control/control.jsx';
 import Detail from './detail/detail.jsx';
 import Submit from './submit/submit.jsx';
 import SaveConfirm from './utils/saveConfirm.jsx';
+// import { message } from 'antd';
 
 class EditorPage extends React.Component{
 	constructor(props) {
@@ -15,7 +16,8 @@ class EditorPage extends React.Component{
 			ffmap : null,
 			store : [],
 			plazaId : '',
-			isMerge : false
+			isMerge : false,
+			floor : [] //楼层店铺数据
 		};
 
 		this.editStart = this.editStart.bind(this);
@@ -23,7 +25,8 @@ class EditorPage extends React.Component{
 		this.getPlazaId = this.getPlazaId.bind(this);
 		this.saveEdit = this.saveEdit.bind(this);
 		this.setMerge = this.setMerge.bind(this);
-		this.mergeStore = this.mergeStore.bind(this);
+		// this.mergeStore = this.mergeStore.bind(this);
+		// this.deleteStore = this.deleteStore.bind(this);
 	}
 
 	//DOM加载完毕之后，初始化map
@@ -34,11 +37,22 @@ class EditorPage extends React.Component{
 			regionInteractive : true
 		});
 		this.state.ffmap.loadBuilding(this.state.plazaId); //1000772
+
+
+		//获取商铺列表
+		this.state.ffmap.on('rendered', event => {
+			const _list = [];
+			event.storeGroup.eachLayer(function(s) {
+				_list.push(s.feature);
+			});
+
+			this.setState({floor : _list});
+		});
 	}
 
 	editStart() {
 		this.state.ffmap.on('featureClick', event => {
-			if(event.store.editEnabled()) {
+			if(event.store.editEnabled() || event.store.selected) {
 				return;
 			}
 
@@ -63,13 +77,21 @@ class EditorPage extends React.Component{
 	}
 
 	editStore(update) {
-		if(update.name) {
-			//name要在地图上更新，所以要单独调用set
-			this.state.store[0].name = update.name;
+		console.log(update)
+		if(!this.state.isMerge) {
+			if(update.name) {
+				//name要在地图上更新，所以要单独调用set
+				this.state.store[0].name = update.name;
+			}
 		}
-	
+		else {
+			if(this.state.nameLabel) {
+				this.state.nameLabel.setContent(update.name);
+			}
+		}
 		let newStore = Object.assign(this.state.store[0], update);
 		this.setState({store : [newStore]});
+
 	}
 
 	getPlazaId(id) {
@@ -82,6 +104,8 @@ class EditorPage extends React.Component{
 
 	saveEdit() {
 		//todo提交store数据
+		console.log(this.state.store)
+
 		this.state.store[0].disableEdit();
 		this.setState({store : []});
 	}
@@ -93,23 +117,37 @@ class EditorPage extends React.Component{
 		}
 		this.setState({isMerge : true});
 	}
-	mergeStore(store) {
-		//
-	}
+	// mergeStore(store) {
+	// 	if(this.state.store.length > 1) {
+	// 		message.warning('无法合并！');
+	// 	}
+	// }
+
+	//delete挪到control.jsx里面啦 
+	// deleteStore() {
+	// 	if(this.state.store.length > 0 && !this.state.isMerge) {
+	// 		this.state.store[0].remove();
+	// 	}
+	// } 
 
 	render () {
-		// console.log(this.state.isMerge)
 	    return (
 			<div className="page" id="editor">
-				<PlazaSelect getPlazaId={this.getPlazaId} />
-				<div className="content-wrapper clearfix">
-					<Control state={this.state} setMerge={this.setMerge} mergeStore={this.mergeStore} />
+				<div className="topbar">
+					<div className="mid clearfix">
+						<PlazaSelect getPlazaId={this.getPlazaId} />
+						<Control state={this.state} setMerge={this.setMerge} mergeStore={this.mergeStore} editStart={this.editStart} saveEdit={this.saveEdit} />
+					</div>
+				</div>
+				<div className="e-content mid clearfix">
 					<div className="map-wrapper">
-						<div className="map" id="map" style={{height:600}}></div>
+						<div className="map" id="map" style={{height:530}}></div>
 					</div>
 					<Detail state={this.state} editStore={this.editStore} />
 				</div>
-				<Submit state={this.state} editStart={this.editStart} saveEdit={this.saveEdit} />
+				<div className="bottom mid">
+					<Submit state={this.state} />
+				</div>
 
 				<SaveConfirm ref="saveConfirm" />
 			</div>

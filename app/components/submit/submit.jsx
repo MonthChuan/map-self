@@ -1,31 +1,32 @@
 import './submit.css';
 import React from 'react';  
-import { Button } from 'antd';   
+import { Button, Upload } from 'antd';   
 
 export default class Submit extends React.Component{
 	constructor(props) {
 		super(props);
 		this.state = this.props.state;
 
-		this.editStart = this.editStart.bind(this);
-		this.saveEdit = this.saveEdit.bind(this);
+		this.uploadChange = this.uploadChange.bind(this);
 	}
 
-	editStart() {
-		this.setState({tip : '正处于编辑状态！'});
-		this.props.editStart();
-	}
-
-	saveEdit() {
-		this.props.saveEdit();
+	uploadChange(info) {
+		this.setState({uploadTip : info.file.status});
 	}
 
 	render() {
 		return (
 			<div className="submit">
-				<span>{this.state.tip || '点击开始编辑'}</span>
-				<Button type="primary" onClick={this.editStart}>开始编辑</Button>
-				<Button type="primary" onClick={this.saveEdit}>保存</Button>
+				<span>{this.state.uploadTip || ''}</span>
+				<Upload
+					className="upload-wrap"
+					action=""
+					name="file"
+					showUploadList={false}
+					onChange={this.uploadChange}
+				>
+					<Button>上传CAD</Button>
+				</Upload>
 				<Button type="primary">完成编辑</Button>
 			</div>
 		);

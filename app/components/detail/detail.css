@@ -1,15 +1,30 @@
 .detail-wrapper {
   float: right;
-  width: 200px;
-  height: 600px;
+  width: 274px;
+  height: 100%;
   border: 1px solid #e5e5e5;
-  text-align: center
+  overflow: hidden;
+
+  overflow-y: auto;
 }
-.detail-wrapper .title {
-  line-height: 40px;
-  font-size: 14px;
-  border-bottom: 1px solid #e5e5e5;
-}
+
 .detail-wrapper .line {
   margin-top: 10px;
+}
+.ant-select-selection__placeholder {
+  text-align: left;
+}
+
+.stores li {
+  height: 50px;
+  line-height: 50px;
+  border-bottom: 1px solid #e5e5e5;
+  padding-left: 15px;
+  color: #666;
+  text-align: left;
+  cursor: pointer;
+}
+
+.stores .selected {
+  background: #e2f6ff;
 }

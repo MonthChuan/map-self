@@ -1,24 +1,25 @@
 import './control.css';
 import React from 'react';  
-import { Button, Input, Upload, Icon } from 'antd';   
-
-const Search = Input.Search;
+import { Button, message } from 'antd'; 
+// import L from 'leaflet';  
 
 export default class Control extends React.Component{
 	constructor(props) {
 		super(props);
 		this.state = this.props.state;
-		this.drawLine = this.drawLine.bind(this);
+		// this.drawLine = this.drawLine.bind(this);
 		this.drawPloy = this.drawPloy.bind(this);
-		this.seachStore = this.seachStore.bind(this);
-		this.uploadChange = this.uploadChange.bind(this);
 		this.setMerge = this.setMerge.bind(this);
+		this.deleteStore = this.deleteStore.bind(this);
+		this.mergeStore = this.mergeStore.bind(this);
+		this.editStart = this.editStart.bind(this);
+		this.saveEdit = this.saveEdit.bind(this);
 	}
 
 	//画线
-	drawLine(evt) {
-		this.state.ffmap.startPolyline();
-	}
+	// drawLine(evt) {
+	// 	this.state.ffmap.startPolyline();
+	// }
 	
 	//画面
 	drawPloy() {
@@ -29,46 +30,69 @@ export default class Control extends React.Component{
 	setMerge() {
 		this.props.setMerge();
 	}
-	//搜索店铺
-	seachStore(value) {
-		let stores = [];
 
-		if(/^[0-9]*$/.test(value)) {
-			stores = this.state.ffmap.searchStoreByID(value);
+	mergeStore(store) {
+		if(this.props.state.store.length < 2) {
+			message.warning('无法合并！');
 		}
 		else {
-			stores = this.state.ffmap.serachStoreByName(value);
+			const s1 = this.props.state.store[0].feature;
+			const s2 = this.props.state.store[1].feature;
+
+			if( s1.getBounds().intersects(s2.getBounds()) ) {
+				const union = turf.union(s1.toGeoJSON(), s2.toGeoJSON());
+
+
+console.log(union)
+				const layer = this.state.ffmap.drawGeoJSON(union);
+
+				this.props.state.store[0].remove();
+				this.props.state.store[1].remove();
+				this.props.state.store[0].isDelete = true;
+				this.props.state.store[1].isDelete = true;
+      			this.state.ffmap.addOverlay(layer);
+		  				
+				const coords = turf.coordAll(union).map(function(item) {
+					return FFanMap.Utils.toOriginalCoordinates(item);
+				});
+				this.props.state.store.unshift( {region : coords} );
+				//手动添加一个名称label
+				const centerLatLng = layer.getBounds().getCenter();
+				const nameLabel = new FFanMap.Label(centerLatLng, '');
+				this.state.ffmap.addOverlay(nameLabel);
+				this.props.state.nameLabel = nameLabel;
+			}
+			else {
+				message.error('无法合并！');
+			}
 		}
-		stores.forEach(function(store, i) {
-			store.selected = true;
-		});
 	}
-	uploadChange(info) {
-		this.setState({uploadTip : info.file.status});
+
+	editStart() {
+		this.setState({tip : '正处于编辑状态！'});
+		this.props.editStart();
 	}
+
+	saveEdit() {
+		this.props.saveEdit();
+	}
+
+	//delete
+	deleteStore() {
+		if(this.props.state.store.length > 0 && !this.props.state.isMerge) {
+			this.props.state.store[0].remove();
+			this.props.state.store[0].isDelete = true;
+		}
+	} 
 	render() {
 		return (
 			<div className="control">
-				<Button type="primary" onClick={this.drawLine}>线</Button><br />
-				<Button type="primary" onClick={this.drawPloy}>面</Button><br />
-				<Button type="primary" onClick={this.setMerge}>合并</Button> <Button type="primary" onClick={this.props.mergeStore}>开始合并</Button><br />
-				<Search
-					placeholder="搜索店铺"
-					style={{ width: 100 }}
-					onSearch={this.seachStore}
-				/>
-				<Upload
-					className="upload-wrap"
-					action=""
-					name="file"
-					showUploadList={false}
-					onChange={this.uploadChange}
-				>
-					<Button>
-						<Icon type="upload" /> 上传CAD
-					</Button>
-				</Upload>
-				<p>{this.state.uploadTip || ''}</p>
+				{/*<Button type="primary" onClick={this.drawLine}>线</Button><br />*/}
+				<Button type="primary" onClick={this.drawPloy}>面</Button>
+				<Button type="primary" onClick={this.deleteStore}>删除</Button>
+				<Button type="primary" onClick={this.setMerge}>合并</Button> <Button type="primary" onClick={this.mergeStore}>提交合并</Button>
+				<Button type="primary" onClick={this.editStart}>开始编辑</Button>
+				<Button type="primary" onClick={this.saveEdit}>保存</Button>
 			</div>
 		);
 	}

@@ -1,8 +1,13 @@
 .submit {
   text-align: right;
-  padding: 20px 0;
 }
 
 .submit button {
   margin-left: 15px;
+}
+
+.upload-wrap {
+  display: inline-block;
+  width: 100px;
+  margin-top: 15px;
 }
