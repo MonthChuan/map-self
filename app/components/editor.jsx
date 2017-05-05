@@ -7,7 +7,6 @@ import Control from './control/control.jsx';
 import Detail from './detail/detail.jsx';
 import Submit from './submit/submit.jsx';
 import SaveConfirm from './utils/saveConfirm.jsx';
-// import { message } from 'antd';
 
 class EditorPage extends React.Component{
 	constructor(props) {
@@ -25,8 +24,6 @@ class EditorPage extends React.Component{
 		this.getPlazaId = this.getPlazaId.bind(this);
 		this.saveEdit = this.saveEdit.bind(this);
 		this.setMerge = this.setMerge.bind(this);
-		// this.mergeStore = this.mergeStore.bind(this);
-		// this.deleteStore = this.deleteStore.bind(this);
 	}
 
 	//DOM加载完毕之后，初始化map
@@ -117,18 +114,6 @@ class EditorPage extends React.Component{
 		}
 		this.setState({isMerge : true});
 	}
-	// mergeStore(store) {
-	// 	if(this.state.store.length > 1) {
-	// 		message.warning('无法合并！');
-	// 	}
-	// }
-
-	//delete挪到control.jsx里面啦 
-	// deleteStore() {
-	// 	if(this.state.store.length > 0 && !this.state.isMerge) {
-	// 		this.state.store[0].remove();
-	// 	}
-	// } 
 
 	render () {
 	    return (

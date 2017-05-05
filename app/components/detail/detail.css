@@ -24,6 +24,9 @@
   text-align: left;
   cursor: pointer;
 }
+.stores li:hover {
+  color: #108ee9;
+}
 
 .stores .selected {
   background: #e2f6ff;

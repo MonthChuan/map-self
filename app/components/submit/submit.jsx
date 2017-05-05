@@ -27,7 +27,7 @@ export default class Submit extends React.Component{
 				>
 					<Button>上传CAD</Button>
 				</Upload>
-				<Button type="primary">完成编辑</Button>
+				<Button type="primary">提交审核</Button>
 			</div>
 		);
 	}

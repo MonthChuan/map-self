@@ -1,13 +1,11 @@
 import './control.css';
 import React from 'react';  
 import { Button, message } from 'antd'; 
-// import L from 'leaflet';  
 
 export default class Control extends React.Component{
 	constructor(props) {
 		super(props);
 		this.state = this.props.state;
-		// this.drawLine = this.drawLine.bind(this);
 		this.drawPloy = this.drawPloy.bind(this);
 		this.setMerge = this.setMerge.bind(this);
 		this.deleteStore = this.deleteStore.bind(this);
@@ -15,15 +13,13 @@ export default class Control extends React.Component{
 		this.editStart = this.editStart.bind(this);
 		this.saveEdit = this.saveEdit.bind(this);
 	}
-
-	//画线
-	// drawLine(evt) {
-	// 	this.state.ffmap.startPolyline();
-	// }
 	
 	//画面
 	drawPloy() {
-		this.state.ffmap.startPolygon();
+		const newStore = this.state.ffmap.startPolygon();
+
+		
+		console.log(newStore)
 	}
 
 	//合并
@@ -69,7 +65,6 @@ console.log(union)
 	}
 
 	editStart() {
-		this.setState({tip : '正处于编辑状态！'});
 		this.props.editStart();
 	}
 
@@ -87,7 +82,6 @@ console.log(union)
 	render() {
 		return (
 			<div className="control">
-				{/*<Button type="primary" onClick={this.drawLine}>线</Button><br />*/}
 				<Button type="primary" onClick={this.drawPloy}>面</Button>
 				<Button type="primary" onClick={this.deleteStore}>删除</Button>
 				<Button type="primary" onClick={this.setMerge}>合并</Button> <Button type="primary" onClick={this.mergeStore}>提交合并</Button>
