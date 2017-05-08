@@ -64,7 +64,6 @@ export default class Detail extends React.Component{
 			item.className = 'selected';
 		});
 
-		console.log(filterNode)
 	}
 
 	render() {

@@ -74,16 +74,22 @@ class EditorPage extends React.Component{
 	}
 
 	editStore(update) {
-		console.log(update)
 		if(!this.state.isMerge) {
 			if(update.name) {
 				//name要在地图上更新，所以要单独调用set
+				if(this.state.isAdd) {
+					//手动添加一个名称label,如果是添加，应该建一个name放上去。todo
+					// const centerLatLng = this.state.store[0].getBounds().getCenter();
+					// const nameLabel = new FFanMap.Label(centerLatLng, '');
+					// this.state.ffmap.addOverlay(nameLabel);
+					// this.state.store[0].nameLabel = nameLabel;
+				}
 				this.state.store[0].name = update.name;
 			}
 		}
 		else {
-			if(this.state.nameLabel) {
-				this.state.nameLabel.setContent(update.name);
+			if(this.state.store[0].nameLabel) {
+				this.state.store[0].nameLabel.setContent(update.name);
 			}
 		}
 		let newStore = Object.assign(this.state.store[0], update);
@@ -100,10 +106,11 @@ class EditorPage extends React.Component{
 	}
 
 	saveEdit() {
-		//todo提交store数据
-		console.log(this.state.store)
-
-		this.state.store[0].disableEdit();
+		console.log(this.state.store);
+		if(this.state.store[0].disableEdit) {
+			this.state.store[0].disableEdit();
+		}
+	
 		this.setState({store : []});
 	}
 
