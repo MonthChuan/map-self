@@ -3,11 +3,11 @@
 }
 
 .submit button {
-  margin-left: 15px;
+  margin-top: 20px;
+  margin-right: 20px;
+  padding: 10px 44px;
 }
 
 .upload-wrap {
   display: inline-block;
-  width: 100px;
-  margin-top: 15px;
 }

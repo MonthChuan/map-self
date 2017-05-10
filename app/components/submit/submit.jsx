@@ -8,10 +8,18 @@ export default class Submit extends React.Component{
 		this.state = this.props.state;
 
 		this.uploadChange = this.uploadChange.bind(this);
+		this.submitAll = this.submitAll.bind(this);
 	}
 
 	uploadChange(info) {
 		this.setState({uploadTip : info.file.status});
+	}
+
+	submitAll() {
+		if(this.props.state.store.length > 0) {
+			this.props.saveEdit();
+		}
+		//todo结束本次编辑。。。
 	}
 
 	render() {
@@ -25,9 +33,9 @@ export default class Submit extends React.Component{
 					showUploadList={false}
 					onChange={this.uploadChange}
 				>
-					<Button>上传CAD</Button>
+					<Button type="primary">上传附件</Button>
 				</Upload>
-				<Button type="primary">提交审核</Button>
+				<Button type="primary" onClick={this.submitAll}>提交审核</Button>
 			</div>
 		);
 	}

@@ -2,6 +2,49 @@
   float: right;
 }
 
-.control .ant-btn-primary {
-  margin-bottom: 15px;
+.control .e-save,
+.control .e-start {
+  width: 132px;
+  height: 70px;
+  font-size: 18px;
+}
+
+.control .s-btn {
+  display: inline-block;
+  color: #666;
+  font-size: 14px;
+  height: 32px;
+  line-height: 32px;
+  border-right: 1px solid #e5e5e5;
+  position: relative;
+  padding: 0 20px;
+}
+.control .s-btn .s-icon {
+  display: block;
+  width: 18px;
+  height: 18px;
+  margin-right: 10px;
+  margin-top: 6px;
+  overflow: hidden;
+  background: url(http://timg.ffan.com/convert/resize/url_T10_ETB5bQ1RCvBVdK/tfs/813c92c19b7cd46cc00b8a1bb9120d86.png) no-repeat;
+  float: left;
+}
+
+.control .s-add .s-icon {background-position: 0 -18px;}
+.control .s-edit .s-icon {background-position: 0 -54px;}
+.control .s-delete .s-icon {background-position: 0 -90px;}
+.control .s-merge .s-icon {background-position: 0 -126px;}
+.control .s-zt .s-icon {background-position: 0 -162px;}
+
+
+.control .s-add.disable .s-icon {background-position: 0 0px;}
+.control .s-edit.disable .s-icon {background-position: 0 -36px;}
+.control .s-delete.disable .s-icon {background-position: 0 -72px;}
+.control .s-merge.disable .s-icon {background-position: 0 -108px;}
+.control .s-zt.disable .s-icon {background-position: 0 -144px;}
+
+.control .disable {
+  color: #e2e2e3; 
+  cursor: not-allowed;
+  pointer-events: none;
 }

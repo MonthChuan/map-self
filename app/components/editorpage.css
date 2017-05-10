@@ -8,7 +8,7 @@
 }
 
 .topbar {
-  height: 65px;
+  height: 70px;
   width: 100%;
   border-bottom: 1px solid #e5e5e5;
 }
@@ -17,7 +17,6 @@
   margin: 10px auto;
 }
 .bottom {
-  border: 1px solid #e5e5e5;
   height: 60px;
 }
 
@@ -33,3 +32,15 @@
   width: 918px;
   height: 100%;
 }
+
+.page .ant-btn-primary {
+  /*background-color: #2fcae7;
+  border-color: #2fcae7;*/
+  border-radius: 0px;
+}
+
+.page .e-show {display: inline-block;}
+.page .e-hide {display: none;}
+
+
+

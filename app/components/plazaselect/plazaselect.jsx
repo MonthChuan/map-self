@@ -27,7 +27,7 @@ export default class PlazaSelect extends React.Component{
 			<div className="plaza-select">
 				<Select
 					showSearch
-					style={{ width: 200 }}
+					style={{ width: 224, height: 32 }}
 					defaultValue={plazalist[0].plazaName}
 					placeholder="选择广场"
 					optionFilterProp="children"
