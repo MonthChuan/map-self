@@ -61,7 +61,7 @@ class EditorPage extends React.Component{
 		});
 
 		this.state.ffmap.on('featureClick', event => {
-			if(this.state.store.length > 2 || this.state.status.isZT) {
+			if(this.state.store.length > 2 || (this.state.status.isZT && this.state.status.isActive)) {
 				message.warning('您正在编辑状态，请先完成操作并保存，再进行其他操作！', 3);
 				return;
 			}
