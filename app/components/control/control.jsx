@@ -23,7 +23,7 @@ export default class Control extends React.Component{
 	//检查是否可以进行下面操作
 	checkAct() {
 		if(this.props.state.store.length > 0 && this.props.state.store[0].act != 'show') {
-			message.warning('您正在编辑状态，请先完成操作并保存，再进行其他操作！');
+			message.warning('您正在编辑状态，请先完成操作并保存，再进行其他操作！', 3);
 			return false;
 		}
 		return true;
@@ -72,7 +72,7 @@ export default class Control extends React.Component{
 
 	mergeStore(store) {
 		if(this.props.state.store.length < 2) {
-			message.warning('无法合并！');
+			message.warning('无法合并！', 3);
 		}
 		else {
 			const s1 = this.props.state.store[0].feature;
@@ -100,7 +100,7 @@ export default class Control extends React.Component{
 				this.props.newNameLabel(centerLatLng);
 			}
 			else {
-				message.error('无法合并！');
+				message.error('无法合并！', 3);
 			}
 		}
 	}

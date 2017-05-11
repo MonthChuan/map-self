@@ -62,7 +62,7 @@ class EditorPage extends React.Component{
 
 		this.state.ffmap.on('featureClick', event => {
 			if(this.state.store.length > 2 || this.state.status.isZT) {
-				message.warning('您正在编辑状态，请先完成操作并保存，再进行其他操作！');
+				message.warning('您正在编辑状态，请先完成操作并保存，再进行其他操作！', 3);
 				return;
 			}
 			if(this.state.status.isStart || !this.state.status.isActive) {
@@ -75,7 +75,7 @@ class EditorPage extends React.Component{
 					return;
 				}
 				if(this.state.store.length > 0 && this.state.store[0].act != 'show' && !(this.state.status.isMerge || this.state.status.isSubMerge)) {
-					message.warning('您正在编辑状态，请先完成操作并保存，再进行其他操作！');
+					message.warning('您正在编辑状态，请先完成操作并保存，再进行其他操作！', 3);
 					return;
 				}
 
@@ -154,7 +154,7 @@ class EditorPage extends React.Component{
 
 	editStore(update) { 
 		if(this.state.store.length == 0) {
-			message.warning('没有正在编辑的商铺！');
+			message.warning('没有正在编辑的商铺！', 3);
 			return;
 		}
 		if(this.state.status.isAdd) {
@@ -185,6 +185,7 @@ class EditorPage extends React.Component{
 	}
 
 	getPlazaId(id) {
+		this.saveEdit();
 		this.state.plazaId = id;
 
 		if(this.state.ffmap) {
