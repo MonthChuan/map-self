@@ -129,7 +129,7 @@ export default class Control extends React.Component{
 	} 
 
 	dropDown( { key } ) {
-		if(!this.checkAct()) {return}
+		// if(!this.checkAct()) {return}
 		this.props.setState({status : {
 			isAdd : false,
 			isEdit : false,
@@ -153,26 +153,7 @@ export default class Control extends React.Component{
 		};
 		//承重柱
 		const bulidFuc2 = () => {
-			this.props.state.ffmap.on('click', event => {
-				if(this.props.state.store.length > 0) {
-					return;
-				}
-				const p1 = FFanMap.Utils.latLngToPoint(event.latlng);
-				const p2 = [p1.x - 10, p1.y - 10];
-				const bounds = [event.latlng, FFanMap.Utils.pointToLatLng(p2)];
-				const layer = L.rectangle(bounds, {
-					draggable : true,
-					color: "#ff7800", 
-					weight: 1, 
-					transform: true
-				});
-
-				this.props.state.ffmap.addOverlay(layer);
-				layer.transform.enable({rotation: true});
-				layer.name = '承重柱';
-				layer.regionType = '承重柱';
-				this.props.setState({store : [layer]});
-			});
+			
 		};
 		//万达百货
 		const bulidFuc3 = () => {

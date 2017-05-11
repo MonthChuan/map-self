@@ -113,6 +113,28 @@ class EditorPage extends React.Component{
 			
 			this.setState({store : [event.store]});
 		});
+
+		//承重柱
+		this.state.ffmap.on('click', event => {
+			if(this.state.status.isZT != 2) {
+				return;
+			}
+			const p1 = FFanMap.Utils.latLngToPoint(event.latlng);
+			const p2 = [p1.x - 10, p1.y - 10];
+			const bounds = [event.latlng, FFanMap.Utils.pointToLatLng(p2)];
+			const layer = L.rectangle(bounds, {
+				draggable : true,
+				color: "#ff7800", 
+				weight: 1, 
+				transform: true
+			});
+
+			this.state.ffmap.addOverlay(layer);
+			layer.transform.enable({rotation: true});
+			layer.name = '承重柱';
+			layer.regionType = '承重柱';
+			this.setState({store : [layer]});
+		});
 	}
 
 	//点击开始编辑按钮
@@ -140,7 +162,9 @@ class EditorPage extends React.Component{
 			if(this.state.status.isAdd) {
 				//手动添加一个名称label,如果是添加，应该建一个name放上去。todo
 				const center = this.state.store[0].graphics.getCenter();
-				this.newNameLabel(center);
+				if(!this.state.store[0].nameLabel) {
+					this.newNameLabel(center);
+				}
 				this.state.store[0].nameLabel.setContent(update.name);
 			}
 		}
