@@ -5,19 +5,20 @@ const Option = Select.Option;
 const TabPane = Tabs.TabPane;
 const Search = Input.Search;
 const RadioGroup = Radio.Group;
-const typelist = [
-	{name : "便利店", code : "060401"},
-	{name : "礼品店", code : "060403"},
-	{name : "儿童用品店", code : "060404"},
-	{name : "购物中心", code : "060405"},
-	{name : "服装店", code : "060406"}
-];
+// const typelist = [
+// 	{name : "便利店", code : "060401"},
+// 	{name : "礼品店", code : "060403"},
+// 	{name : "儿童用品店", code : "060404"},
+// 	{name : "购物中心", code : "060405"},
+// 	{name : "服装店", code : "060406"}
+// ];
 
 export default class Detail extends React.Component{
 	constructor(props) {
 		super(props);
 		this.state = this.props.state;
 		this.state.zsRadio = 1;
+		this.state.typelist = [];
 
 		this.selectChange = this.selectChange.bind(this);
 		this.selectChangeName = this.selectChangeName.bind(this);
@@ -25,6 +26,18 @@ export default class Detail extends React.Component{
 		this.searchStore = this.searchStore.bind(this);
 		this.onRadioChange = this.onRadioChange.bind(this);
 		this.onCalendarChange = this.onCalendarChange.bind(this);
+	}
+
+	//第一次渲染组件之后，异步获取数据
+	componentDidMount() {
+		$.ajax({
+			'url' : 'http://yunjin.intra.sit.ffan.com/mapeditor/category/categoryCodes',
+			'dataType' : 'json'
+		}).done( req => {
+			if(req.status == 200) {
+				this.setState({typelist : req.data});
+			}
+		});
 	}
 
 	onCalendarChange(value, mode) {}
@@ -42,6 +55,7 @@ export default class Detail extends React.Component{
 	}
 
 	selectChange(value) {
+		console.log(111)
 		this.props.editStore({ 'regionType' : value});
 	}
 
@@ -79,8 +93,8 @@ export default class Detail extends React.Component{
 	}
 
 	render() {
-		const typelistTpl = typelist.map(function(item) {
-			return <Option key={item.code} value={item.code}>{item.name}</Option>
+		const typelistTpl = this.state.typelist.map(function(item) {
+			return <Option key={item.code} value={item.code}>{item.desc}</Option>
 		});
 
 		const self = this;
@@ -91,6 +105,8 @@ export default class Detail extends React.Component{
 			return <li key={item.id} value={item.id} onClick={self.clickStore}>{item.properties.re_name}</li>;
 		});
 
+		const isDisable = (this.props.state.store[0] && this.props.state.store[0].action=='SHOW') ? true : false;
+
 		return (
 			<div className="detail-wrapper">
 				 <div className="card-container">
@@ -99,11 +115,11 @@ export default class Detail extends React.Component{
 							<div className="y-scroll info-wrap">
 								<div className="line">
 									<label className="txt">店铺名称：</label>
-									<Input placeholder="店铺名称" value={(this.props.state.store[0] && this.props.state.store[0].name)} onChange={this.selectChangeName} />
+									<Input placeholder="店铺名称" disabled={isDisable} value={(this.props.state.store[0] && this.props.state.store[0].name)} onChange={this.selectChangeName} />
 								</div>
 								<div className="line">
 									<label className="txt">业态：</label>
-									<Select placeholder="店铺类型" value={(this.props.state.store[0] && this.props.state.store[0].regionType)} onChange={this.selectChange}>
+									<Select placeholder="店铺类型" disabled={isDisable} value={(this.props.state.store[0] && this.props.state.store[0].regionType)} onChange={this.selectChange}>
 										{typelistTpl}
 									</Select>
 								</div>
@@ -174,7 +190,7 @@ export default class Detail extends React.Component{
 							<div className="y-scroll info-wrap">
 								<div className="line">
 										<label className="txt">楼层业态：</label>
-										<Select placeholder="楼层业态" onChange={this.selectChange}>
+										<Select placeholder="楼层业态">
 											{typelistTpl}
 										</Select>
 									</div>

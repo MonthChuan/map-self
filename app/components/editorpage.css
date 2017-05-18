@@ -8,13 +8,17 @@
 }
 
 .topbar {
+  position: relative;
   height: 70px;
   width: 100%;
   border-bottom: 1px solid #e5e5e5;
+  z-index: 2;
 }
 .e-content {
+  position: relative;
   height: 530px;
   margin: 10px auto;
+  z-index: 1;
 }
 .bottom {
   height: 60px;
@@ -43,4 +47,4 @@
 .page .e-hide {display: none;}
 
 
-
+.page .transform-handler--rotate {}

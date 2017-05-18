@@ -22,7 +22,7 @@ export default class Control extends React.Component{
 
 	//检查是否可以进行下面操作
 	checkAct() {
-		if(this.props.state.store.length > 0 && this.props.state.store[0].act != 'show') {
+		if(this.props.state.store.length > 0 && this.props.state.store[0].action != 'SHOW') {
 			message.warning('您正在编辑状态，请先完成操作并保存，再进行其他操作！', 3);
 			return false;
 		}
@@ -34,8 +34,13 @@ export default class Control extends React.Component{
 		if(!this.checkAct()) {return}
 
 
-		const newStore = this.state.ffmap.startPolygon();
-		newStore.act = "add";
+		const newStore = this.state.ffmap.startPolygon({
+			color : '#ddc486',
+			fillColor : '#fef8eb',
+			weight : 1,
+			fillOpacity : 0.6
+		});
+		newStore.action = "NEW";
 
 		this.props.setState({status : {
 			isAdd : true,
@@ -48,6 +53,10 @@ export default class Control extends React.Component{
 			isActive : true
 		}});
 		this.props.state.store = [newStore];
+
+		newStore.on('click', e => {
+			this.props.initFeatureClick(e);
+		});
 	}
 
 	//合并
@@ -80,7 +89,7 @@ export default class Control extends React.Component{
 
 			if( s1.getBounds().intersects(s2.getBounds()) ) {
 				const union = turf.union(s1.toGeoJSON(), s2.toGeoJSON());
-				const layer = this.state.ffmap.drawGeoJSON(union);
+				const layer = this.state.ffmap.drawGeoJSON(union, {editable: true});
 
 				this.props.state.store[0].remove();
 				this.props.state.store[1].remove();
@@ -91,13 +100,17 @@ export default class Control extends React.Component{
 				const coords = turf.coordAll(union).map(function(item) {
 					return FFanMap.Utils.toOriginalCoordinates(item);
 				});
-				const _s = [{region : coords}].concat(this.props.state.store);
+				layer.region = coords;
+				const _s = [layer].concat(this.props.state.store);
 				this.props.setState({store : _s});
 				this.props.state.store = _s;
-				// this.props.state.store.unshift( {region : coords} );
 				//手动添加一个名称label
 				const centerLatLng = layer.getBounds().getCenter();
 				this.props.newNameLabel(centerLatLng);
+
+				layer.on('click', e => {
+					this.props.initFeatureClick(e);
+				});
 			}
 			else {
 				message.error('无法合并！', 3);
@@ -215,7 +228,7 @@ export default class Control extends React.Component{
 		const submergeStyle = {'display' : (this.props.state.status.isSubMerge ? 'inline-block' : 'none')};
 
 		const startStyle = {'display' : (this.props.state.status.isStart ? 'inline-block' : 'none')};
-		const saveStyle = {'display' : (!this.props.state.status.isStart ? 'inline-block' : 'none')};
+		const saveStyle = {'display' : (this.props.state.status.isStart || (this.props.state.status.isActive == 2) ? 'none' : 'inline-block')};
 	
 		return (
 			<div className="control">
@@ -228,8 +241,8 @@ export default class Control extends React.Component{
 				<Dropdown overlay={menu}>
 					<span className={name5}><i className="s-icon"></i>专题数据<Icon type="down" /></span>
 				</Dropdown>
-				<Button className="e-start" style={startStyle} type="primary" onClick={this.editStart}>开始编辑</Button>
-				<Button className="e-save" style={saveStyle} type="primary" onClick={this.saveEdit}>保存</Button>
+				<Button ref="actionBtn" className="e-start" style={startStyle} type="primary" onClick={this.editStart}>开始编辑</Button>
+				<Button ref="actionBtn" className="e-save" style={saveStyle} type="primary" onClick={this.saveEdit}>保存</Button>
 				<SaveConfirm ref="saveConfirm" />
 			</div>
 		);

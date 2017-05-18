@@ -18,6 +18,9 @@
   border-right: 1px solid #e5e5e5;
   position: relative;
   padding: 0 20px;
+  min-width: 125px;
+  white-space: nowrap;
+  margin-top: 19px;
 }
 .control .s-btn .s-icon {
   display: block;
@@ -26,7 +29,7 @@
   margin-right: 10px;
   margin-top: 6px;
   overflow: hidden;
-  background: url(http://timg.ffan.com/convert/resize/url_T10_ETB5bQ1RCvBVdK/tfs/813c92c19b7cd46cc00b8a1bb9120d86.png) no-repeat;
+  background: url(http://timg.ffan.com/convert/resize/url_T1ZhdTB5Vg1RCvBVdK/tfs/f7414aa028c8edb09820afa4358b1a3f.png) no-repeat;
   float: left;
 }
 
