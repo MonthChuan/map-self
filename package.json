@@ -16,6 +16,7 @@
   "dependencies": {
     "antd": "^2.9.1",
     "babel-polyfill": "^6.23.0",
+    "js-md5": "^0.4.2",
     "leaflet-path-transform": "^1.0.3",
     "react": "^15.5.4"
   },

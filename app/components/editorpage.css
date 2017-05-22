@@ -47,4 +47,9 @@
 .page .e-hide {display: none;}
 
 
-.page .transform-handler--rotate {}
+.popconfirm-btn {
+  display: block;
+  width: 918px;
+  height: 1px;
+}
+.ant-popover-arrow {display: none!important;}

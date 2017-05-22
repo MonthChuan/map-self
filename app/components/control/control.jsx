@@ -93,20 +93,21 @@ export default class Control extends React.Component{
 
 				this.props.state.store[0].remove();
 				this.props.state.store[1].remove();
-				// this.props.state.store[0].isDelete = true;
-				// this.props.state.store[1].isDelete = true;
+				this.props.state.store[0].action = 'DELETE';
+				this.props.state.store[1].action = 'DELETE';
       			this.state.ffmap.addOverlay(layer);
 		  				
 				const coords = turf.coordAll(union).map(function(item) {
 					return FFanMap.Utils.toOriginalCoordinates(item);
 				});
-				layer.region = coords;
+				layer.coords = coords;
+				layer.action = 'NEW';
 				const _s = [layer].concat(this.props.state.store);
 				this.props.setState({store : _s});
 				this.props.state.store = _s;
 				//手动添加一个名称label
 				const centerLatLng = layer.getBounds().getCenter();
-				this.props.newNameLabel(centerLatLng);
+				this.props.newNameLabel(centerLatLng, layer);
 
 				layer.on('click', e => {
 					this.props.initFeatureClick(e);
@@ -153,42 +154,53 @@ export default class Control extends React.Component{
 			isStart : false,
 			isActive : true
 		}});
+		const bulidZT = (name, type) => {
+			const layer = this.state.ffmap.startPolygon({
+				color: "#ff7800", 
+				weight: 1
+			});
+			layer.name = name;
+			layer.regionType = type;
+			layer.action = 'NEW';
+
+			this.props.setState({store : [layer]});
+		};
 		//多经点
 		const bulidFuc1 = () => {
 			const layer = this.state.ffmap.startPolygon({
 				color: "#ff7800", 
 				weight: 1
 			});
-			layer.name = '多经点';
-			layer.regionType = '多经点';
+			layer.name = '多经点位';
+			layer.regionType = '030201';
 
 			this.props.setState({store : [layer]});
 		};
-		//承重柱
-		const bulidFuc2 = () => {
+		// //承重柱
+		// const bulidFuc2 = () => {
 			
-		};
+		// };
 		//万达百货
-		const bulidFuc3 = () => {
-			const layer = this.state.ffmap.startPolygon({
-				color: "#ff7800", 
-				weight: 1
-			});
-			layer.name = '万达百货';
-			layer.regionType = '万达百货';
+		// const bulidFuc3 = () => {
+		// 	const layer = this.state.ffmap.startPolygon({
+		// 		color: "#ff7800", 
+		// 		weight: 1
+		// 	});
+		// 	layer.name = '万达百货';
+		// 	layer.regionType = '万达百货';
 
-			this.props.setState({store : [layer]});
-		};
+		// 	this.props.setState({store : [layer]});
+		// };
 
 		switch(parseInt(key)) {
 			case 1:
-				bulidFuc1();
+				bulidZT('多经点位', '030201');
 				break;
 			case 2:
-				bulidFuc2();
+				// bulidFuc2();
 				break;
 			case 3:
-				bulidFuc3();
+				bulidZT('万达百货', '万达百货');
 				break;
 			default:
 				break;
@@ -241,8 +253,8 @@ export default class Control extends React.Component{
 				<Dropdown overlay={menu}>
 					<span className={name5}><i className="s-icon"></i>专题数据<Icon type="down" /></span>
 				</Dropdown>
-				<Button ref="actionBtn" className="e-start" style={startStyle} type="primary" onClick={this.editStart}>开始编辑</Button>
-				<Button ref="actionBtn" className="e-save" style={saveStyle} type="primary" onClick={this.saveEdit}>保存</Button>
+				<Button className="e-start" style={startStyle} type="primary" onClick={this.editStart}>开始编辑</Button>
+				<Button className="e-save" style={saveStyle} type="primary" onClick={this.saveEdit}>保存</Button>
 				<SaveConfirm ref="saveConfirm" />
 			</div>
 		);

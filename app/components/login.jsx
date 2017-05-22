@@ -1,6 +1,7 @@
 import './loginpage.css';
 import React from 'react'; 
 import { Form, Icon, Input, Button, Checkbox } from 'antd';
+import md5 from 'js-md5';
 const FormItem = Form.Item;    
 
 class Login extends React.Component{
@@ -14,16 +15,26 @@ class Login extends React.Component{
 	handleSubmit(e) {
 		e.preventDefault();
 		this.props.form.validateFields((err, values) => {
-		if (!err) {
-			console.log('Received values of form: ', values);
-		}
+			console.log(values)
+			values.password = md5.hex(values.password);
+			if (!err) {
+				$.ajax({
+					'url' : preAjaxUrl + '/mapeditor/user/v1/login',
+					'type' : 'POST',
+					'dataType' : 'json',
+					'data' : {"data" : JSON.stringify(values)}
+				}).done( req => {
+					console.log(req)
+				});
+				// console.log('Received values of form: ', values);
+			}
 		});
 	}
 
 	rememberMe(e) {
 		const form = this.props.form;
 		const isChecked = e ? e.target.checked : form.getFieldValue('remember') ; 
-		const nameField = form.getFieldInstance('userName');
+		const nameField = form.getFieldInstance('phone');
 		const psField = form.getFieldInstance('password');
 		
 		if(isChecked) {
@@ -50,7 +61,7 @@ class Login extends React.Component{
 						<p className="title">欢迎使用FFAN地图在线编辑平台</p>
 						<Form onSubmit={this.handleSubmit} className="login-form">
 							<FormItem>
-							{getFieldDecorator('userName', {
+							{getFieldDecorator('phone', {
 								rules: [{ required: true, message: '请您填写用户名' }],
 							})(
 								<Input prefix={<Icon type="user" style={{ fontSize: 13 }} />} placeholder="请输入用户名" />

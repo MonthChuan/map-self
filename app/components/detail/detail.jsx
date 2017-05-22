@@ -55,15 +55,14 @@ export default class Detail extends React.Component{
 	}
 
 	selectChange(value) {
-		console.log(111)
 		this.props.editStore({ 'regionType' : value});
 	}
 
 	clickStore(event) {
-		const id = event.target.value;
+		const id = event.target.getAttribute('value');
 		const s = this.props.state.ffmap.searchStoreByID(id);
 		
-		if(s[0].selected) {
+		if(s.length==0 || s[0].selected) {
 			return;
 		}
 		s[0].selected = true;
