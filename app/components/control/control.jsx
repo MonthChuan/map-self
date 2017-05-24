@@ -98,9 +98,16 @@ export default class Control extends React.Component{
 				this.props.state.store[1].action = 'DELETE';
       			this.state.ffmap.addOverlay(layer);
 		  				
-				coords = turf.coordAll(union).map(function(item) {
-					return FMap.Utils.toOriginalCoordinates(item);
+				// coords = turf.coordAll(union).map(function(item) {
+				// 	return FMap.Utils.toOriginalCoordinates(item);
+				// });
+				const coordObj = turf.coordAll(union).map(item => {
+					return {
+						lat : item[0],
+						lng : item[1]
+					};
 				});
+				coords = FMap.Utils.getOriginalByLatlngs(coordObj);
 
 				layer.coords = coords;
 				layer.action = 'NEW';
