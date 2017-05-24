@@ -123,7 +123,7 @@ export default class Detail extends React.Component{
 									</Select>
 								</div>
 
-								<p className="line-tit">招商平台信息</p>
+								{/*<p className="line-tit">招商平台信息</p>
 								<div className="line">
 									<label className="txt">地图ID：</label>
 									<span className="txt2">ALF0237</span>
@@ -169,7 +169,7 @@ export default class Detail extends React.Component{
 								<div className="line">
 									<label className="txt">地板至不可拆卸管道最低高度：</label>
 									<Input placeholder="小数点后一位" />m
-								</div>
+								</div>*/}
 
 
 							</div>

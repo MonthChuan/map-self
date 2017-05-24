@@ -49,31 +49,94 @@ class EditorPage extends React.Component{
 	} 
 
 	fixStoreParam(obj) {
-		let f = null;
+		// let f = null;
 		let coords = [];
 		let centerPoint = null;
 		let centerPointXY = {x : 0, y : 0};
 		let coordsList = [];
 		let layerType = '';
 
+		// if(obj.feature) {
+		// 	f = obj.feature.toGeoJSON();
+		// 	layerType = 'feature';
+		// }
+		// else if(obj.graphics) {
+		// 	f = obj.graphics.toGeoJSON();
+		// 	layerType = 'graphics';
+		// }
+		// else if(obj.toGeoJSON) {
+		// 	f = obj.toGeoJSON();
+		// }
+		
+
+		// if(obj.action != 'DELETE') {
+		// 	if(obj.coords) {
+		// 		coords = obj.coords.map( item => {
+		// 			return [item.x, item.y, 0];
+		// 		});
+		// 		centerPoint = obj.getBounds().getCenter();
+		// 	} 
+		// 	else {
+		// 		if(obj.getCenter) {
+		// 			centerPoint = obj.getCenter();
+		// 		}
+		// 		else {
+		// 			centerPoint = obj[layerType].getCenter();
+		// 		}
+				
+		// 		coordsList = f.geometry.coordinates[0].length > 1 ? f.geometry.coordinates[0] : f.geometry.coordinates[0][0];
+		// 		coords = coordsList.map(item => {
+		// 			const r = FMap.Utils.toOriginalCoordinates(item);
+		// 			return [r.x, r.y, 0];
+		// 		});
+		// 	}
+			
+		// 	centerPointXY = FMap.Utils.toOriginalCoordinates(centerPoint);
+		// }
+
+
+		//=======================
+			// const list = obj.getLatLngs();
+			// const result = [];
+			// for (let i = 0; i < list.length; ++i) {
+			// 	var innerList = list[i], innerTemp = [];
+			// 	var temp = [];
+			// 	if(innerList.length > 1) {
+			// 		innerList.forEach(latlng => {
+			// 			const point = FMap.Utils.toOriginalCoordinates(latlng);
+			// 			temp.push([point.x, point.y]);
+			// 			});
+			// 			innerTemp.push(temp);
+			// 	}
+			// 	else {
+			// 		for (let j = 0; j < innerList.length; ++j) {
+			// 			var latlngList = innerList[j];
+			// 			latlngList.forEach(latlng => {
+			// 			const point = FMap.Utils.toOriginalCoordinates(latlng);
+			// 			temp.push([point.x, point.y]);
+			// 			});
+			// 			innerTemp.push(temp);
+			// 		}
+			// 	}
+			// 	result.push(innerTemp);
+			// }
+			// coords = result[0][0];
+			// centerPointXY =  {x: coords[0][0], y : coords[0][1]}
+		//======================
+
+
 		if(obj.feature) {
-			f = obj.feature.toGeoJSON();
 			layerType = 'feature';
 		}
 		else if(obj.graphics) {
-			f = obj.graphics.toGeoJSON();
 			layerType = 'graphics';
 		}
-		else if(obj.toGeoJSON) {
-			f = obj.toGeoJSON();
-		}
+
 		
 
 		if(obj.action != 'DELETE') {
 			if(obj.coords) {
-				coords = obj.coords.map( item => {
-					return [item.x, item.y, 0];
-				});
+				coords = obj.coords;
 				centerPoint = obj.getBounds().getCenter();
 			} 
 			else {
@@ -84,14 +147,16 @@ class EditorPage extends React.Component{
 					centerPoint = obj[layerType].getCenter();
 				}
 				
-				coordsList = f.geometry.coordinates[0].length > 1 ? f.geometry.coordinates[0] : f.geometry.coordinates[0][0];
-				coords = coordsList.map(item => {
-					const r = FFanMap.Utils.toOriginalCoordinates(item);
-					return [r.x, r.y, 0];
-				});
+				coordsList = obj.getOriginalLatlng();
+				if(coordsList[0].length > 1) {
+					coords = coordsList[0];
+				}
+				else {
+					coords = coordsList[0][0];
+				}
 			}
 			
-			centerPointXY = FFanMap.Utils.toOriginalCoordinates(centerPoint);
+			centerPointXY = FMap.Utils.toOriginalCoordinates(centerPoint);
 		}
 
 		if(obj.action == 'NEW') {
@@ -106,7 +171,7 @@ class EditorPage extends React.Component{
 				centerx : centerPointXY.x,
 				centery : centerPointXY.y,
 				re_name : obj.name,
-				re_type : obj.regionType,
+				re_type : obj.regionType || '',
 				region_id : obj.id || ''
 			},
 			geometry : {
@@ -190,7 +255,7 @@ class EditorPage extends React.Component{
 
 	//DOM加载完毕之后，初始化map
 	componentDidMount() {
-		this.state.ffmap = new FFanMap('map', {
+		this.state.ffmap = new FMap.Map('map', {
 			zoom : 20,
 			editable : true,
 			regionInteractive : true,
@@ -241,9 +306,9 @@ class EditorPage extends React.Component{
 			if(this.state.status.isZT != 2 || (this.state.store.length > 0 && this.state.store[0].action != 'SHOW')) {
 				return;
 			}
-			const p1 = FFanMap.Utils.latLngToPoint(event.latlng);
+			const p1 = FMap.Utils.latLngToPoint(event.latlng);
 			const p2 = [p1.x + 3, p1.y + 3];
-			const bounds = [event.latlng, FFanMap.Utils.pointToLatLng(p2)];
+			const bounds = [event.latlng, FMap.Utils.pointToLatLng(p2)];
 			const layer = L.rectangle(bounds, {
 				draggable : true,
 				color: "#ff7800", 
@@ -258,29 +323,16 @@ class EditorPage extends React.Component{
 			layer.action = 'NEW';
 			this.setState({store : [layer]});
 		});
-
-
-
-
-
-
-
-
-		//--------------------------------
-		this.state.ffmap.on('rendered', e => {
-			e.regionGroup.eachLayer(i => {
-				i.feature.properties.re_name = 'test1';
-				i.feature.properties.name = 'test2'
-				i.name = 'test3'
-			})
-		})
 	}
 
 	//点击开始编辑按钮
 	editStart() {
 		$.ajax({
 			'url' : preAjaxUrl + '/mapeditor/map/editStart/' + this.state.plazaId + '/' + this.state.floorId,
-			'type' : 'POST'
+			'type' : 'POST',
+			'xhrFields': {
+                      withCredentials: true
+              }
 		}).done(req => {
 			if(req.status == 200) {
 				this.setState({status : {
@@ -384,24 +436,10 @@ class EditorPage extends React.Component{
 		}).done(req => {
 			if(req.status == 200) {
 
-				if(this.state.store[0].transform) {
-					this.state.store[0].transform.enable({
-						rotation: false,
-						scaling : false
-					});
-				}
-				if(this.state.store[0].dragging) {
-					this.state.store[0].dragging.disable();
-				}
-			
-				if(this.state.store[0].eachLayer) {
-					this.state.store[0].eachLayer(i => {
-						i.disableEdit();
-					});
-				}
-				else {
-					this.state.store[0].disableEdit();
-				}
+				Modal.success({
+					title : '提示',
+					content : '保存成功！'
+				});
 
 
 				
@@ -411,6 +449,24 @@ class EditorPage extends React.Component{
 					title : '提示',
 					content : req.message
 				});
+			}
+			if(this.state.store[0].transform) {
+				this.state.store[0].transform.enable({
+					rotation: false,
+					scaling : false
+				});
+			}
+			if(this.state.store[0].dragging) {
+				this.state.store[0].dragging.disable();
+			}
+		
+			if(this.state.store[0].eachLayer) {
+				this.state.store[0].eachLayer(i => {
+					i.disableEdit();
+				});
+			}
+			else {
+				this.state.store[0].disableEdit();
 			}
 			//重置按钮状态
 			this.setState({status : {
@@ -427,13 +483,11 @@ class EditorPage extends React.Component{
 			this.setState({store : []});
 		});
 		
-		// if(this.state.store[0].action == 'DELETE') {}
-		
 	}
 
 	//新建一个name label
 	newNameLabel(center, layer) {
-		const nameLabel = new FFanMap.PoiLabel(center, '', layer);
+		const nameLabel = new FMap.PoiLabel(center, '', layer, { pane : 'markerPane'});
 		this.state.ffmap.addOverlay(nameLabel);
 		this.state.store[0].nameLabel = nameLabel;
 	}

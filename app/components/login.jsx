@@ -7,26 +7,37 @@ const FormItem = Form.Item;
 class Login extends React.Component{
 	constructor(props) {
 		super(props);
+		this.state = {
+			reqMessage : ''
+		};
 
-		this.handleSubmit = this.handleSubmit.bind(this);
+		this.handleLogin = this.handleLogin.bind(this);
 		this.rememberMe = this.rememberMe.bind(this);
+
+		this.clearTxt = this.clearTxt.bind(this);
 	}
 
-	handleSubmit(e) {
+	handleLogin(e) {
 		e.preventDefault();
+		this.clearTxt();
 		this.props.form.validateFields((err, values) => {
 			console.log(values)
 			values.password = md5.hex(values.password);
 			if (!err) {
 				$.ajax({
-					'url' : preAjaxUrl + '/mapeditor/user/v1/login',
+					'url' : preAjaxUrl + '/mapeditor/user/v1/login?phone=' + values.phone + '&password=' + values.password,
 					'type' : 'POST',
-					'dataType' : 'json',
-					'data' : {"data" : JSON.stringify(values)}
+					'dataType' : 'json'
 				}).done( req => {
-					console.log(req)
+					if(req.status == 200) {
+						//页面跳转
+						document.cookie = 'uuid=' + escape(req.data.uuid) + ';expires=' + ((new Date()).getTime() + 1*24*60*60*1000);
+						location.href = '/';
+					}
+					else {
+						this.setState({'reqMessage' : req.message});
+					}
 				});
-				// console.log('Received values of form: ', values);
 			}
 		});
 	}
@@ -51,6 +62,10 @@ class Login extends React.Component{
 		this.rememberMe();
 	}
 
+	clearTxt() {
+		this.setState({'reqMessage' : ''});
+	}
+
 	render() {
 		const { getFieldDecorator } = this.props.form;
 		
@@ -59,19 +74,20 @@ class Login extends React.Component{
 				<div className="main">
 					<div className="info">
 						<p className="title">欢迎使用FFAN地图在线编辑平台</p>
-						<Form onSubmit={this.handleSubmit} className="login-form">
+						<div className="error-txt">{this.state.reqMessage}</div>
+						<Form onSubmit={this.handleLogin} className="login-form">
 							<FormItem>
 							{getFieldDecorator('phone', {
 								rules: [{ required: true, message: '请您填写用户名' }],
 							})(
-								<Input prefix={<Icon type="user" style={{ fontSize: 13 }} />} placeholder="请输入用户名" />
+								<Input onChange={this.clearTxt} prefix={<Icon type="user" style={{ fontSize: 13 }} />} placeholder="请输入用户名" />
 							)}
 							</FormItem>
 							<FormItem>
 							{getFieldDecorator('password', {
 								rules: [{ required: true, message: '请您填写密码' }],
 							})(
-								<Input prefix={<Icon type="lock" style={{ fontSize: 13 }} />} type="password" placeholder="请输入密码" />
+								<Input onChange={this.clearTxt} prefix={<Icon type="lock" style={{ fontSize: 13 }} />} type="password" placeholder="请输入密码" />
 							)}
 							</FormItem>
 							<FormItem className="login-subline">

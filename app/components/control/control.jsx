@@ -88,6 +88,7 @@ export default class Control extends React.Component{
 			const s2 = this.props.state.store[1].feature;
 
 			if( s1.getBounds().intersects(s2.getBounds()) ) {
+				let coords = [];
 				const union = turf.union(s1.toGeoJSON(), s2.toGeoJSON());
 				const layer = this.state.ffmap.drawGeoJSON(union, {editable: true});
 
@@ -97,9 +98,10 @@ export default class Control extends React.Component{
 				this.props.state.store[1].action = 'DELETE';
       			this.state.ffmap.addOverlay(layer);
 		  				
-				const coords = turf.coordAll(union).map(function(item) {
-					return FFanMap.Utils.toOriginalCoordinates(item);
+				coords = turf.coordAll(union).map(function(item) {
+					return FMap.Utils.toOriginalCoordinates(item);
 				});
+
 				layer.coords = coords;
 				layer.action = 'NEW';
 				const _s = [layer].concat(this.props.state.store);

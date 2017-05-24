@@ -63,7 +63,7 @@ export default class Submit extends React.Component{
 					showUploadList={false}
 					onChange={this.uploadChange}
 				>
-					<Button type="primary" disabled={this.state.btnstatus}>上传附件</Button>
+					{/*<Button type="primary" disabled={this.state.btnstatus}>上传附件</Button>这期木有上传*/}
 				</Upload>
 				<Button type="primary" onClick={this.submitAll} disabled={this.state.btnstatus}>提交审核</Button>
 			</div>

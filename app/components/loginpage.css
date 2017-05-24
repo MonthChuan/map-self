@@ -32,7 +32,7 @@
   line-height: 30px;
   padding-left: 40px;
   background: url(http://timg.ffan.com/convert/resize/url_T1egVTBXdb1RCvBVdK/tfs/faf16c506dd0450e10dd13c2bec44215.png) left center no-repeat;
-  margin-bottom: 35px;
+  margin-bottom: 15px;
 }
 .login .login-button {
   width: 100%;
@@ -47,3 +47,9 @@
 }
 .login .login-subline .ant-form-item-control {line-height: 20px;}
 .login .ant-input-lg {height: 48px;}
+
+.login .error-txt {
+  height: 20px;
+  line-height: 20px;
+  color: #f04134;
+}
