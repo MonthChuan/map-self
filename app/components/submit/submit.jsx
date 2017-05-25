@@ -71,16 +71,20 @@ export default class Submit extends React.Component{
 					title : '',
 					content : req.message
 				});
-				this.props.setState({status : {
-					isAdd : false,
-					isEdit : false,
-					isDelete : false,
-					isMerge : false,
-					isSubMerge : false,
-					isZT : false,
-					isStart : false,
-					isActive : 2
-				}});
+
+				setTimeout(()=>{
+					location.reload();
+				}, 1000);
+				// this.props.setState({status : {
+				// 	isAdd : false,
+				// 	isEdit : false,
+				// 	isDelete : false,
+				// 	isMerge : false,
+				// 	isSubMerge : false,
+				// 	isZT : false,
+				// 	isStart : false,
+				// 	isActive : 2
+				// }});
 				// this.setState({btnstatus : 'disabled'});
 			}
 			else {
