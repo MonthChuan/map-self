@@ -280,6 +280,9 @@ class EditorPage extends React.Component{
 					title : '注意',
 					content : req.message
 				});
+				if(req.status == 460) {
+					location.href = location.pathname + '#/login';
+				}
 			}
 		});
 	}

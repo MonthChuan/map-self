@@ -32,7 +32,8 @@ class Login extends React.Component{
 					if(req.status == 200) {
 						//页面跳转
 						document.cookie = 'uuid=' + escape(req.data.uuid) + ';expires=' + ((new Date()).getTime() + 1*24*60*60*1000);
-						location.href = '/';
+						location.href = location.pathname;
+						// this.props.history.pushState(null, '/')
 					}
 					else {
 						this.setState({'reqMessage' : req.message});
