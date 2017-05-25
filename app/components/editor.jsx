@@ -56,83 +56,12 @@ class EditorPage extends React.Component{
 		let coordsList = [];
 		let layerType = '';
 
-		// if(obj.feature) {
-		// 	f = obj.feature.toGeoJSON();
-		// 	layerType = 'feature';
-		// }
-		// else if(obj.graphics) {
-		// 	f = obj.graphics.toGeoJSON();
-		// 	layerType = 'graphics';
-		// }
-		// else if(obj.toGeoJSON) {
-		// 	f = obj.toGeoJSON();
-		// }
-		
-
-		// if(obj.action != 'DELETE') {
-		// 	if(obj.coords) {
-		// 		coords = obj.coords.map( item => {
-		// 			return [item.x, item.y, 0];
-		// 		});
-		// 		centerPoint = obj.getBounds().getCenter();
-		// 	} 
-		// 	else {
-		// 		if(obj.getCenter) {
-		// 			centerPoint = obj.getCenter();
-		// 		}
-		// 		else {
-		// 			centerPoint = obj[layerType].getCenter();
-		// 		}
-				
-		// 		coordsList = f.geometry.coordinates[0].length > 1 ? f.geometry.coordinates[0] : f.geometry.coordinates[0][0];
-		// 		coords = coordsList.map(item => {
-		// 			const r = FMap.Utils.toOriginalCoordinates(item);
-		// 			return [r.x, r.y, 0];
-		// 		});
-		// 	}
-			
-		// 	centerPointXY = FMap.Utils.toOriginalCoordinates(centerPoint);
-		// }
-
-
-		//=======================
-			// const list = obj.getLatLngs();
-			// const result = [];
-			// for (let i = 0; i < list.length; ++i) {
-			// 	var innerList = list[i], innerTemp = [];
-			// 	var temp = [];
-			// 	if(innerList.length > 1) {
-			// 		innerList.forEach(latlng => {
-			// 			const point = FMap.Utils.toOriginalCoordinates(latlng);
-			// 			temp.push([point.x, point.y]);
-			// 			});
-			// 			innerTemp.push(temp);
-			// 	}
-			// 	else {
-			// 		for (let j = 0; j < innerList.length; ++j) {
-			// 			var latlngList = innerList[j];
-			// 			latlngList.forEach(latlng => {
-			// 			const point = FMap.Utils.toOriginalCoordinates(latlng);
-			// 			temp.push([point.x, point.y]);
-			// 			});
-			// 			innerTemp.push(temp);
-			// 		}
-			// 	}
-			// 	result.push(innerTemp);
-			// }
-			// coords = result[0][0];
-			// centerPointXY =  {x: coords[0][0], y : coords[0][1]}
-		//======================
-
-
 		if(obj.feature) {
 			layerType = 'feature';
 		}
 		else if(obj.graphics) {
 			layerType = 'graphics';
-		}
-
-		
+		}	
 
 		if(obj.action != 'DELETE') {
 			if(obj.coords) {

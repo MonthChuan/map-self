@@ -103,11 +103,41 @@ export default class Control extends React.Component{
 				// });
 				const coordObj = turf.coordAll(union).map(item => {
 					return {
-						lat : item[0],
-						lng : item[1]
+						lat : item[1],
+						lng : item[0]
 					};
 				});
 				coords = FMap.Utils.getOriginalByLatlngs(coordObj);
+
+				//-------------------
+				// layer.eachLayer(item => {
+				// 	const list = item.getLatLngs();
+				// 	const result = [];
+				// 	for (let i = 0; i < list.length; ++i) {
+				// 		var innerList = list[i], innerTemp = [];
+				// 		var temp = [];
+				// 		if(innerList.length > 1) {
+				// 			innerList.forEach(latlng => {
+				// 				const point = FMap.Utils.toOriginalCoordinates(latlng);
+				// 				temp.push([point.x, point.y]);
+				// 				});
+				// 				innerTemp.push(temp);
+				// 		}
+				// 		else {
+				// 			for (let j = 0; j < innerList.length; ++j) {
+				// 				var latlngList = innerList[j];
+				// 				latlngList.forEach(latlng => {
+				// 				const point = FMap.Utils.toOriginalCoordinates(latlng);
+				// 				temp.push([point.x, point.y]);
+				// 				});
+				// 				innerTemp.push(temp);
+				// 			}
+				// 		}
+				// 		result.push(innerTemp);
+				// 	}
+				// 	coords = result[0][0];
+				// });
+				//--------------------
 
 				layer.coords = coords;
 				layer.action = 'NEW';
