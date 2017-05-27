@@ -88,10 +88,15 @@ export default class Submit extends React.Component{
 				// this.setState({btnstatus : 'disabled'});
 			}
 			else {
-				Modal.error({
-					title : '注意',
-					content : req.message
-				});
+				if(req.status == 460) {
+					location.href = location.pathname + '#/login';
+				}
+				else {
+					Modal.error({
+						title : '注意',
+						content : req.message
+					});
+				}
 			}
 		});
 	}

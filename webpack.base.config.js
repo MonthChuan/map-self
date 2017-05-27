@@ -3,6 +3,7 @@ var path = require('path');
 export default function() {
   const ASSETS_LIMIT = 5000;
   return {
+    devtool: 'source-map',
     module: {
       loaders: [
         {
