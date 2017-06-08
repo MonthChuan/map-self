@@ -72,11 +72,6 @@ export default class Control extends React.Component{
 			isStart : false,
 			isActive : true
 		}});
-
-		// 	if(this.state.store.length > 0) {
-		// 		this.refs.saveConfirm.showConfirm();
-		// 	}
-		
 	}
 
 	mergeStore(store) {
@@ -98,9 +93,6 @@ export default class Control extends React.Component{
 				this.props.state.store[1].action = 'DELETE';
       			this.state.ffmap.addOverlay(layer);
 		  				
-				// coords = turf.coordAll(union).map(function(item) {
-				// 	return FMap.Utils.toOriginalCoordinates(item);
-				// });
 				const coordObj = turf.coordAll(union).map(item => {
 					return {
 						lat : item[1],
@@ -108,36 +100,6 @@ export default class Control extends React.Component{
 					};
 				});
 				coords = FMap.Utils.getOriginalByLatlngs(coordObj);
-
-				//-------------------
-				// layer.eachLayer(item => {
-				// 	const list = item.getLatLngs();
-				// 	const result = [];
-				// 	for (let i = 0; i < list.length; ++i) {
-				// 		var innerList = list[i], innerTemp = [];
-				// 		var temp = [];
-				// 		if(innerList.length > 1) {
-				// 			innerList.forEach(latlng => {
-				// 				const point = FMap.Utils.toOriginalCoordinates(latlng);
-				// 				temp.push([point.x, point.y]);
-				// 				});
-				// 				innerTemp.push(temp);
-				// 		}
-				// 		else {
-				// 			for (let j = 0; j < innerList.length; ++j) {
-				// 				var latlngList = innerList[j];
-				// 				latlngList.forEach(latlng => {
-				// 				const point = FMap.Utils.toOriginalCoordinates(latlng);
-				// 				temp.push([point.x, point.y]);
-				// 				});
-				// 				innerTemp.push(temp);
-				// 			}
-				// 		}
-				// 		result.push(innerTemp);
-				// 	}
-				// 	coords = result[0][0];
-				// });
-				//--------------------
 
 				layer.coords = coords;
 				layer.action = 'NEW';
@@ -215,28 +177,12 @@ export default class Control extends React.Component{
 
 			this.props.setState({store : [layer]});
 		};
-		// //承重柱
-		// const bulidFuc2 = () => {
-			
-		// };
-		//万达百货
-		// const bulidFuc3 = () => {
-		// 	const layer = this.state.ffmap.startPolygon({
-		// 		color: "#ff7800", 
-		// 		weight: 1
-		// 	});
-		// 	layer.name = '万达百货';
-		// 	layer.regionType = '万达百货';
-
-		// 	this.props.setState({store : [layer]});
-		// };
 
 		switch(parseInt(key)) {
 			case 1:
 				bulidZT('多经点位', '030201');
 				break;
 			case 2:
-				// bulidFuc2();
 				break;
 			case 3:
 				bulidZT('万达百货', '万达百货');

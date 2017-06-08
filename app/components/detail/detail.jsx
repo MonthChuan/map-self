@@ -5,13 +5,6 @@ const Option = Select.Option;
 const TabPane = Tabs.TabPane;
 const Search = Input.Search;
 const RadioGroup = Radio.Group;
-// const typelist = [
-// 	{name : "便利店", code : "060401"},
-// 	{name : "礼品店", code : "060403"},
-// 	{name : "儿童用品店", code : "060404"},
-// 	{name : "购物中心", code : "060405"},
-// 	{name : "服装店", code : "060406"}
-// ];
 
 export default class Detail extends React.Component{
 	constructor(props) {

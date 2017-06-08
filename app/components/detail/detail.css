@@ -1,5 +1,7 @@
 .detail-wrapper {
-  float: right;
+  position: absolute;
+  top: 0;
+  right: 0;
   width: 274px;
   height: 100%;
   border: 1px solid #e5e5e5;
@@ -59,9 +61,19 @@
 .detail-wrapper .ant-tabs-mini .ant-tabs-tab:last-child {
   border-right: 0;
 }
+.detail-wrapper .ant-tabs-content {
+  padding-top: 50px;
+  margin-top: -50px;
+  height: 100%;
+}
+.detail-wrapper .card-container,
+.detail-wrapper .ant-tabs,
+.detail-wrapper .ant-tabs-tabpane {
+  height: 100%;
+  }
 .detail-wrapper .y-scroll {
   width: 100%;
-  height: 480px;
+  height: 100%;
   overflow-y: auto;
 }
 .info-wrap {

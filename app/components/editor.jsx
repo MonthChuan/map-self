@@ -468,7 +468,7 @@ class EditorPage extends React.Component{
 						/>
 					</div>
 				</div>
-				<div className="e-content mid clearfix">
+				<div className="e-content mid">
 					<Popconfirm 
 						title="确认删除此商铺？"
 						okText="确认" 
@@ -481,10 +481,12 @@ class EditorPage extends React.Component{
 					>
 						<a ref="popconfirmChild" className="popconfirm-btn"></a>
 					</Popconfirm>
-					<div className="map-wrapper">
-						<div className="map" id="map" style={{height:530}}></div>
+					<div className="e-content-main clearfix">
+						<div className="map-wrapper">
+							<div className="map" id="map" style={{height:'100%'}}></div>
+						</div>
+						<Detail state={this.state} editStore={this.editStore} />
 					</div>
-					<Detail state={this.state} editStore={this.editStore} />
 				</div>
 				<div className="bottom mid">
 					<Submit state={this.state} saveEdit={this.saveEdit} setState={this.setState} />
