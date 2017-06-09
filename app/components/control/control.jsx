@@ -18,6 +18,7 @@ export default class Control extends React.Component{
 		this.editRegion = this.editRegion.bind(this);
 
 		this.checkAct = this.checkAct.bind(this);
+		this.cancelAct = this.cancelAct.bind(this);
 	}
 
 	//检查是否可以进行下面操作
@@ -144,7 +145,6 @@ export default class Control extends React.Component{
 	} 
 
 	dropDown( { key } ) {
-		// if(!this.checkAct()) {return}
 		this.props.setState({status : {
 			isAdd : false,
 			isEdit : false,
@@ -207,6 +207,29 @@ export default class Control extends React.Component{
 		}});
 	}
 
+	//取消操作
+	cancelAct() {
+		//取消新增商铺
+		if(this.props.state.status.isAdd) {
+			this.props.state.store.remove();
+		}
+		
+
+		this.props.setState({
+			status : {
+				isAdd : true,
+				isEdit : true,
+				isDelete : true,
+				isMerge : true,
+				isSubMerge : false,
+				isZT : true,
+				isStart : false,
+				isActive : false
+			},
+			store : []
+		});
+	}
+
 	render() {
 		const menu = (
 			<Menu onClick={this.dropDown}>
@@ -215,6 +238,7 @@ export default class Control extends React.Component{
 				<Menu.Item key="3">万达百货</Menu.Item>
 			</Menu>
 		);
+		const name0 = "s-btn clearfix" + (this.props.state.status.isActive ? '' : ' disable');
 		const name1 = "s-btn s-add clearfix" + (this.props.state.status.isAdd ? '' : ' disable');
 		const name2 = "s-btn s-edit clearfix" + (this.props.state.status.isEdit ? '' : ' disable');
 		const name3 = "s-btn s-delete clearfix" + (this.props.state.status.isDelete ? '' : ' disable');
@@ -229,6 +253,7 @@ export default class Control extends React.Component{
 	
 		return (
 			<div className="control">
+				<a className={name0} onClick={this.cancelAct}>取消操作</a>
 				<a className={name1} onClick={this.drawPloy}><i className="s-icon"></i>新增商铺</a>
 				<a className={name2} onClick={this.editRegion} ><i className="s-icon"></i>商铺编辑</a>
 				<a className={name3} onClick={this.deleteStore}><i className="s-icon"></i>删除商铺</a>

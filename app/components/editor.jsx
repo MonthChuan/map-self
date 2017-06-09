@@ -13,7 +13,8 @@ class EditorPage extends React.Component{
 		super(props);
 		this.state = {
 			ffmap : null,
-			store : [],
+			store : [], //最后提交的时候
+			bkStore : [], //取消操作数据备份
 			plazaId : '',
 			isMerge : false,
 			floor : [], //楼层店铺数据
@@ -49,7 +50,6 @@ class EditorPage extends React.Component{
 	} 
 
 	fixStoreParam(obj) {
-		// let f = null;
 		let coords = [];
 		let centerPoint = null;
 		let centerPointXY = {x : 0, y : 0};
@@ -191,7 +191,7 @@ class EditorPage extends React.Component{
 			baseAPI : 'http://yunjin.intra.sit.ffan.com/mapeditor/map'
 			// baseAPI: 'http://imap.sit.ffan.com/poi'
 		});
-		this.state.ffmap.loadBuilding(this.state.plazaId); //1000772
+		// this.state.ffmap.loadBuilding(this.state.plazaId); //1000772
 
 
 		//获取商铺列表
@@ -431,7 +431,6 @@ class EditorPage extends React.Component{
 		this.setState({popconfirmVisible : false});
 		this.preDeleteStore.action = 'DELETE';
 		this.state.store = [this.preDeleteStore];
-		// this.setState({store : [this.preDeleteStore]});
 		if(this.state.store[0].graphics) {
 			this.state.store[0].graphics.remove();
 		}
@@ -441,9 +440,7 @@ class EditorPage extends React.Component{
 		
 		if(this.state.store[0].nameLabel) {
 			this.state.store[0].nameLabel.remove();
-		}
-		// this.preDeleteStore = null;
-		
+		}	
 	}
 
 	deleteStoreConfirmCancel(e) {
@@ -452,6 +449,7 @@ class EditorPage extends React.Component{
 	}
 
 	render () {
+		// const _height = document.body.clientHeight - 80 - 60;
 	    return (
 			<div className="page" id="editor">
 				<div className="topbar">
