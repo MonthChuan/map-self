@@ -109,7 +109,7 @@ export default class Control extends React.Component{
 				this.props.state.store = _s;
 				//手动添加一个名称label
 				const centerLatLng = layer.getBounds().getCenter();
-				this.props.newNameLabel(centerLatLng, layer);
+				this.props.newNameLabel(centerLatLng, layer, layer);
 
 				layer.on('click', e => {
 					this.props.initFeatureClick(e);
@@ -237,10 +237,13 @@ export default class Control extends React.Component{
 			}
 			else if(item.action == 'DELETE') {
 				this.props.state.ffmap.addOverlay(item.feature);
-				this.props.newNameLabel(item.feature.getCenter(), item.feature);
+				this.props.newNameLabel(item.feature.getCenter(), item.feature, item);
 				item.nameLabel.setContent(item.name)
 			}
 
+			if(item.selected) {
+				item.selected = false;
+			}
 			
 		}
 

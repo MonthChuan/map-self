@@ -179,7 +179,7 @@ class EditorPage extends React.Component{
 						isStart : false,
 						isActive : true
 					}});
-					_store.action = 'merge';
+					// _store.action = 'merge';
 					if(this.state.store.length == 2 ) {
 						const _oStore = this.state.store.pop();
 						_oStore.selected = false;
@@ -315,7 +315,7 @@ class EditorPage extends React.Component{
 				if(!this.state.store[0].nameLabel) {
 					//手动添加一个名称label,如果是添加，应该建一个name放上去。todo
 					const center = this.state.store[0].graphics.getCenter();
-					this.newNameLabel(center, this.state.store[0].graphics);
+					this.newNameLabel(center, this.state.store[0].graphics, this.state.store[0]);
 				}
 				this.state.store[0].nameLabel.setContent(update.name);
 			}
@@ -437,10 +437,10 @@ class EditorPage extends React.Component{
 	}
 
 	//新建一个name label
-	newNameLabel(center, layer) {
-		const nameLabel = new FMap.PoiLabel(center, '', layer, { pane : 'markerPane'});
+	newNameLabel(center, sourceLayer, nameLayer) {
+		const nameLabel = new FMap.PoiLabel(center, '', sourceLayer, { pane : 'markerPane'});
 		this.state.ffmap.addOverlay(nameLabel);
-		this.state.store[0].nameLabel = nameLabel;
+		nameLayer.nameLabel = nameLabel;
 	}
 
 	deleteStoreConfirmOk(e) {
@@ -500,7 +500,7 @@ class EditorPage extends React.Component{
 					</Popconfirm>
 					<div className="e-content-main clearfix" style={{height:_height}}>
 						<div className="map-wrapper">
-							<div ref="map" className="map" id="map" style={{height:740}}></div>
+							<div ref="map" className="map" id="map" style={{height:_height}}></div>
 						</div>
 						<Detail state={this.state} editStore={this.editStore} />
 					</div>
