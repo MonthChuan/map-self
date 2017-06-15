@@ -237,7 +237,7 @@ export default class Control extends React.Component{
 			}
 			else if(item.action == 'DELETE') {
 				this.props.state.ffmap.addOverlay(item.feature);
-				this.props.newNameLabel(item.feature.getCenter(), item);
+				this.props.newNameLabel(item.feature.getCenter(), item.feature);
 				item.nameLabel.setContent(item.name)
 			}
 
