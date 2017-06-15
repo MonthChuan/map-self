@@ -166,17 +166,6 @@ export default class Control extends React.Component{
 
 			this.props.setState({store : [layer]});
 		};
-		//多经点
-		const bulidFuc1 = () => {
-			const layer = this.state.ffmap.startPolygon({
-				color: "#ff7800", 
-				weight: 1
-			});
-			layer.name = '多经点位';
-			layer.regionType = '030201';
-
-			this.props.setState({store : [layer]});
-		};
 
 		switch(parseInt(key)) {
 			case 1:
@@ -209,10 +198,54 @@ export default class Control extends React.Component{
 
 	//取消操作
 	cancelAct() {
-		//取消新增商铺
-		if(this.props.state.status.isAdd) {
-			this.props.state.store.remove();
+		for(let i = 0, l = this.props.state.store.length; i < l; i++) {
+			let item = this.props.state.store[i];
+			let bkItem = this.props.state.bkStore[i];
+			if(item.action == 'NEW') {
+				if(item._proxy) {
+					item._proxy.editor.map.editTools.stopDrawing();
+				}
+				
+				if(item.graphics) {
+					item.graphics.remove();
+				}
+				else {
+					if(item.transform) {
+						item.transform.disable();
+					}
+					item.remove();
+				}
+
+				if(item.nameLabel) {
+					item.nameLabel.remove();
+				}
+			}
+			else if(item.action == 'UPDATE') {
+				item.disableEdit();
+				item.feature.setLatLngs(bkItem.latlng);
+				if(item.name != bkItem.name) {
+					item.re_name = bkItem.name;
+					item.name = bkItem.name;
+					if(item.nameLabel) {
+						item.nameLabel.setContent(bkItem.name);
+					}
+				}
+
+				if(item.regionType != bkItem.regionType) {
+					item.regionType = bkItem.regionType;
+				}
+			}
+			else if(item.action == 'DELETE') {
+				this.props.state.ffmap.addOverlay(item.feature);
+				this.props.newNameLabel(item.feature.getCenter(), item);
+				item.nameLabel.setContent(item.name)
+			}
+
+			
 		}
+
+
+		
 		
 
 		this.props.setState({
@@ -226,7 +259,8 @@ export default class Control extends React.Component{
 				isStart : false,
 				isActive : false
 			},
-			store : []
+			store : [],
+			bkStore : []
 		});
 	}
 

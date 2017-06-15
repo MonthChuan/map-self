@@ -15,7 +15,7 @@ class EditorPage extends React.Component{
 			ffmap : null,
 			store : [], //最后提交的时候
 			bkStore : [], //取消操作数据备份
-			plazaId : '',
+			plazaId : '1100314',
 			isMerge : false,
 			floor : [], //楼层店铺数据
 			floorId : 1, //默认一楼
@@ -145,6 +145,19 @@ class EditorPage extends React.Component{
 							i.enableEdit();
 						});
 					}
+					const _latlng = _store.feature.getLatLngs()[0][0].map(item => {
+						return Object.assign({}, item);
+					});
+
+					this.setState({
+						store : [_store],
+						bkStore : [{
+							name : _store.name,
+							regionType : _store.regionType,
+							latlng : [[_latlng]]
+						}]
+					});
+					return;
 				}
 				else if(this.state.status.isDelete) {
 					this.setState({
@@ -179,7 +192,9 @@ class EditorPage extends React.Component{
 
 			}
 			
-			this.setState({store : [_store]});
+			this.setState({
+				store : [_store]
+			});
 	}
 
 	//DOM加载完毕之后，初始化map
@@ -191,7 +206,7 @@ class EditorPage extends React.Component{
 			baseAPI : 'http://yunjin.intra.sit.ffan.com/mapeditor/map'
 			// baseAPI: 'http://imap.sit.ffan.com/poi'
 		});
-		// this.state.ffmap.loadBuilding(this.state.plazaId); //1000772
+		this.state.ffmap.loadBuilding(1100314);
 
 
 		//获取商铺列表
@@ -320,6 +335,8 @@ class EditorPage extends React.Component{
 	}
 
 	getPlazaId(id) {
+		id = 1100314;
+
 		if(this.state.store.length > 0 && this.state.store[0].action != 'SHOW') {
 			this.saveEdit();
 		}
@@ -430,7 +447,9 @@ class EditorPage extends React.Component{
 		this.preDeleteStore.selected = false;
 		this.setState({popconfirmVisible : false});
 		this.preDeleteStore.action = 'DELETE';
+		
 		this.state.store = [this.preDeleteStore];
+		// this.state.bkStore = [this.preDeleteStore];
 		if(this.state.store[0].graphics) {
 			this.state.store[0].graphics.remove();
 		}
@@ -449,7 +468,7 @@ class EditorPage extends React.Component{
 	}
 
 	render () {
-		// const _height = document.body.clientHeight - 80 - 60;
+		const _height = document.body.clientHeight - 80 - 60;
 	    return (
 			<div className="page" id="editor">
 				<div className="topbar">
@@ -479,9 +498,9 @@ class EditorPage extends React.Component{
 					>
 						<a ref="popconfirmChild" className="popconfirm-btn"></a>
 					</Popconfirm>
-					<div className="e-content-main clearfix">
+					<div className="e-content-main clearfix" style={{height:_height}}>
 						<div className="map-wrapper">
-							<div className="map" id="map" style={{height:'100%'}}></div>
+							<div ref="map" className="map" id="map" style={{height:740}}></div>
 						</div>
 						<Detail state={this.state} editStore={this.editStore} />
 					</div>
