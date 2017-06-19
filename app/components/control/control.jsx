@@ -1,12 +1,13 @@
 import './control.css';
 import React from 'react';  
-import { Button, message, Menu, Dropdown, Icon } from 'antd'; 
+import { Button, message, Menu, Dropdown, Icon, Modal } from 'antd'; 
 import SaveConfirm from '../utils/saveConfirm.jsx';
 
 export default class Control extends React.Component{
 	constructor(props) {
 		super(props);
 		this.state = this.props.state;
+		this.state.btnstatus = false;
 
 		this.drawPloy = this.drawPloy.bind(this);
 		this.setMerge = this.setMerge.bind(this);
@@ -16,9 +17,46 @@ export default class Control extends React.Component{
 		this.saveEdit = this.saveEdit.bind(this);
 		this.dropDown = this.dropDown.bind(this);
 		this.editRegion = this.editRegion.bind(this);
+		this.submitAll = this.submitAll.bind(this);
 
 		this.checkAct = this.checkAct.bind(this);
 		this.cancelAct = this.cancelAct.bind(this);
+	}
+
+	submitAll() {
+		if(this.props.state.store.length > 0 && this.props.state.store[0].action != 'SHOW') {
+			this.props.saveEdit();
+		}
+		//todo结束本次编辑。。。
+
+		$.ajax({
+			'url' : preAjaxUrl + '/mapeditor/map/editEnd/' + this.props.state.plazaId,
+			'method' : 'POST'
+		}).done(req => {
+			if(req.status == 200) {
+				Modal.success({
+					title : '',
+					content : '已经提交审核，请耐心等待！'
+				});
+				this.props.setState({status : {
+					isAdd : false,
+					isEdit : false,
+					isDelete : false,
+					isMerge : false,
+					isSubMerge : false,
+					isZT : false,
+					isStart : false,
+					isActive : 2
+				}});
+				this.setState({btnstatus : 'disabled'});
+			}
+			else {
+				Modal.error({
+					title : '注意',
+					content : req.message
+				});
+			}
+		});
 	}
 
 	//检查是否可以进行下面操作
@@ -300,8 +338,9 @@ export default class Control extends React.Component{
 				<Dropdown overlay={menu}>
 					<span className={name5}><i className="s-icon"></i>专题数据<Icon type="down" /></span>
 				</Dropdown>
-				<Button className="e-start" style={startStyle} type="primary" onClick={this.editStart}>开始编辑</Button>
+				<Button className="e-save" style={startStyle} type="primary" onClick={this.editStart}>开始编辑</Button>
 				<Button className="e-save" style={saveStyle} type="primary" onClick={this.saveEdit}>保存</Button>
+				<Button className="e-save" type="primary" onClick={this.submitAll} disabled={this.state.btnstatus}>提交审核</Button>
 				<SaveConfirm ref="saveConfirm" />
 			</div>
 		);

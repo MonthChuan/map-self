@@ -2,11 +2,11 @@
   float: right;
 }
 
-.control .e-save,
-.control .e-start {
-  width: 132px;
+.control .e-save {
+  width: 110px;
   height: 70px;
   font-size: 18px;
+  margin-left: 10px;
 }
 
 .control .s-btn {

@@ -206,7 +206,7 @@ class EditorPage extends React.Component{
 			baseAPI : 'http://yunjin.intra.sit.ffan.com/mapeditor/map'
 			// baseAPI: 'http://imap.sit.ffan.com/poi'
 		});
-		this.state.ffmap.loadBuilding(1100314);
+		// this.state.ffmap.loadBuilding(1100314);
 
 
 		//获取商铺列表
@@ -267,6 +267,10 @@ class EditorPage extends React.Component{
 			layer.action = 'NEW';
 			this.setState({store : [layer]});
 		});
+
+
+
+		this.refs.map.style.height = '100%';
 	}
 
 	//点击开始编辑按钮
@@ -468,7 +472,6 @@ class EditorPage extends React.Component{
 	}
 
 	render () {
-		const _height = document.body.clientHeight - 80 - 60;
 	    return (
 			<div className="page" id="editor">
 				<div className="topbar">
@@ -498,9 +501,9 @@ class EditorPage extends React.Component{
 					>
 						<a ref="popconfirmChild" className="popconfirm-btn"></a>
 					</Popconfirm>
-					<div className="e-content-main clearfix" style={{height:_height}}>
+					<div className="e-content-main clearfix" >
 						<div className="map-wrapper">
-							<div ref="map" className="map" id="map" style={{height:_height}}></div>
+							<div ref="map" className="map" id="map" style={{height:700}}></div>
 						</div>
 						<Detail state={this.state} editStore={this.editStore} />
 					</div>
