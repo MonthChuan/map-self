@@ -7,8 +7,8 @@ import { Provider } from 'react-redux';
 import { Router, Route, hashHistory } from 'react-router';
 
 import editorReducers from './reducers';
-import LoginPage from './components/login.jsx';
-import EditorPage from './components/editor.jsx';
+import LoginPage from './ui/login/login.jsx';
+import EditorPage from './ui/editor/editor.jsx';
 
 // create root component
 const Root = ({ store }) => (
