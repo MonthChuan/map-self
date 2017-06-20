@@ -68,3 +68,8 @@
   height: 1px;
 }
 .ant-popover-arrow {display: none!important;}
+
+.leaflet-overlay-pane path.leaflet-interactive.selected:hover,
+.leaflet-overlay-pane path.leaflet-interactive.selected {
+  fill : red;
+}

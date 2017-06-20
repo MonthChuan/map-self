@@ -17,10 +17,13 @@
   line-height: 32px;
   border-right: 1px solid #e5e5e5;
   position: relative;
-  padding: 0 20px;
-  min-width: 125px;
+  padding: 0 15px;
+  min-width: 120px;
   white-space: nowrap;
   margin-top: 19px;
+}
+.control .s-zt {
+  border-right : none;
 }
 .control .s-btn .s-icon {
   display: block;
@@ -50,4 +53,7 @@
   color: #e2e2e3; 
   cursor: not-allowed;
   pointer-events: none;
+}
+.control .s-cancel {
+  min-width: 90px;
 }

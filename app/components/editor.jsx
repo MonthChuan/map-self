@@ -7,6 +7,7 @@ import Control from './control/control.jsx';
 import Detail from './detail/detail.jsx';
 import Submit from './submit/submit.jsx';
 import { message, Modal, Popconfirm } from 'antd'; 
+import { getSelect, setSelect } from './utils/select';
 
 class EditorPage extends React.Component{
 	constructor(props) {
@@ -55,13 +56,11 @@ class EditorPage extends React.Component{
 		let centerPointXY = {x : 0, y : 0};
 		let coordsList = [];
 		let layerType = '';
+		let paramId = '';
 
-		if(obj.feature) {
-			layerType = 'feature';
-		}
-		else if(obj.graphics) {
+		if(obj.graphics) {
 			layerType = 'graphics';
-		}	
+		}
 
 		if(obj.action != 'DELETE') {
 			if(obj.coords) {
@@ -76,7 +75,7 @@ class EditorPage extends React.Component{
 					centerPoint = obj[layerType].getCenter();
 				}
 				
-				coordsList = obj.getOriginalLatlng();
+				coordsList = FMap.Utils.getOriginalByLatlngs(obj.getLatLngs());
 				if(coordsList[0].length > 1) {
 					coords = coordsList[0];
 				}
@@ -90,22 +89,25 @@ class EditorPage extends React.Component{
 
 		if(obj.action == 'NEW') {
 			this.state.floorMaxNum ++ ;
-			obj.id = this.state.plazaId + '_' + this.state.floorName + '_' + this.state.floorMaxNum;
+			paramId = this.state.plazaId + '_' + this.state.floorName + '_' + this.state.floorMaxNum;
+		}
+		else {
+			paramId = obj.feature.properties.region_id;
 		}
 
 		const param = {
 			type : 'Feature',
-			id : obj.id || '',
+			id : paramId,
 			properties : {
 				centerx : centerPointXY.x,
 				centery : centerPointXY.y,
-				re_name : obj.name,
-				re_type : obj.regionType || '',
-				region_id : obj.id || ''
+				re_name : obj.feature.properties.re_name || '',
+				re_type : obj.feature.properties.re_type || '',
+				region_id : paramId
 			},
 			geometry : {
 				type : 'MultiPolygon',
-				coordinates : [[coords]]
+				coordinates : [[coords.concat(coords.slice(0,1))]]
 			}
 		};
 
@@ -116,7 +118,7 @@ class EditorPage extends React.Component{
 	}
 
 	initFeatureClick(event) {
-		const _store = event.store || event.target;
+		const _store = event.layer;
 		if(this.state.store.length > 2 || (this.state.status.isZT && this.state.status.isActive)) {
 				message.warning('您正在编辑状态，请先完成操作并保存，再进行其他操作！', 3);
 				return;
@@ -145,7 +147,7 @@ class EditorPage extends React.Component{
 							i.enableEdit();
 						});
 					}
-					const _latlng = _store.feature.getLatLngs()[0][0].map(item => {
+					const _latlng = _store.getLatLngs()[0][0].map(item => {
 						return Object.assign({}, item);
 					});
 
@@ -179,12 +181,12 @@ class EditorPage extends React.Component{
 						isStart : false,
 						isActive : true
 					}});
-					// _store.action = 'merge';
+			
 					if(this.state.store.length == 2 ) {
 						const _oStore = this.state.store.pop();
-						_oStore.selected = false;
+						setSelect(_oStore, false);
 					}
-					_store.selected = true;
+					setSelect(_store, true);
 					const _s = [_store].concat(this.state.store);
 					this.setState({store : _s});
 					return;
@@ -206,8 +208,6 @@ class EditorPage extends React.Component{
 			baseAPI : 'http://yunjin.intra.sit.ffan.com/mapeditor/map'
 			// baseAPI: 'http://imap.sit.ffan.com/poi'
 		});
-		// this.state.ffmap.loadBuilding(1100314);
-
 
 		//获取商铺列表
 		this.state.ffmap.on('rendered', event => {
@@ -226,6 +226,10 @@ class EditorPage extends React.Component{
 				numList.push( parseInt(arr[arr.length - 1]) );
 			});
 
+			event.regionGroup.on('click', e => {
+				this.initFeatureClick(e);
+			});
+
 			let maxNum = numList[0];
 			numList.map( i => {
 				if(i > maxNum) {
@@ -239,10 +243,6 @@ class EditorPage extends React.Component{
 				floorMaxNum : maxNum,
 				floorName : f_name
 			});
-		});
-
-		this.state.ffmap.on('featureClick', event => {
-			this.initFeatureClick(event);
 		});
 
 		//承重柱
@@ -262,8 +262,12 @@ class EditorPage extends React.Component{
 
 			this.state.ffmap.addOverlay(layer);
 			layer.transform.enable({rotation: true});
-			layer.name = '承重柱';
-			layer.regionType = '030202';
+			layer.feature = {
+				properties : {
+					re_name : '承重柱',
+					re_type : '030202'
+				}
+			};
 			layer.action = 'NEW';
 			this.setState({store : [layer]});
 		});
@@ -313,27 +317,36 @@ class EditorPage extends React.Component{
 			message.warning('没有正在编辑的商铺！', 3);
 			return;
 		}
-		if(this.state.status.isAdd) {
-			//name要在地图上更新，所以要单独调用set
-			if(this.state.status.isAdd) {
-				if(!this.state.store[0].nameLabel) {
-					//手动添加一个名称label,如果是添加，应该建一个name放上去。todo
-					const center = this.state.store[0].graphics.getCenter();
-					this.newNameLabel(center, this.state.store[0].graphics, this.state.store[0]);
-				}
-				this.state.store[0].nameLabel.setContent(update.name);
+
+		const store0 = this.state.store[0];
+		//name要在地图上更新，所以要单独调用set
+		if(store0.action == 'NEW') {
+			if(!store0.label) {
+				//手动添加一个名称label,如果是添加，应该建一个name放上去。todo
+				const center = store0.graphics.getCenter();
+				this.newNameLabel(center, store0.graphics, store0);
+			}
+			store0.label.setContent(update.re_name);
+			if(!store0.feature) {
+				store0.feature = {
+					properties : {
+						re_name : '',
+						re_type : ''
+					}
+				};
 			}
 		}
 		else {
-			if(update.name) {		
-				this.state.store[0].re_name = update.name;
-				if(this.state.store[0].nameLabel) {
-					this.state.store[0].nameLabel.setContent(update.name);
+			if(update.re_name) {		
+				this.state.store[0].re_name = update.re_name;
+				if(this.state.store[0].label) {
+					this.state.store[0].label.setContent(update.re_name);
 				}
 			}
 		}
-		const newStore0 = Object.assign(this.state.store[0], update);
-		const newSlist = [newStore0].concat(this.state.store.slice(1));
+		
+		Object.assign(store0.feature.properties, update);
+		const newSlist = [store0].concat(this.state.store.slice(1));
 		this.setState({store : newSlist});
 
 	}
@@ -395,8 +408,6 @@ class EditorPage extends React.Component{
 					title : '提示',
 					content : '保存成功！'
 				});
-
-
 				
 			}
 			else {
@@ -435,7 +446,10 @@ class EditorPage extends React.Component{
 				isActive : false
 			}});
 
-			this.setState({store : []});
+			this.setState({
+				store : [],
+				bkStore : []
+			});
 		});
 		
 	}
@@ -444,7 +458,7 @@ class EditorPage extends React.Component{
 	newNameLabel(center, sourceLayer, nameLayer) {
 		const nameLabel = new FMap.PoiLabel(center, '', sourceLayer, { pane : 'markerPane'});
 		this.state.ffmap.addOverlay(nameLabel);
-		nameLayer.nameLabel = nameLabel;
+		nameLayer.label = nameLabel;
 	}
 
 	deleteStoreConfirmOk(e) {
@@ -453,16 +467,17 @@ class EditorPage extends React.Component{
 		this.preDeleteStore.action = 'DELETE';
 		
 		this.state.store = [this.preDeleteStore];
+		const store0 = this.state.store[0];
 		// this.state.bkStore = [this.preDeleteStore];
-		if(this.state.store[0].graphics) {
-			this.state.store[0].graphics.remove();
+		if(store0.graphics) {
+			store0.graphics.remove();
 		}
 		else {
-			this.state.store[0].remove();
+			store0.remove();
 		}
 		
-		if(this.state.store[0].nameLabel) {
-			this.state.store[0].nameLabel.remove();
+		if(store0.label) {
+			store0.label.remove();
 		}	
 	}
 

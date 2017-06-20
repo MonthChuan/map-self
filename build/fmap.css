@@ -669,19 +669,13 @@
 .material-icons.icon-close::before {
   content: "&#xE5CD;";
 }
-.leaflet-overlay-pane path.leaflet-interactive.region-store:hover {
+.leaflet-overlay-pane path.map-region-interactive:hover {
   fill: #ff8d00;
-}
-.leaflet-overlay-pane path.leaflet-interactive.region-store.selected {
-  fill: red;
-}
-.leaflet-overlay-pane path.leaflet-interactive.region-store.selected:hover {
-  fill: red;
 }
 #map {
   height: 100%;
   width: 100%;
-  background: url(http://timg.ffan.com/convert/resize/url_T1lgKTB5Dv1RCvBVdK/tfs/da40ab71e46d515c2ef70a02233c3fb5.png) #f3fbff;
+  background: url(http://timg.ffan.com/convert/resize/url_T1lgKTB5Dv1RCvBVdK/tfs/da40ab71e46d515c2ef70a02233c3fb5.png) #d7edff;
 }
 .leaflet-container .leaflet-bar a {
   width: 36px;
@@ -762,8 +756,7 @@
 .indoor-control-floor .control-floor-warp .control-floor-list {
   width: 36px;
   max-height: 180px;
-  overflow-x: hidden;
-  overflow-y: hidden;
+  overflow: hidden;
 }
 .indoor-control-floor .control-floor-warp .control-floor-list .control-floor-item {
   font-size: 14px;
@@ -792,93 +785,6 @@
 .ffan-map-label.hide,
 .ffan-map-label.zoom-hide {
   display: none;
-}
-.ffan-region {
-  stroke-width: 1px;
-}
-.ffan-region-10000 {
-  stroke: none;
-  fill: white;
-}
-.ffan-region-20000 {
-  stroke: #848484;
-  fill: white;
-}
-.ffan-region-30000 {
-  stroke: none;
-  fill: #e5edf6;
-}
-.ffan-region-40000 {
-  stroke: #a0a0a0;
-  fill: #e5edf6;
-}
-.ffan-region-40200 {
-  stroke: #B4C2DD;
-  fill: #e5edf6;
-}
-.ffan-region-40300 {
-  stroke: #a0a0a0;
-  fill: #e5edf6;
-}
-.ffan-region-50000 {
-  stroke: none;
-  fill: #e5edf6;
-}
-.ffan-region-50701 {
-  stroke: #6a9c7b;
-  fill: #b2d5be;
-}
-.ffan-region-60000 {
-  stroke: #ddc486;
-  fill: #FEF8EB;
-}
-.ffan-region-60200 {
-  stroke: #DEBA97;
-  fill: #FCE5CE;
-}
-.ffan-region-60206 {
-  stroke: #e4d56d;
-  fill: #FCFDD1;
-}
-.ffan-region-60209 {
-  stroke: #e4d56d;
-  fill: #FCFDD1;
-}
-.ffan-region-60300 {
-  stroke: #8491ba;
-  fill: #d4dffc;
-}
-.ffan-region-60400 {
-  stroke: #ddc486;
-  fill: #FEF8EB;
-}
-.ffan-region-60401 {
-  stroke: #6ea6be;
-  fill: #d8effe;
-}
-.ffan-region-60404 {
-  stroke: #a081c9;
-  fill: #ebdffe;
-}
-.ffan-region-60405 {
-  stroke: #76B2A9;
-  fill: #B2F0E6;
-}
-.ffan-region-60411 {
-  stroke: #5ebc62;
-  fill: #C4FBD6;
-}
-.ffan-region-60606 {
-  stroke: #a0a0a0;
-  fill: #466d94;
-}
-.ffan-region-60700 {
-  stroke: #67c0d4;
-  fill: #C9F3FD;
-}
-.ffan-region-60411 {
-  stroke: #86cf56;
-  fill: #ddfccc;
 }
 .leaflet-vertex-icon,
 .leaflet-middle-icon {
@@ -977,5 +883,3 @@
   height: 22px;
   line-height: 22px;
 }
-
-/*# sourceMappingURL=fmap.css.map*/

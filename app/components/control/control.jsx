@@ -2,6 +2,7 @@ import './control.css';
 import React from 'react';  
 import { Button, message, Menu, Dropdown, Icon, Modal } from 'antd'; 
 import SaveConfirm from '../utils/saveConfirm.jsx';
+import { getSelect, setSelect } from '../utils/select';
 
 export default class Control extends React.Component{
 	constructor(props) {
@@ -73,12 +74,7 @@ export default class Control extends React.Component{
 		if(!this.checkAct()) {return}
 
 
-		const newStore = this.state.ffmap.startPolygon({
-			color : '#ddc486',
-			fillColor : '#fef8eb',
-			weight : 1,
-			fillOpacity : 0.6
-		});
+		const newStore = this.state.ffmap.startPolygon();
 		newStore.action = "NEW";
 
 		this.props.setState({status : {
@@ -118,18 +114,21 @@ export default class Control extends React.Component{
 			message.warning('无法合并！', 3);
 		}
 		else {
-			const s1 = this.props.state.store[0].feature;
-			const s2 = this.props.state.store[1].feature;
+			const s0 = this.props.state.store[0];
+			const s1 = this.props.state.store[1];
 
-			if( s1.getBounds().intersects(s2.getBounds()) ) {
+			if( s0.getBounds().intersects(s1.getBounds()) ) {
 				let coords = [];
-				const union = turf.union(s1.toGeoJSON(), s2.toGeoJSON());
+				const union = turf.union(s0.toGeoJSON(), s1.toGeoJSON());
 				const layer = this.state.ffmap.drawGeoJSON(union, {editable: true});
 
-				this.props.state.store[0].remove();
-				this.props.state.store[1].remove();
-				this.props.state.store[0].action = 'DELETE';
-				this.props.state.store[1].action = 'DELETE';
+				s0.remove();
+				s0.label.remove();
+
+				s1.remove();
+				s1.label.remove();
+				s0.action = 'DELETE';
+				s1.action = 'DELETE';
       			this.state.ffmap.addOverlay(layer);
 		  				
 				const coordObj = turf.coordAll(union).map(item => {
@@ -254,18 +253,18 @@ export default class Control extends React.Component{
 					item.remove();
 				}
 
-				if(item.nameLabel) {
-					item.nameLabel.remove();
+				if(item.label) {
+					item.label.remove();
 				}
 			}
 			else if(item.action == 'UPDATE') {
 				item.disableEdit();
-				item.feature.setLatLngs(bkItem.latlng);
+				item.setLatLngs(bkItem.latlng);
 				if(item.name != bkItem.name) {
 					item.re_name = bkItem.name;
 					item.name = bkItem.name;
-					if(item.nameLabel) {
-						item.nameLabel.setContent(bkItem.name);
+					if(item.label) {
+						item.label.setContent(bkItem.name);
 					}
 				}
 
@@ -274,13 +273,16 @@ export default class Control extends React.Component{
 				}
 			}
 			else if(item.action == 'DELETE') {
-				this.props.state.ffmap.addOverlay(item.feature);
-				this.props.newNameLabel(item.feature.getCenter(), item.feature, item);
-				item.nameLabel.setContent(item.name)
+				this.props.state.ffmap.addOverlay(item);
+				this.props.newNameLabel(item.getCenter(), item, item);
+				item.label.setContent(item.feature.properties.re_name);
 			}
 
-			if(item.selected) {
-				item.selected = false;
+			// if(item.selected) {
+			// 	item.selected = false;
+			// }
+			if(getSelect(item)) {
+				setSelect(item, false);
 			}
 			
 		}
@@ -313,7 +315,7 @@ export default class Control extends React.Component{
 				<Menu.Item key="3">万达百货</Menu.Item>
 			</Menu>
 		);
-		const name0 = "s-btn clearfix" + (this.props.state.status.isActive ? '' : ' disable');
+		const name0 = "s-btn s-cancel clearfix" + (this.props.state.status.isActive ? '' : ' disable');
 		const name1 = "s-btn s-add clearfix" + (this.props.state.status.isAdd ? '' : ' disable');
 		const name2 = "s-btn s-edit clearfix" + (this.props.state.status.isEdit ? '' : ' disable');
 		const name3 = "s-btn s-delete clearfix" + (this.props.state.status.isDelete ? '' : ' disable');

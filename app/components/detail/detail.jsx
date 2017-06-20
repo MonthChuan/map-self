@@ -44,11 +44,11 @@ export default class Detail extends React.Component{
 	selectChangeName(event) {
 		const { value } = event.target;
 
-		this.props.editStore({'name' : value});
+		this.props.editStore({'re_name' : value});
 	}
 
 	selectChange(value) {
-		this.props.editStore({ 'regionType' : value});
+		this.props.editStore({ 're_type' : value});
 	}
 
 	clickStore(event) {
@@ -97,7 +97,10 @@ export default class Detail extends React.Component{
 			return <li key={item.id} value={item.id} onClick={self.clickStore}>{item.properties.re_name}</li>;
 		});
 
-		const isDisable = (this.props.state.store[0] && this.props.state.store[0].action=='SHOW') ? true : false;
+		const _item = this.props.state.store[0];
+		const isDisable = (_item && _item.action=='SHOW') ? true : false;
+		const storeName = (_item && _item.feature) ? _item.feature.properties.re_name : '';
+		const storeType = (_item && _item.feature) ? _item.feature.properties.re_type : '';
 
 		return (
 			<div className="detail-wrapper">
@@ -107,11 +110,11 @@ export default class Detail extends React.Component{
 							<div className="y-scroll info-wrap">
 								<div className="line">
 									<label className="txt">店铺名称：</label>
-									<Input placeholder="店铺名称" disabled={isDisable} value={(this.props.state.store[0] && this.props.state.store[0].name)} onChange={this.selectChangeName} />
+									<Input placeholder="店铺名称" disabled={isDisable} value={storeName} onChange={this.selectChangeName} />
 								</div>
 								<div className="line">
 									<label className="txt">业态：</label>
-									<Select placeholder="店铺类型" disabled={isDisable} value={(this.props.state.store[0] && this.props.state.store[0].regionType)} onChange={this.selectChange}>
+									<Select placeholder="店铺类型" disabled={isDisable} value={storeType} onChange={this.selectChange}>
 										{typelistTpl}
 									</Select>
 								</div>
