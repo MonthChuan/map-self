@@ -1,15 +1,16 @@
 import './control.css';
 import React from 'react';
-import { connect } from 'react-redux'  
+import { connect } from 'react-redux';  
 import { Button, message, Menu, Dropdown, Icon, Modal } from 'antd'; 
 import SaveConfirm from '../utils/saveConfirm.jsx';
 import { getSelect, setSelect } from '../utils/select';
 
+import * as Service from '../../../services/index';
+import { SET_STATUS, SET_STORE, SET_BKSTORE, INCREASE_MAXNUM } from '../../../action/actionTypes';
+
 class Control extends React.Component{
   constructor(props) {
     super(props);
-    this.state = this.props.state;
-    this.state.btnstatus = false;
 
     this.drawPloy = this.drawPloy.bind(this);
     this.setMerge = this.setMerge.bind(this);
@@ -23,118 +24,198 @@ class Control extends React.Component{
 
     this.checkAct = this.checkAct.bind(this);
     this.cancelAct = this.cancelAct.bind(this);
+
+    this.fixStoreParam = this.fixStoreParam.bind(this);
   }
 
-  submitAll() {
-    if(this.props.state.store.length > 0 && this.props.state.store[0].action != 'SHOW') {
-      this.props.saveEdit();
-    }
-    //todo结束本次编辑。。。
+	fixStoreParam(obj) {
+		let coords = [];
+		let centerPoint = null;
+		let centerPointXY = {x : 0, y : 0};
+		let coordsList = [];
+		let layerType = '';
+		let paramId = '';
 
-    $.ajax({
-      'url' : preAjaxUrl + '/mapeditor/map/editEnd/' + this.props.state.plazaId,
-      'method' : 'POST'
-    }).done(req => {
-      if(req.status == 200) {
+		if(obj.graphics) {
+			layerType = 'graphics';
+		}
+
+		if(obj.action != 'DELETE') {
+			if(obj.coords) {
+				coords = obj.coords;
+				centerPoint = obj.getBounds().getCenter();
+			} 
+			else {
+				if(obj.getCenter) {
+					centerPoint = obj.getCenter();
+				}
+				else {
+					centerPoint = obj[layerType].getCenter();
+				}
+				
+				coordsList = FMap.Utils.getOriginalByLatlngs(obj.getLatLngs());
+				if(coordsList[0].length > 1) {
+					coords = coordsList[0];
+				}
+				else {
+					coords = coordsList[0][0];
+				}
+			}
+			
+			centerPointXY = FMap.Utils.toOriginalCoordinates(centerPoint);
+		}
+
+		if(obj.action == 'NEW') {
+      const floor = this.props.map;
+
+      this.props.dispatch({
+        type : INCREASE_MAXNUM
+      });
+			// this.state.floorMaxNum ++ ;
+			paramId = floor.plazaId + '_' + floor.floorName + '_' + floor.floorMaxNum;
+		}
+		else {
+			paramId = obj.feature.properties.region_id;
+		}
+
+		const param = {
+			type : 'Feature',
+			id : paramId,
+			properties : {
+				centerx : centerPointXY.x,
+				centery : centerPointXY.y,
+				re_name : obj.feature.properties.re_name || '',
+				re_type : obj.feature.properties.re_type || '',
+				region_id : paramId
+			},
+			geometry : {
+				type : 'MultiPolygon',
+				coordinates : [[coords.concat(coords.slice(0,1))]]
+			}
+		};
+
+		return {
+			action : obj.action,
+			feature : param
+		}
+	}
+
+  //保存
+  saveEdit() {
+    const storeList = this.props.store.store;
+    const control = this.props.control;
+    const map = this.props.map;
+
+    if(storeList.length == 0) {
+      message.warning('没有正在编辑的商铺！', 3);
+			return;
+    }
+    if( control.isSubMerge && storeList.length < 3 ) {
+			message.warning('商铺合并操作未完成，请继续操作！', 3);
+			return;
+		}
+
+    const regionParam = storeList.map(item => {
+			return this.fixStoreParam(item);
+		});
+
+    Service.saveDataAjax(
+      preAjaxUrl + '/mapeditor/map/plaza/edit/region/' + map.plazaId + '/' + map.floorId,
+      regionParam,
+      () => {
         Modal.success({
-          title : '',
-          content : '已经提交审核，请耐心等待！'
+          title : '提示',
+          content : '保存成功！'
         });
-        this.props.setState({status : {
-          isAdd : false,
-          isEdit : false,
-          isDelete : false,
-          isMerge : false,
-          isSubMerge : false,
-          isZT : false,
-          isStart : false,
-          isActive : 2
-        }});
-        this.setState({btnstatus : 'disabled'});
-      }
-      else {
-        Modal.error({
-          title : '注意',
-          content : req.message
+      },
+      () => {
+        if(storeList[0].transform) {
+          storeList[0].transform.enable({
+            rotation: false,
+            scaling : false
+          });
+        }
+
+        if(storeList[0].dragging) {
+          storeList[0].dragging.disable();
+        }
+
+        if(storeList[0].eachLayer) {
+          storeList[0].eachLayer( i => {
+            i.disableEdit();
+          });
+        }
+        else {
+          storeList[0].disableEdit();
+        }
+
+        this.props.dispatch({
+          type : SET_STATUS,
+          status : {
+            isAdd : true,
+            isEdit : true,
+            isDelete : true,
+            isMerge : true,
+            isSubMerge : false,
+            isZT : true,
+            isStart : false,
+            isActive : false
+          }
         });
+
+        this.props.dispatch({
+          type : SET_STORE,
+          data : []
+        })
+        this.props.dispatch({
+          type : SET_BKSTORE,
+          data : []
+        })
       }
-    });
-  }
-
-  //检查是否可以进行下面操作
-  checkAct() {
-    if(this.props.state.store.length > 0 && this.props.state.store[0].action != 'SHOW') {
-      message.warning('您正在编辑状态，请先完成操作并保存，再进行其他操作！', 3);
-      return false;
-    }
-    return true;
-  }
-  
-  //新增商铺
-  drawPloy() {
-
-    this.props.dispatch({type: 'addRegion'});
-
-
-    if(!this.checkAct()) {return}
-
-
-    const newStore = this.state.ffmap.startPolygon();
-    newStore.action = "NEW";
-
-    this.props.setState({status : {
-      isAdd : true,
-      isEdit : false,
-      isDelete : false,
-      isMerge : false,
-      isSubMerge : false,
-      isZT : false,
-      isStart : false,
-      isActive : true
-    }});
-    this.props.state.store = [newStore];
-
-    newStore.on('click', e => {
-      this.props.initFeatureClick(e);
-    });
+    );
   }
 
   //合并
   setMerge() {
     if(!this.checkAct()) {return}
-    this.props.setState({status : {
-      isAdd : false,
-      isEdit : false,
-      isDelete : false,
-      isMerge : true,
-      isSubMerge : false,
-      isZT : false,
-      isStart : false,
-      isActive : true
-    }});
+    this.props.dispatch({
+      type : SET_STATUS,
+      status : {
+        isAdd : false,
+        isEdit : false,
+        isDelete : false,
+        isMerge : true,
+        isSubMerge : false,
+        isZT : false,
+        isStart : false,
+        isActive : true
+      }
+    });
   }
 
   mergeStore(store) {
-    if(this.props.state.store.length < 2) {
+    const storeList = this.props.store.store;
+    if(storeList.length < 2) {
       message.warning('无法合并！', 3);
     }
     else {
-      const s0 = this.props.state.store[0];
-      const s1 = this.props.state.store[1];
+      const s0 = storeList[0];
+      const s1 = storeList[1];
 
       if( s0.getBounds().intersects(s1.getBounds()) ) {
         let coords = [];
         const union = turf.union(s0.toGeoJSON(), s1.toGeoJSON());
-        const layer = this.state.ffmap.drawGeoJSON(union, {editable: true});
+        const layer = this.props.map.ffmap.drawGeoJSON(union, {editable: true});
 
         s0.remove();
         s0.label.remove();
 
         s1.remove();
         s1.label.remove();
+
         s0.action = 'DELETE';
         s1.action = 'DELETE';
-            this.state.ffmap.addOverlay(layer);
+        this.props.map.ffmap.addOverlay(layer);
               
         const coordObj = turf.coordAll(union).map(item => {
           return {
@@ -146,9 +227,11 @@ class Control extends React.Component{
 
         layer.coords = coords;
         layer.action = 'NEW';
-        const _s = [layer].concat(this.props.state.store);
-        this.props.setState({store : _s});
-        this.props.state.store = _s;
+        const _s = [layer].concat(storeList);
+        this.props.dispatch({
+          type : SET_STORE,
+          data : _s
+        });
         //手动添加一个名称label
         const centerLatLng = layer.getBounds().getCenter();
         this.props.newNameLabel(centerLatLng, layer, layer);
@@ -163,27 +246,153 @@ class Control extends React.Component{
     }
   }
 
-  editStart() {
-    this.props.editStart();
-  }
-
-  saveEdit() {
-    this.props.saveEdit();
-  }
-
   //delete
   deleteStore() {
     if(!this.checkAct()) {return}
-    this.props.setState({status : {
-      isAdd : false,
-      isEdit : false,
-      isDelete : true,
-      isMerge : false,
-      isSubMerge : false,
-      isZT : false,
-      isStart : false,
-      isActive : true
-    }});
+    this.props.dispatch({
+      type : SET_STATUS,
+      status : {
+        isAdd : false,
+        isEdit : false,
+        isDelete : true,
+        isMerge : false,
+        isSubMerge : false,
+        isZT : false,
+        isStart : false,
+        isActive : true
+      }
+    });
+  }
+
+  //商铺编辑
+  editRegion() {
+    if(!this.checkAct()) {return}
+
+    this.props.dispatch({
+      type : SET_STATUS,
+      status : {
+        isAdd : false,
+        isEdit : true,
+        isDelete : false,
+        isMerge : false,
+        isSubMerge : false,
+        isZT : false,
+        isStart : false,
+        isActive : true
+      }
+    });
+    // this.props.setState({status : {
+    //   isAdd : false,
+    //   isEdit : true,
+    //   isDelete : false,
+    //   isMerge : false,
+    //   isSubMerge : false,
+    //   isZT : false,
+    //   isStart : false,
+    //   isActive : true
+    // }});
+  }
+
+  //检查是否可以进行下面操作
+  checkAct() {
+    const storeList = this.props.store.store;
+    if(storeList.length > 0 && storeList[0].action != 'SHOW') {
+      message.warning('您正在编辑状态，请先完成操作并保存，再进行其他操作！', 3);
+      return false;
+    }
+    return true;
+  }
+
+  //开始编辑
+  editStart() {
+    Service.editStartAjax(
+      preAjaxUrl + '/mapeditor/map/editStart/' + this.props.map.plazaId + '/' + this.props.map.floorId,
+      () => {
+          this.props.dispatch({
+            type: SET_STATUS,
+            status : {
+              isAdd : true,
+              isEdit : true,
+              isDelete : true,
+              isMerge : true,
+              isSubMerge : false,
+              isZT : true,
+              isStart : false,
+              isActive : false
+            }
+          });
+      }
+    );
+  }
+
+  //新增商铺
+  drawPloy() {
+    if(!this.checkAct()) {return}
+
+    const newStore = this.props.map.ffmap.startPolygon();
+    newStore.action = "NEW";
+
+    this.props.dispatch({
+        type : SET_STATUS,
+        status : {
+          isAdd : true,
+          isEdit : false,
+          isDelete : false,
+          isMerge : false,
+          isSubMerge : false,
+          isZT : false,
+          isStart : false,
+          isActive : true
+        }
+    });
+
+    this.props.dispatch({
+      type : SET_STORE,
+      data : [newStore]
+    });
+
+    newStore.on('click', e => {
+      this.props.initFeatureClick(e);
+    });
+  }
+
+
+
+
+  //----------------------------------------
+
+  submitAll() {
+    const store = this.props.store.store;
+    if(store.length > 0 && store[0].action != 'SHOW') {
+      Modal.warning({
+          title : '提示',
+          content : '您有操作未保存，请先保存！'
+      });
+    }
+    //todo结束本次编辑。。。
+
+    Service.editEndAjax(
+      preAjaxUrl + '/mapeditor/map/editEnd/' + this.props.map.plazaId,
+      () => {
+        Modal.success({
+          title : '',
+          content : '已经提交审核，请耐心等待！'
+        });
+        this.props.dispatch({
+          type : SET_STATUS,
+          status : {
+            isAdd : false,
+            isEdit : false,
+            isDelete : false,
+            isMerge : false,
+            isSubMerge : false,
+            isZT : false,
+            isStart : false,
+            isActive : 2
+          }
+        });
+      }
+    );
   } 
 
   dropDown( { key } ) {
@@ -223,26 +432,11 @@ class Control extends React.Component{
     }
   }
 
-  //商铺编辑
-  editRegion() {
-    if(!this.checkAct()) {return}
-    this.props.setState({status : {
-      isAdd : false,
-      isEdit : true,
-      isDelete : false,
-      isMerge : false,
-      isSubMerge : false,
-      isZT : false,
-      isStart : false,
-      isActive : true
-    }});
-  }
-
   //取消操作
   cancelAct() {
-    for(let i = 0, l = this.props.state.store.length; i < l; i++) {
-      let item = this.props.state.store[i];
-      let bkItem = this.props.state.bkStore[i];
+    for(let i = 0, l = this.props.store.store.length; i < l; i++) {
+      let item = this.props.store.store[i];
+      let bkItem = this.props.store.bkStore[i];
       if(item.action == 'NEW') {
         if(item._proxy) {
           item._proxy.editor.map.editTools.stopDrawing();
@@ -273,19 +467,16 @@ class Control extends React.Component{
           }
         }
 
-        if(item.regionType != bkItem.regionType) {
-          item.regionType = bkItem.regionType;
+        if(item.re_type != bkItem.re_type) {
+          item.re_type = bkItem.re_type;
         }
       }
       else if(item.action == 'DELETE') {
-        this.props.state.ffmap.addOverlay(item);
+        this.props.map.ffmap.addOverlay(item);
         this.props.newNameLabel(item.getCenter(), item, item);
         item.label.setContent(item.feature.properties.re_name);
       }
 
-      // if(item.selected) {
-      // 	item.selected = false;
-      // }
       if(getSelect(item)) {
         setSelect(item, false);
       }
@@ -293,10 +484,8 @@ class Control extends React.Component{
     }
 
 
-    
-    
-
-    this.props.setState({
+    this.props.dispatch({
+      type : SET_STATUS,
       status : {
         isAdd : true,
         isEdit : true,
@@ -306,13 +495,21 @@ class Control extends React.Component{
         isZT : true,
         isStart : false,
         isActive : false
-      },
-      store : [],
-      bkStore : []
-    });
+      }
+    })
+    this.props.dispatch({
+      type : SET_STORE,
+      data : []
+    })
+    this.props.dispatch({
+      type : SET_BKSTORE,
+      data : []
+    })
+    
   }
 
   render() {
+    const data = this.props.control;
     const menu = (
       <Menu onClick={this.dropDown}>
         <Menu.Item key="1">多经点</Menu.Item>
@@ -320,18 +517,18 @@ class Control extends React.Component{
         <Menu.Item key="3">万达百货</Menu.Item>
       </Menu>
     );
-    const name0 = "s-btn s-cancel clearfix" + (this.props.state.status.isActive ? '' : ' disable');
-    const name1 = "s-btn s-add clearfix" + (this.props.state.status.isAdd ? '' : ' disable');
-    const name2 = "s-btn s-edit clearfix" + (this.props.state.status.isEdit ? '' : ' disable');
-    const name3 = "s-btn s-delete clearfix" + (this.props.state.status.isDelete ? '' : ' disable');
-    const name4 = "s-btn s-merge clearfix" + (this.props.state.status.isMerge ? '' : ' disable');
-    const name5 = "s-btn s-zt clearfix" + (this.props.state.status.isZT ? '' : ' disable');
+    const name0 = "s-btn s-cancel clearfix" + (data.isActive ? '' : ' disable');
+    const name1 = "s-btn s-add clearfix" + (data.isAdd ? '' : ' disable');
+    const name2 = "s-btn s-edit clearfix" + (data.isEdit ? '' : ' disable');
+    const name3 = "s-btn s-delete clearfix" + (data.isDelete ? '' : ' disable');
+    const name4 = "s-btn s-merge clearfix" + (data.isMerge ? '' : ' disable');
+    const name5 = "s-btn s-zt clearfix" + (data.isZT ? '' : ' disable');
 
-    const mergeStyle = {'display' : (this.props.state.status.isSubMerge ? 'none' : 'inline-block')};
-    const submergeStyle = {'display' : (this.props.state.status.isSubMerge ? 'inline-block' : 'none')};
+    const mergeStyle = {'display' : (data.isSubMerge ? 'none' : 'inline-block')};
+    const submergeStyle = {'display' : (data.isSubMerge ? 'inline-block' : 'none')};
 
-    const startStyle = {'display' : (this.props.state.status.isStart ? 'inline-block' : 'none')};
-    const saveStyle = {'display' : (this.props.state.status.isStart || (this.props.state.status.isActive == 2) ? 'none' : 'inline-block')};
+    const startStyle = {'display' : (data.isStart ? 'inline-block' : 'none')};
+    const saveStyle = {'display' : (data.isStart || (data.isActive == 2) ? 'none' : 'inline-block')};
   
     return (
       <div className="control">
@@ -347,7 +544,7 @@ class Control extends React.Component{
         </Dropdown>
         <Button className="e-save" style={startStyle} type="primary" onClick={this.editStart}>开始编辑</Button>
         <Button className="e-save" style={saveStyle} type="primary" onClick={this.saveEdit}>保存</Button>
-        <Button className="e-save" type="primary" onClick={this.submitAll} disabled={this.state.btnstatus}>提交审核</Button>
+        <Button className="e-save" type="primary" onClick={this.submitAll} disabled={data.isSubmit}>提交审核</Button>
         <SaveConfirm ref="saveConfirm" />
       </div>
     );

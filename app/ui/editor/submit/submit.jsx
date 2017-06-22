@@ -1,12 +1,13 @@
 import './submit.css';
 import React from 'react';  
+import { connect } from 'react-redux';
 import { Button, Upload, Modal, Radio } from 'antd'; 
 const RadioGroup = Radio.Group;  
 
-export default class Submit extends React.Component{
+class Submit extends React.Component{
 	constructor(props) {
 		super(props);
-		this.state = this.props.state;
+		this.state = {};
 		
 		this.state.checkStatus = 1;
 
@@ -80,5 +81,9 @@ export default class Submit extends React.Component{
 	}
 }
 
-// export default Login;
+function mapStateToProps(state) {
+  return state;
+}
+
+export default connect(mapStateToProps)(Submit);
 

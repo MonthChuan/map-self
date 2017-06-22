@@ -37,13 +37,29 @@ const SAVE = 'save';
 const CANCEL = 'cancel';
 
 
-export default {
-  SELECT_REGION,
-  ADD_REGION,
-  DEL_REGION,
-  EIDT_REGION,
-  MERGE_REGION,
-  ADD_SPECIAL,
-  SAVE,
-  CANCEL
-};
+
+
+
+export const SET_STATUS = 'setStatus';
+export const ADD_MAP = 'addMap';
+export const SET_PLAZAID = 'setPlazaId';
+export const GET_PLAZALIST = 'getPlazaList';
+export const SET_FLOORINFO = 'setFloorInfo';
+export const SET_STORE = 'setStore';
+export const SET_BKSTORE = 'setBKStore';
+export const SET_CONFIRMSHOW = 'setConfirmShow';
+export const INCREASE_MAXNUM = 'increaseMaxNum';
+
+
+// export default {
+//   SELECT_REGION,
+//   ADD_REGION,
+//   DEL_REGION,
+//   EIDT_REGION,
+//   MERGE_REGION,
+//   ADD_SPECIAL,
+//   SAVE,
+//   CANCEL,
+
+//   EDIT_START
+// };

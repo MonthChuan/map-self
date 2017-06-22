@@ -1,6 +1,7 @@
 import './editorpage.css';
 import 'antd/dist/antd.css';
 import React from 'react'; 
+import { connect } from 'react-redux';
 
 import PlazaSelect from './plazaselect/plazaselect.jsx';  
 import Control from './control/control.jsx';  
@@ -9,37 +10,17 @@ import Submit from './submit/submit.jsx';
 import { message, Modal, Popconfirm } from 'antd'; 
 import { getSelect, setSelect } from './utils/select';
 
+
+
+import * as Service from '../../services/index';
+import { ADD_MAP, SET_PLAZAID, SET_STATUS, SET_FLOORINFO, SET_STORE, SET_BKSTORE, SET_CONFIRMSHOW } from '../../action/actionTypes';
+
 class EditorPage extends React.Component{
 	constructor(props) {
 		super(props);
-		this.state = {
-			ffmap : null,
-			store : [], //最后提交的时候
-			bkStore : [], //取消操作数据备份
-			plazaId : '1100314',
-			isMerge : false,
-			floor : [], //楼层店铺数据
-			floorId : 1, //默认一楼
-			floorMaxNum : 0, //为了拼新建商铺的ID
-			floorName : 'F1', //为了拼新建商铺的ID
-			status : {
-				isAdd : false,
-				isEdit : false,
-				isDelete : false,
-				isMerge : false,
-				isSubMerge : false,
-				isZT : false,
-				isStart : true,
-				isActive : false
-			},
-			popconfirmVisible : false
-		};
 		this.preDeleteStore = null;
 
-		this.editStart = this.editStart.bind(this);
 		this.editStore = this.editStore.bind(this);
-		this.getPlazaId = this.getPlazaId.bind(this);
-		this.saveEdit = this.saveEdit.bind(this);
 		this.setState = this.setState.bind(this);
 
 
@@ -47,97 +28,32 @@ class EditorPage extends React.Component{
 		this.initFeatureClick = this.initFeatureClick.bind(this);
 		this.deleteStoreConfirmOk = this.deleteStoreConfirmOk.bind(this);
 		this.deleteStoreConfirmCancel = this.deleteStoreConfirmCancel.bind(this);
-		this.fixStoreParam = this.fixStoreParam.bind(this);
 	} 
-
-	fixStoreParam(obj) {
-		let coords = [];
-		let centerPoint = null;
-		let centerPointXY = {x : 0, y : 0};
-		let coordsList = [];
-		let layerType = '';
-		let paramId = '';
-
-		if(obj.graphics) {
-			layerType = 'graphics';
-		}
-
-		if(obj.action != 'DELETE') {
-			if(obj.coords) {
-				coords = obj.coords;
-				centerPoint = obj.getBounds().getCenter();
-			} 
-			else {
-				if(obj.getCenter) {
-					centerPoint = obj.getCenter();
-				}
-				else {
-					centerPoint = obj[layerType].getCenter();
-				}
-				
-				coordsList = FMap.Utils.getOriginalByLatlngs(obj.getLatLngs());
-				if(coordsList[0].length > 1) {
-					coords = coordsList[0];
-				}
-				else {
-					coords = coordsList[0][0];
-				}
-			}
-			
-			centerPointXY = FMap.Utils.toOriginalCoordinates(centerPoint);
-		}
-
-		if(obj.action == 'NEW') {
-			this.state.floorMaxNum ++ ;
-			paramId = this.state.plazaId + '_' + this.state.floorName + '_' + this.state.floorMaxNum;
-		}
-		else {
-			paramId = obj.feature.properties.region_id;
-		}
-
-		const param = {
-			type : 'Feature',
-			id : paramId,
-			properties : {
-				centerx : centerPointXY.x,
-				centery : centerPointXY.y,
-				re_name : obj.feature.properties.re_name || '',
-				re_type : obj.feature.properties.re_type || '',
-				region_id : paramId
-			},
-			geometry : {
-				type : 'MultiPolygon',
-				coordinates : [[coords.concat(coords.slice(0,1))]]
-			}
-		};
-
-		return {
-			action : obj.action,
-			feature : param
-		}
-	}
 
 	initFeatureClick(event) {
 		const _store = event.layer;
-		if(this.state.store.length > 2 || (this.state.status.isZT && this.state.status.isActive)) {
+
+		const control = this.props.control;
+		const storeList = this.props.store.store;
+		if(storeList.length > 2 || (control.isZT && control.isActive)) {
 				message.warning('您正在编辑状态，请先完成操作并保存，再进行其他操作！', 3);
 				return;
 			}
-			if(this.state.status.isStart || !this.state.status.isActive) {
+			if(control.isStart || !control.isActive) {
 				//查看店铺信息
 				_store.action = 'SHOW';
 			}
 			else {
 				//去掉重复操作
-				if((_store.editEnabled && _store.editEnabled()) || _store.selected) {
+				if((_store.editEnabled && _store.editEnabled()) || getSelect(_store)) {
 					return;
 				}
-				if(this.state.store.length > 0 && this.state.store[0].action != 'SHOW' && !(this.state.status.isMerge || this.state.status.isSubMerge)) {
+				if(storeList.length > 0 && storeList[0].action != 'SHOW' && !(control.isMerge || control.isSubMerge)) {
 					message.warning('您正在编辑状态，请先完成操作并保存，再进行其他操作！', 3);
 					return;
 				}
 
-				if(this.state.status.isEdit) {
+				if(control.isEdit) {
 					_store.action = 'UPDATE';
 					if(_store.enableEdit) {
 						_store.enableEdit();
@@ -151,9 +67,14 @@ class EditorPage extends React.Component{
 						return Object.assign({}, item);
 					});
 
-					this.setState({
-						store : [_store],
-						bkStore : [{
+					this.props.dispatch({
+						type : SET_STORE,
+						data : [_store]
+					});
+
+					this.props.dispatch({
+						type : SET_BKSTORE,
+						data : [{
 							name : _store.name,
 							regionType : _store.regionType,
 							latlng : [[_latlng]]
@@ -161,56 +82,69 @@ class EditorPage extends React.Component{
 					});
 					return;
 				}
-				else if(this.state.status.isDelete) {
-					this.setState({
-						popconfirmVisible : true
+				else if(control.isDelete) {
+					this.props.dispatch({
+						type : SET_CONFIRMSHOW,
+						data : true
 					});
 					this.refs.popconfirmChild.click();
-					_store.selected = true;
+
+					setSelect(_store, true);
 					this.preDeleteStore = _store;
 					return;
 				}
-				else if(this.state.status.isMerge || this.state.status.isSubMerge) {
-					this.setState({status : {
-						isAdd : false,
-						isEdit : false,
-						isDelete : false,
-						isMerge : false,
-						isSubMerge : true,
-						isZT : false,
-						isStart : false,
-						isActive : true
-					}});
+				else if(control.isMerge || control.isSubMerge) {
+					this.props.dispatch({
+						type : SET_STATUS,
+						status : {
+							isAdd : false,
+							isEdit : false,
+							isDelete : false,
+							isMerge : false,
+							isSubMerge : true,
+							isZT : false,
+							isStart : false,
+							isActive : true
+						}
+					});
 			
-					if(this.state.store.length == 2 ) {
-						const _oStore = this.state.store.pop();
+					if(storeList.length == 2 ) {
+						const _oStore = storeList.pop();
 						setSelect(_oStore, false);
 					}
 					setSelect(_store, true);
-					const _s = [_store].concat(this.state.store);
-					this.setState({store : _s});
+					const _s = [_store].concat(storeList);
+
+					this.props.dispatch({
+						type : SET_STORE,
+						data : _s
+					});
 					return;
 				}
 
 			}
 			
-			this.setState({
-				store : [_store]
+			this.props.dispatch({
+				type : SET_STORE,
+				data : [_store]
 			});
 	}
 
 	//DOM加载完毕之后，初始化map
 	componentDidMount() {
-		this.state.ffmap = new FMap.Map('map', {
+		const map = new FMap.Map('map', {
 			zoom : 20,
 			editable : true,
 			regionInteractive : true,
 			baseAPI : 'http://yunjin.intra.sit.ffan.com/mapeditor/map'
-			// baseAPI: 'http://imap.sit.ffan.com/poi'
+		});
+		this.props.dispatch({
+			type : ADD_MAP,
+			ffmap : map
 		});
 
-		//获取商铺列表
-		this.state.ffmap.on('rendered', event => {
+		// 获取商铺列表
+		map.on('rendered', event => {
 			let storeList = [];
 			let numList = [];
 			let f_name = '';
@@ -237,79 +171,47 @@ class EditorPage extends React.Component{
 				}
 			});
 
-			this.setState({
-				floor : storeList,
-				floorId : f_num,
-				floorMaxNum : maxNum,
-				floorName : f_name
+			this.props.dispatch({
+				type : SET_FLOORINFO,
+				info : {
+					floor : storeList,
+					floorId : f_num,
+					floorMaxNum : maxNum,
+					floorName : f_name
+				}
 			});
 		});
 
 		//承重柱
-		this.state.ffmap.on('click', event => {
-			if(this.state.status.isZT != 2 || (this.state.store.length > 0 && this.state.store[0].action != 'SHOW')) {
-				return;
-			}
-			const p1 = FMap.Utils.latLngToPoint(event.latlng);
-			const p2 = [p1.x + 3, p1.y + 3];
-			const bounds = [event.latlng, FMap.Utils.pointToLatLng(p2)];
-			const layer = L.rectangle(bounds, {
-				draggable : true,
-				color: "#ff7800", 
-				weight: 1, 
-				transform: true
-			});
+		// this.state.ffmap.on('click', event => {
+		// 	if(this.state.status.isZT != 2 || (this.state.store.length > 0 && this.state.store[0].action != 'SHOW')) {
+		// 		return;
+		// 	}
+		// 	const p1 = FMap.Utils.latLngToPoint(event.latlng);
+		// 	const p2 = [p1.x + 3, p1.y + 3];
+		// 	const bounds = [event.latlng, FMap.Utils.pointToLatLng(p2)];
+		// 	const layer = L.rectangle(bounds, {
+		// 		draggable : true,
+		// 		color: "#ff7800", 
+		// 		weight: 1, 
+		// 		transform: true
+		// 	});
 
-			this.state.ffmap.addOverlay(layer);
-			layer.transform.enable({rotation: true});
-			layer.feature = {
-				properties : {
-					re_name : '承重柱',
-					re_type : '030202'
-				}
-			};
-			layer.action = 'NEW';
-			this.setState({store : [layer]});
-		});
+		// 	this.state.ffmap.addOverlay(layer);
+		// 	layer.transform.enable({rotation: true});
+		// 	layer.feature = {
+		// 		properties : {
+		// 			re_name : '承重柱',
+		// 			re_type : '030202'
+		// 		}
+		// 	};
+		// 	layer.action = 'NEW';
+		// 	this.setState({store : [layer]});
+		// });
 
 
 
 		this.refs.map.style.height = '100%';
-	}
-
-	//点击开始编辑按钮
-	editStart() {
-		$.ajax({
-			'url' : preAjaxUrl + '/mapeditor/map/editStart/' + this.state.plazaId + '/' + this.state.floorId,
-			'type' : 'POST',
-			'xhrFields': {
-                      withCredentials: true
-              }
-		}).done(req => {
-			if(req.status == 200) {
-				this.setState({status : {
-					isAdd : true,
-					isEdit : true,
-					isDelete : true,
-					isMerge : true,
-					isSubMerge : false,
-					isZT : true,
-					isStart : false,
-					isActive : false
-				}});
-			}
-			else {
-				if(req.status == 460) {
-					location.href = location.pathname + '#/login';
-				}
-				else {
-					Modal.error({
-						title : '注意',
-						content : req.message
-					});
-				}
-			}
-		});
 	}
 
 	editStore(update) { 
@@ -348,35 +250,6 @@ class EditorPage extends React.Component{
 		Object.assign(store0.feature.properties, update);
 		const newSlist = [store0].concat(this.state.store.slice(1));
 		this.setState({store : newSlist});
-
-	}
-
-	getPlazaId(id) {
-		id = 1100314;
-
-		if(this.state.store.length > 0 && this.state.store[0].action != 'SHOW') {
-			this.saveEdit();
-		}
-
-		this.state.plazaId = id;
-
-		if(this.state.ffmap) {
-			this.state.ffmap.loadBuilding(id);
-		}
-
-		this.setState({
-			status : {
-				isAdd : false,
-				isEdit : false,
-				isDelete : false,
-				isMerge : false,
-				isSubMerge : false,
-				isZT : false,
-				isStart : true,
-				isActive : false
-			}
-		});
-		this.setState({store : []});
 
 	}
 
@@ -457,18 +330,24 @@ class EditorPage extends React.Component{
 	//新建一个name label
 	newNameLabel(center, sourceLayer, nameLayer) {
 		const nameLabel = new FMap.PoiLabel(center, '', sourceLayer, { pane : 'markerPane'});
-		this.state.ffmap.addOverlay(nameLabel);
+		this.props.map.ffmap.addOverlay(nameLabel);
 		nameLayer.label = nameLabel;
 	}
 
 	deleteStoreConfirmOk(e) {
-		this.preDeleteStore.selected = false;
-		this.setState({popconfirmVisible : false});
+		setSelect(this.preDeleteStore, false);
+		// this.setState({popconfirmVisible : false});
+		this.props.dispatch({
+			type : SET_CONFIRMSHOW,
+			data : false
+		})
 		this.preDeleteStore.action = 'DELETE';
 		
-		this.state.store = [this.preDeleteStore];
-		const store0 = this.state.store[0];
-		// this.state.bkStore = [this.preDeleteStore];
+		this.props.dispatch({
+			type : SET_STORE,
+			data : [this.preDeleteStore]
+		});
+		const store0 = this.preDeleteStore;
 		if(store0.graphics) {
 			store0.graphics.remove();
 		}
@@ -482,24 +361,31 @@ class EditorPage extends React.Component{
 	}
 
 	deleteStoreConfirmCancel(e) {
-		this.preDeleteStore.selected = false;
-		this.setState({popconfirmVisible : false});
+		setSelect(this.preDeleteStore, false);
+		this.props.dispatch({
+			type : SET_CONFIRMSHOW,
+			data : false
+		})
 	}
 
 	render () {
+		console.log(this.props)
 	    return (
 			<div className="page" id="editor">
 				<div className="topbar">
 					<div className="mid clearfix">
-						<PlazaSelect getPlazaId={this.getPlazaId} />
-						<Control 
+						<PlazaSelect />
+						{/*<Control 
 							state={this.state} 
 							setState={this.setState}
 							initFeatureClick={this.initFeatureClick}
 							mergeStore={this.mergeStore} 
-							editStart={this.editStart} 
 							saveEdit={this.saveEdit} 
 							newNameLabel={this.newNameLabel}
+						/>*/}
+						<Control 
+							newNameLabel={this.newNameLabel} 
+							initFeatureClick={this.initFeatureClick}
 						/>
 					</div>
 				</div>
@@ -510,7 +396,7 @@ class EditorPage extends React.Component{
 						cancelText="取消"
 						placement="top"
 						arrowPointAtCenter
-						visible={this.state.popconfirmVisible}
+						visible={this.props.map.popconfirmVisible}
 						onConfirm={this.deleteStoreConfirmOk}
 						onCancel={this.deleteStoreConfirmCancel}
 					>
@@ -520,7 +406,7 @@ class EditorPage extends React.Component{
 						<div className="map-wrapper">
 							<div ref="map" className="map" id="map" style={{height:700}}></div>
 						</div>
-						<Detail state={this.state} editStore={this.editStore} />
+						<Detail newNameLabel={this.newNameLabel} />
 					</div>
 				</div>
 				<div className="bottom mid">
@@ -531,5 +417,10 @@ class EditorPage extends React.Component{
 	  }
 }
 
-export default EditorPage;
+function mapStateToProps(state) {
+  return state;
+}
+
+export default connect(mapStateToProps)(EditorPage);
+// export default EditorPage;
 

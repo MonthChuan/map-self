@@ -1,36 +1,62 @@
 import './plazaselect.css';
 import React from 'react'; 
+import { connect } from 'react-redux';
+
+import * as Service from '../../../services/index';
+import { GET_PLAZALIST, SET_PLAZAID, SET_STATUS } from '../../../action/actionTypes';
+
 import { Select } from 'antd';  
 const Option = Select.Option;
-// const plazalist = require('./plazalist.js'); //模拟广场数据，后期要改为接口获取
 
-export default class PlazaSelect extends React.Component{
+class PlazaSelect extends React.Component{
 	constructor(props) {
 		super(props);
-		this.state = {
-			plazalist : []
-		};
-
 		this.handleChange = this.handleChange.bind(this);
 		this.getPlazaState = this.getPlazaState.bind(this);
 	}
 
 	//第一次渲染组件之后，异步获取数据
 	componentDidMount() {
-		$.ajax({
-			'url' : 'http://yunjin.intra.sit.ffan.com/mapeditor/plaza/v1/indoor/plazas',
-			'data' : {'pageSize' : 100},
-			'dataType' : 'json'
-		}).done( req => {
-			if(req.status == 200) {
-				this.setState({plazalist : req.data.list});
-				this.props.getPlazaId(this.state.plazalist[0].plazaFfanId); //把广场ID传递给父组件
+		Service.getPlazaListAjax((data) => {
+			this.props.dispatch({
+				type : GET_PLAZALIST,
+				list : data.data.list
+			});
+			this.props.dispatch({
+				type : SET_PLAZAID,
+				id : data.data.list[0].plazaFfanId
+			});
+
+			if(this.props.map.ffmap) {
+				this.props.map.ffmap.loadBuilding(this.props.map.plazaId);
 			}
+
 		});
 	}
 
 	handleChange(value) {
-		this.props.getPlazaId(value);
+		this.props.dispatch({
+			type : SET_PLAZAID,
+			id : value
+		});
+
+		if(this.props.map.ffmap) {
+			this.props.map.ffmap.loadBuilding(value);
+		}
+		this.props.dispatch({
+			type : SET_STATUS,
+			status : {
+				isAdd : false,
+				isEdit : false,
+				isDelete : false,
+				isMerge : false,
+				isSubMerge : false,
+				isZT : false,
+				isStart : true,
+				isActive : false
+			}
+		});
+
 	}
 
 	getPlazaState(item) {
@@ -52,8 +78,8 @@ export default class PlazaSelect extends React.Component{
 	render() {
 		let selectTpl = '';
 		const self = this;
-		if(this.state.plazalist.length > 0) {
-			const plazalistTpl = this.state.plazalist.map(function(item) {
+		if(this.props.map.plazalist.length > 0) {
+			const plazalistTpl = this.props.map.plazalist.map(function(item) {
 				item.locked = 0; //--------------------------------------------------------------------待删
 				return <Option 
 					key={String(item.plazaFfanId)} 
@@ -64,11 +90,12 @@ export default class PlazaSelect extends React.Component{
 				</Option>
 			});
 
+			const firstPlaza = this.props.map.plazalist[0];
 			selectTpl = (
 				<Select
 					showSearch
 					style={{ width: 224, height: 32 }}
-					defaultValue={this.state.plazalist[0].plazaName + self.getPlazaState(this.state.plazalist[0])}
+					defaultValue={firstPlaza.plazaName + self.getPlazaState(firstPlaza)}
 					placeholder="选择广场"
 					optionFilterProp="children"
 					onChange={this.handleChange}
@@ -87,5 +114,9 @@ export default class PlazaSelect extends React.Component{
 	}
 }
 
-// export default Login;
+function mapStateToProps(state) {
+  return state;
+}
+
+export default connect(mapStateToProps)(PlazaSelect);
 

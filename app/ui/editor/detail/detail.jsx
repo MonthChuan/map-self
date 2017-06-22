@@ -1,15 +1,17 @@
 import './detail.css';
 import React from 'react';  
+import { connect } from 'react-redux';
+import { SET_STATUS, SET_STORE } from '../../../action/actionTypes';
 import { Input, Select, Tabs, Radio, DatePicker } from 'antd'; 
 const Option = Select.Option;
 const TabPane = Tabs.TabPane;
 const Search = Input.Search;
 const RadioGroup = Radio.Group;
 
-export default class Detail extends React.Component{
+class Detail extends React.Component{
 	constructor(props) {
 		super(props);
-		this.state = this.props.state;
+		this.state = {};
 		this.state.zsRadio = 1;
 		this.state.typelist = [];
 
@@ -19,7 +21,67 @@ export default class Detail extends React.Component{
 		this.searchStore = this.searchStore.bind(this);
 		this.onRadioChange = this.onRadioChange.bind(this);
 		this.onCalendarChange = this.onCalendarChange.bind(this);
+
+		this.beforeEditDetail = this.beforeEditDetail.bind(this);
 	}
+
+	beforeEditDetail() {
+		const store0 = this.props.store.store[0];
+		if(!store0) {
+			return false;
+		}
+
+		if(store0.action == 'NEW') {
+			if(!store0.label) {
+				//手动添加一个名称label,如果是添加，应该建一个name放上去。todo
+				const center = store0.graphics.getCenter();
+				this.props.newNameLabel(center, store0.graphics, store0);
+			}
+			if(!store0.feature) {
+				store0.feature = {
+					properties : {
+						re_name : '',
+						re_type : ''
+					}
+				};
+			}
+		}
+		return true;
+	}
+
+	selectChangeName(event) {
+		const { value } = event.target;
+		// this.props.editStore({'re_name' : value});
+		if(this.beforeEditDetail()) {
+			const store = this.props.store.store[0];
+
+			store.label.setContent(value);
+			Object.assign(store.feature.properties, {'re_name' : value});
+			const newSlist = [store].concat(this.props.store.store.slice(1));
+			this.props.dispatch({
+				type : SET_STORE,
+				data : newSlist
+			})
+		}
+
+		
+	}
+
+	selectChange(value) {
+		// this.props.editStore({ 're_type' : value});
+		if(this.beforeEditDetail()) {
+			const store = this.props.store.store[0];
+
+			Object.assign(store.feature.properties, {'re_type' : value});
+			const newSlist = [store].concat(this.props.store.store.slice(1));
+			this.props.dispatch({
+				type : SET_STORE,
+				data : newSlist
+			})
+		}
+	}
+
+	//--------------------------------------------------
 
 	//第一次渲染组件之后，异步获取数据
 	componentDidMount() {
@@ -39,16 +101,6 @@ export default class Detail extends React.Component{
 		this.setState({
 			zsRadio : event.target.value
 		});
-	}
-
-	selectChangeName(event) {
-		const { value } = event.target;
-
-		this.props.editStore({'re_name' : value});
-	}
-
-	selectChange(value) {
-		this.props.editStore({ 're_type' : value});
 	}
 
 	clickStore(event) {
@@ -90,14 +142,14 @@ export default class Detail extends React.Component{
 		});
 
 		const self = this;
-		const storelistTpl = this.props.state.floor.map(function(item) {
+		const storelistTpl = this.props.map.floor.map(function(item) {
 			if(!item.properties.re_name || !item.id) {
 				return;
 			}
 			return <li key={item.id} value={item.id} onClick={self.clickStore}>{item.properties.re_name}</li>;
 		});
 
-		const _item = this.props.state.store[0];
+		const _item = this.props.store.store[0];
 		const isDisable = (_item && _item.action=='SHOW') ? true : false;
 		const storeName = (_item && _item.feature) ? _item.feature.properties.re_name : '';
 		const storeType = (_item && _item.feature) ? _item.feature.properties.re_type : '';
@@ -202,5 +254,9 @@ export default class Detail extends React.Component{
 	}
 }
 
-// export default Login;
+function mapStateToProps(state) {
+  return state;
+}
+
+export default connect(mapStateToProps)(Detail);
 

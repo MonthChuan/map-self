@@ -1,16 +1,15 @@
 import { combineReducers } from 'redux';
 
-import toolsReducers from './toolsReducers';
+// import toolsReducers from './toolsReducers';
+import control from './controlReducers';
+import map from './mapReducers';
+import store from './storeReducers';
 
 const editorReducers = combineReducers({
-  startEdit
+  control,
+  map,
+  store
 });
-
-
-function startEdit (previousState, action) {
-  console.log('start edit');
-  return {};
-}
 
 
 export default editorReducers;
