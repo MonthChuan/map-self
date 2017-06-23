@@ -4,9 +4,11 @@ import { connect } from 'react-redux';
 import { Button, message, Menu, Dropdown, Icon, Modal } from 'antd'; 
 import SaveConfirm from '../utils/saveConfirm.jsx';
 import { getSelect, setSelect } from '../utils/select';
+import { formatStore } from '../utils/formatStore';
 
 import * as Service from '../../../services/index';
 import { SET_STATUS, SET_STORE, SET_BKSTORE, INCREASE_MAXNUM } from '../../../action/actionTypes';
+import STATUSCONF from '../../../config/status';
 
 class Control extends React.Component{
   constructor(props) {
@@ -18,7 +20,6 @@ class Control extends React.Component{
     this.mergeStore = this.mergeStore.bind(this);
     this.editStart = this.editStart.bind(this);
     this.saveEdit = this.saveEdit.bind(this);
-    this.dropDown = this.dropDown.bind(this);
     this.editRegion = this.editRegion.bind(this);
     this.submitAll = this.submitAll.bind(this);
 
@@ -29,75 +30,16 @@ class Control extends React.Component{
   }
 
 	fixStoreParam(obj) {
-		let coords = [];
-		let centerPoint = null;
-		let centerPointXY = {x : 0, y : 0};
-		let coordsList = [];
-		let layerType = '';
-		let paramId = '';
-
-		if(obj.graphics) {
-			layerType = 'graphics';
-		}
-
-		if(obj.action != 'DELETE') {
-			if(obj.coords) {
-				coords = obj.coords;
-				centerPoint = obj.getBounds().getCenter();
-			} 
-			else {
-				if(obj.getCenter) {
-					centerPoint = obj.getCenter();
-				}
-				else {
-					centerPoint = obj[layerType].getCenter();
-				}
-				
-				coordsList = FMap.Utils.getOriginalByLatlngs(obj.getLatLngs());
-				if(coordsList[0].length > 1) {
-					coords = coordsList[0];
-				}
-				else {
-					coords = coordsList[0][0];
-				}
-			}
-			
-			centerPointXY = FMap.Utils.toOriginalCoordinates(centerPoint);
-		}
-
-		if(obj.action == 'NEW') {
+    const getNewStoreId = () => {
       const floor = this.props.map;
-
       this.props.dispatch({
         type : INCREASE_MAXNUM
       });
-			// this.state.floorMaxNum ++ ;
-			paramId = floor.plazaId + '_' + floor.floorName + '_' + floor.floorMaxNum;
-		}
-		else {
-			paramId = obj.feature.properties.region_id;
-		}
 
-		const param = {
-			type : 'Feature',
-			id : paramId,
-			properties : {
-				centerx : centerPointXY.x,
-				centery : centerPointXY.y,
-				re_name : obj.feature.properties.re_name || '',
-				re_type : obj.feature.properties.re_type || '',
-				region_id : paramId
-			},
-			geometry : {
-				type : 'MultiPolygon',
-				coordinates : [[coords.concat(coords.slice(0,1))]]
-			}
-		};
+			return floor.plazaId + '_' + floor.floorName + '_' + floor.floorMaxNum;
+    };
 
-		return {
-			action : obj.action,
-			feature : param
-		}
+    return formatStore(obj, getNewStoreId);
 	}
 
   //保存
@@ -151,16 +93,7 @@ class Control extends React.Component{
 
         this.props.dispatch({
           type : SET_STATUS,
-          status : {
-            isAdd : true,
-            isEdit : true,
-            isDelete : true,
-            isMerge : true,
-            isSubMerge : false,
-            isZT : true,
-            isStart : false,
-            isActive : false
-          }
+          status : STATUSCONF.save
         });
 
         this.props.dispatch({
@@ -180,16 +113,7 @@ class Control extends React.Component{
     if(!this.checkAct()) {return}
     this.props.dispatch({
       type : SET_STATUS,
-      status : {
-        isAdd : false,
-        isEdit : false,
-        isDelete : false,
-        isMerge : true,
-        isSubMerge : false,
-        isZT : false,
-        isStart : false,
-        isActive : true
-      }
+      status : STATUSCONF.merge
     });
   }
 
@@ -251,16 +175,7 @@ class Control extends React.Component{
     if(!this.checkAct()) {return}
     this.props.dispatch({
       type : SET_STATUS,
-      status : {
-        isAdd : false,
-        isEdit : false,
-        isDelete : true,
-        isMerge : false,
-        isSubMerge : false,
-        isZT : false,
-        isStart : false,
-        isActive : true
-      }
+      status : STATUSCONF.sdelete
     });
   }
 
@@ -270,27 +185,8 @@ class Control extends React.Component{
 
     this.props.dispatch({
       type : SET_STATUS,
-      status : {
-        isAdd : false,
-        isEdit : true,
-        isDelete : false,
-        isMerge : false,
-        isSubMerge : false,
-        isZT : false,
-        isStart : false,
-        isActive : true
-      }
+      status : STATUSCONF.edit
     });
-    // this.props.setState({status : {
-    //   isAdd : false,
-    //   isEdit : true,
-    //   isDelete : false,
-    //   isMerge : false,
-    //   isSubMerge : false,
-    //   isZT : false,
-    //   isStart : false,
-    //   isActive : true
-    // }});
   }
 
   //检查是否可以进行下面操作
@@ -310,16 +206,7 @@ class Control extends React.Component{
       () => {
           this.props.dispatch({
             type: SET_STATUS,
-            status : {
-              isAdd : true,
-              isEdit : true,
-              isDelete : true,
-              isMerge : true,
-              isSubMerge : false,
-              isZT : true,
-              isStart : false,
-              isActive : false
-            }
+            status : STATUSCONF.start
           });
       }
     );
@@ -331,19 +218,18 @@ class Control extends React.Component{
 
     const newStore = this.props.map.ffmap.startPolygon();
     newStore.action = "NEW";
+    if( !newStore.feature ) {
+        newStore.feature = {
+            properties : {
+              re_name : '',
+              re_type : ''
+            }
+        };
+    }
 
     this.props.dispatch({
         type : SET_STATUS,
-        status : {
-          isAdd : true,
-          isEdit : false,
-          isDelete : false,
-          isMerge : false,
-          isSubMerge : false,
-          isZT : false,
-          isStart : false,
-          isActive : true
-        }
+        status : STATUSCONF.add
     });
 
     this.props.dispatch({
@@ -356,11 +242,6 @@ class Control extends React.Component{
     });
   }
 
-
-
-
-  //----------------------------------------
-
   submitAll() {
     const store = this.props.store.store;
     if(store.length > 0 && store[0].action != 'SHOW') {
@@ -368,6 +249,7 @@ class Control extends React.Component{
           title : '提示',
           content : '您有操作未保存，请先保存！'
       });
+      return;
     }
     //todo结束本次编辑。。。
 
@@ -380,57 +262,11 @@ class Control extends React.Component{
         });
         this.props.dispatch({
           type : SET_STATUS,
-          status : {
-            isAdd : false,
-            isEdit : false,
-            isDelete : false,
-            isMerge : false,
-            isSubMerge : false,
-            isZT : false,
-            isStart : false,
-            isActive : 2
-          }
+          status : STATUSCONF.editEnd
         });
       }
     );
   } 
-
-  dropDown( { key } ) {
-    this.props.setState({status : {
-      isAdd : false,
-      isEdit : false,
-      isDelete : false,
-      isMerge : false,
-      isSubMerge : false,
-      isZT : key,
-      isStart : false,
-      isActive : true
-    }});
-    const bulidZT = (name, type) => {
-      const layer = this.state.ffmap.startPolygon({
-        color: "#ff7800", 
-        weight: 1
-      });
-      layer.name = name;
-      layer.regionType = type;
-      layer.action = 'NEW';
-
-      this.props.setState({store : [layer]});
-    };
-
-    switch(parseInt(key)) {
-      case 1:
-        bulidZT('多经点位', '030201');
-        break;
-      case 2:
-        break;
-      case 3:
-        bulidZT('万达百货', '万达百货');
-        break;
-      default:
-        break;
-    }
-  }
 
   //取消操作
   cancelAct() {
@@ -486,16 +322,7 @@ class Control extends React.Component{
 
     this.props.dispatch({
       type : SET_STATUS,
-      status : {
-        isAdd : true,
-        isEdit : true,
-        isDelete : true,
-        isMerge : true,
-        isSubMerge : false,
-        isZT : true,
-        isStart : false,
-        isActive : false
-      }
+      status : STATUSCONF.cancel
     })
     this.props.dispatch({
       type : SET_STORE,
@@ -510,14 +337,7 @@ class Control extends React.Component{
 
   render() {
     const data = this.props.control;
-    const menu = (
-      <Menu onClick={this.dropDown}>
-        <Menu.Item key="1">多经点</Menu.Item>
-        <Menu.Item key="2">承重柱</Menu.Item>
-        <Menu.Item key="3">万达百货</Menu.Item>
-      </Menu>
-    );
-    const name0 = "s-btn s-cancel clearfix" + (data.isActive ? '' : ' disable');
+    const name0 = "s-btn s-cancel clearfix" + (data.isActive === true ? '' : ' disable');
     const name1 = "s-btn s-add clearfix" + (data.isAdd ? '' : ' disable');
     const name2 = "s-btn s-edit clearfix" + (data.isEdit ? '' : ' disable');
     const name3 = "s-btn s-delete clearfix" + (data.isDelete ? '' : ' disable');
@@ -539,12 +359,9 @@ class Control extends React.Component{
         <a className={name4} style={mergeStyle} onClick={this.setMerge}><i className="s-icon"></i>商铺合并</a>
         <a className="s-btn s-merge clearfix" style={submergeStyle} onClick={this.mergeStore}><i className="s-icon"></i>执行合并</a>
 
-        <Dropdown overlay={menu}>
-          <span className={name5}><i className="s-icon"></i>专题数据<Icon type="down" /></span>
-        </Dropdown>
         <Button className="e-save" style={startStyle} type="primary" onClick={this.editStart}>开始编辑</Button>
         <Button className="e-save" style={saveStyle} type="primary" onClick={this.saveEdit}>保存</Button>
-        <Button className="e-save" type="primary" onClick={this.submitAll} disabled={data.isSubmit}>提交审核</Button>
+        <Button className="e-save" type="primary" onClick={this.submitAll} disabled={data.isSubmit}>结束编辑</Button>
         <SaveConfirm ref="saveConfirm" />
       </div>
     );
@@ -552,8 +369,6 @@ class Control extends React.Component{
 }
 
 function mapStateToProps(state) {
-  // const testData = componentConfig['textField']['props'];
   return state;
 }
-
 export default connect(mapStateToProps)(Control);

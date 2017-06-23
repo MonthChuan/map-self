@@ -1,22 +1,9 @@
-const initialState = {
-  isAdd : false,
-  isEdit : false,
-  isDelete : false,
-  isMerge : false,
-  isSubMerge : false,
-  isZT : false,
-  isStart : true,
-  isActive : false,
-  isSubmit : false
-};
+import STATUS from '../config/status';
 
-
-function control(previousState = initialState, action) {
+function control(previousState = STATUS.initial, action) {
     switch(action.type) {
         case 'setStatus':
             return Object.assign({}, previousState, action.status);
-        // case 'STORE_CHANGE':
-        //     return Object.assign({}, state, {store : action.data});
         default:
             return previousState;
     }

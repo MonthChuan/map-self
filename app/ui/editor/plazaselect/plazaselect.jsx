@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 
 import * as Service from '../../../services/index';
 import { GET_PLAZALIST, SET_PLAZAID, SET_STATUS } from '../../../action/actionTypes';
+import STATUSCONF from '../../../config/status';
 
 import { Select } from 'antd';  
 const Option = Select.Option;
@@ -45,16 +46,7 @@ class PlazaSelect extends React.Component{
 		}
 		this.props.dispatch({
 			type : SET_STATUS,
-			status : {
-				isAdd : false,
-				isEdit : false,
-				isDelete : false,
-				isMerge : false,
-				isSubMerge : false,
-				isZT : false,
-				isStart : true,
-				isActive : false
-			}
+			status : STATUSCONF.initial
 		});
 
 	}

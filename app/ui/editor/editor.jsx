@@ -10,8 +10,6 @@ import Submit from './submit/submit.jsx';
 import { message, Modal, Popconfirm } from 'antd'; 
 import { getSelect, setSelect } from './utils/select';
 
-
-
 import * as Service from '../../services/index';
 import { ADD_MAP, SET_PLAZAID, SET_STATUS, SET_FLOORINFO, SET_STORE, SET_BKSTORE, SET_CONFIRMSHOW } from '../../action/actionTypes';
 
@@ -19,11 +17,6 @@ class EditorPage extends React.Component{
 	constructor(props) {
 		super(props);
 		this.preDeleteStore = null;
-
-		this.editStore = this.editStore.bind(this);
-		this.setState = this.setState.bind(this);
-
-
 		this.newNameLabel = this.newNameLabel.bind(this);
 		this.initFeatureClick = this.initFeatureClick.bind(this);
 		this.deleteStoreConfirmOk = this.deleteStoreConfirmOk.bind(this);
@@ -31,7 +24,7 @@ class EditorPage extends React.Component{
 	} 
 
 	initFeatureClick(event) {
-		const _store = event.layer;
+		const _store = event.layer || event.target;
 
 		const control = this.props.control;
 		const storeList = this.props.store.store;
@@ -63,7 +56,8 @@ class EditorPage extends React.Component{
 							i.enableEdit();
 						});
 					}
-					const _latlng = _store.getLatLngs()[0][0].map(item => {
+					const _latlngList = _store.getLatLngs()[0].length > 1 ? _store.getLatLngs()[0] : _store.getLatLngs()[0][0];
+					const _latlng = _latlngList.map(item => {
 						return Object.assign({}, item);
 					});
 
@@ -182,149 +176,7 @@ class EditorPage extends React.Component{
 			});
 		});
 
-		//承重柱
-		// this.state.ffmap.on('click', event => {
-		// 	if(this.state.status.isZT != 2 || (this.state.store.length > 0 && this.state.store[0].action != 'SHOW')) {
-		// 		return;
-		// 	}
-		// 	const p1 = FMap.Utils.latLngToPoint(event.latlng);
-		// 	const p2 = [p1.x + 3, p1.y + 3];
-		// 	const bounds = [event.latlng, FMap.Utils.pointToLatLng(p2)];
-		// 	const layer = L.rectangle(bounds, {
-		// 		draggable : true,
-		// 		color: "#ff7800", 
-		// 		weight: 1, 
-		// 		transform: true
-		// 	});
-
-		// 	this.state.ffmap.addOverlay(layer);
-		// 	layer.transform.enable({rotation: true});
-		// 	layer.feature = {
-		// 		properties : {
-		// 			re_name : '承重柱',
-		// 			re_type : '030202'
-		// 		}
-		// 	};
-		// 	layer.action = 'NEW';
-		// 	this.setState({store : [layer]});
-		// });
-
-
-
 		this.refs.map.style.height = '100%';
-	}
-
-	editStore(update) { 
-		if(this.state.store.length == 0) {
-			message.warning('没有正在编辑的商铺！', 3);
-			return;
-		}
-
-		const store0 = this.state.store[0];
-		//name要在地图上更新，所以要单独调用set
-		if(store0.action == 'NEW') {
-			if(!store0.label) {
-				//手动添加一个名称label,如果是添加，应该建一个name放上去。todo
-				const center = store0.graphics.getCenter();
-				this.newNameLabel(center, store0.graphics, store0);
-			}
-			store0.label.setContent(update.re_name);
-			if(!store0.feature) {
-				store0.feature = {
-					properties : {
-						re_name : '',
-						re_type : ''
-					}
-				};
-			}
-		}
-		else {
-			if(update.re_name) {		
-				this.state.store[0].re_name = update.re_name;
-				if(this.state.store[0].label) {
-					this.state.store[0].label.setContent(update.re_name);
-				}
-			}
-		}
-		
-		Object.assign(store0.feature.properties, update);
-		const newSlist = [store0].concat(this.state.store.slice(1));
-		this.setState({store : newSlist});
-
-	}
-
-	//点击保存按钮
-	saveEdit() {
-		if(this.state.store.length == 0) {
-			message.warning('没有正在编辑的商铺！', 3);
-			return
-		}
-		if( this.state.status.isSubMerge && this.state.store.length < 3 ) {
-			message.warning('商铺合并操作未完成，请继续操作！', 3);
-			return;
-		}
-
-		const ajaxUrl = preAjaxUrl + '/mapeditor/map/plaza/edit/region/' + this.state.plazaId + '/' + this.state.floorId;
-		const regionParam = this.state.store.map(item => {
-			return this.fixStoreParam(item);
-		});
-
-		$.ajax({
-			'url' : ajaxUrl,
-			'method' : 'POST',
-			'dataType' : 'json',
-			'data' : {"data" : JSON.stringify(regionParam)}
-		}).done(req => {
-			if(req.status == 200) {
-
-				Modal.success({
-					title : '提示',
-					content : '保存成功！'
-				});
-				
-			}
-			else {
-				Modal.error({
-					title : '提示',
-					content : req.message
-				});
-			}
-			if(this.state.store[0].transform) {
-				this.state.store[0].transform.enable({
-					rotation: false,
-					scaling : false
-				});
-			}
-			if(this.state.store[0].dragging) {
-				this.state.store[0].dragging.disable();
-			}
-		
-			if(this.state.store[0].eachLayer) {
-				this.state.store[0].eachLayer(i => {
-					i.disableEdit();
-				});
-			}
-			else {
-				this.state.store[0].disableEdit();
-			}
-			//重置按钮状态
-			this.setState({status : {
-				isAdd : true,
-				isEdit : true,
-				isDelete : true,
-				isMerge : true,
-				isSubMerge : false,
-				isZT : true,
-				isStart : false,
-				isActive : false
-			}});
-
-			this.setState({
-				store : [],
-				bkStore : []
-			});
-		});
-		
 	}
 
 	//新建一个name label
@@ -336,7 +188,6 @@ class EditorPage extends React.Component{
 
 	deleteStoreConfirmOk(e) {
 		setSelect(this.preDeleteStore, false);
-		// this.setState({popconfirmVisible : false});
 		this.props.dispatch({
 			type : SET_CONFIRMSHOW,
 			data : false
@@ -369,20 +220,11 @@ class EditorPage extends React.Component{
 	}
 
 	render () {
-		console.log(this.props)
 	    return (
 			<div className="page" id="editor">
 				<div className="topbar">
 					<div className="mid clearfix">
 						<PlazaSelect />
-						{/*<Control 
-							state={this.state} 
-							setState={this.setState}
-							initFeatureClick={this.initFeatureClick}
-							mergeStore={this.mergeStore} 
-							saveEdit={this.saveEdit} 
-							newNameLabel={this.newNameLabel}
-						/>*/}
 						<Control 
 							newNameLabel={this.newNameLabel} 
 							initFeatureClick={this.initFeatureClick}
@@ -410,7 +252,7 @@ class EditorPage extends React.Component{
 					</div>
 				</div>
 				<div className="bottom mid">
-					<Submit state={this.state} saveEdit={this.saveEdit} setState={this.setState} />
+					<Submit />
 				</div>
 			</div>
 	    );
@@ -420,7 +262,5 @@ class EditorPage extends React.Component{
 function mapStateToProps(state) {
   return state;
 }
-
 export default connect(mapStateToProps)(EditorPage);
-// export default EditorPage;
 

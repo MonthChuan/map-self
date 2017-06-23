@@ -1,7 +1,7 @@
 import './detail.css';
 import React from 'react';  
 import { connect } from 'react-redux';
-import { SET_STATUS, SET_STORE } from '../../../action/actionTypes';
+import { SET_STORE } from '../../../action/actionTypes';
 import { Input, Select, Tabs, Radio, DatePicker } from 'antd'; 
 const Option = Select.Option;
 const TabPane = Tabs.TabPane;
@@ -31,21 +31,22 @@ class Detail extends React.Component{
 			return false;
 		}
 
-		if(store0.action == 'NEW') {
-			if(!store0.label) {
-				//手动添加一个名称label,如果是添加，应该建一个name放上去。todo
-				const center = store0.graphics.getCenter();
-				this.props.newNameLabel(center, store0.graphics, store0);
+		if(!store0.label) {
+			//手动添加一个名称label,如果是添加，应该建一个name放上去。todo
+			let center = null;
+			let sourceLayer = null;
+			if(store0.getCenter) {
+				center = store0.getCenter();
+				sourceLayer = store0;
 			}
-			if(!store0.feature) {
-				store0.feature = {
-					properties : {
-						re_name : '',
-						re_type : ''
-					}
-				};
+			else {
+				center = store0.graphics.getCenter();
+				sourceLayer = store0.graphics;
 			}
+	
+			this.props.newNameLabel(center, sourceLayer, store0);
 		}
+
 		return true;
 	}
 

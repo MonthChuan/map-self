@@ -63,3 +63,14 @@ export const editEndAjax = (url, success) => {
         }
     );
 }
+
+//结束审核
+export const submitCheckAjax = (url, checkStatus, success) => {
+    $post(
+        url,
+        {"verifyResult" : checkStatus},
+        (req) => {
+            callback(req, success);
+        }
+    );
+}
