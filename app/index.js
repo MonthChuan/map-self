@@ -1,15 +1,29 @@
 import './common.css';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import PropTypes from 'prop-types';
+import { createStore } from 'redux';
+import { Provider } from 'react-redux';
 import { Router, Route, hashHistory } from 'react-router';
 
-import LoginPage from './components/login.jsx';
-import EditorPage from './components/editor.jsx';
- 
+import editorReducers from './reducers';
+import LoginPage from './ui/login/login.jsx';
+import EditorPage from './ui/editor/editor.jsx';
+
+// create root component
+const Root = ({ store }) => (
+  <Provider store={store}>
+    <Router history={hashHistory}>
+      <Route path="/login" component={LoginPage}/>
+      <Route path="/" component={EditorPage}/>
+    </Router>
+  </Provider>
+);
+Root.propTypes = { store: PropTypes.object.isRequired };
+// create store
+let store = createStore(editorReducers);
+// render
 ReactDOM.render(
-  <Router history={hashHistory}>
-    <Route path="/login" component={LoginPage}/>
-    <Route path="/" component={EditorPage}/>
-  </Router>,
+  <Root store={store} />,
   document.getElementById('content')
 );
