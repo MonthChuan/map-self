@@ -1,7 +1,8 @@
 import './detail.css';
 import React from 'react';  
 import { connect } from 'react-redux';
-import { SET_STORE } from '../../../action/actionTypes';
+import { SET_STORE, GET_STORECATGORY } from '../../../action/actionTypes';
+import * as Service from '../../../services/index';
 import { Input, Select, Tabs, Radio, DatePicker } from 'antd'; 
 const Option = Select.Option;
 const TabPane = Tabs.TabPane;
@@ -11,16 +12,11 @@ const RadioGroup = Radio.Group;
 class Detail extends React.Component{
 	constructor(props) {
 		super(props);
-		this.state = {};
-		this.state.zsRadio = 1;
-		this.state.typelist = [];
 
 		this.selectChange = this.selectChange.bind(this);
 		this.selectChangeName = this.selectChangeName.bind(this);
 		this.clickStore = this.clickStore.bind(this);
 		this.searchStore = this.searchStore.bind(this);
-		this.onRadioChange = this.onRadioChange.bind(this);
-		this.onCalendarChange = this.onCalendarChange.bind(this);
 
 		this.beforeEditDetail = this.beforeEditDetail.bind(this);
 	}
@@ -52,7 +48,6 @@ class Detail extends React.Component{
 
 	selectChangeName(event) {
 		const { value } = event.target;
-		// this.props.editStore({'re_name' : value});
 		if(this.beforeEditDetail()) {
 			const store = this.props.store.store[0];
 
@@ -69,7 +64,6 @@ class Detail extends React.Component{
 	}
 
 	selectChange(value) {
-		// this.props.editStore({ 're_type' : value});
 		if(this.beforeEditDetail()) {
 			const store = this.props.store.store[0];
 
@@ -82,26 +76,16 @@ class Detail extends React.Component{
 		}
 	}
 
-	//--------------------------------------------------
-
 	//第一次渲染组件之后，异步获取数据
 	componentDidMount() {
-		$.ajax({
-			'url' : 'http://yunjin.intra.sit.ffan.com/mapeditor/category/categoryCodes',
-			'dataType' : 'json'
-		}).done( req => {
-			if(req.status == 200) {
-				this.setState({typelist : req.data});
+		Service.getCatgoryAjax(
+			(req) => {
+				this.props.dispatch({
+					type: GET_STORECATGORY,
+					catgory : req.data
+				});
 			}
-		});
-	}
-
-	onCalendarChange(value, mode) {}
-
-	onRadioChange(event) {
-		this.setState({
-			zsRadio : event.target.value
-		});
+		)
 	}
 
 	clickStore(event) {
@@ -138,7 +122,7 @@ class Detail extends React.Component{
 	}
 
 	render() {
-		const typelistTpl = this.state.typelist.map(function(item) {
+		const typelistTpl = this.props.store.catgory.map(function(item) {
 			return <Option key={item.code} value={item.code}>{item.desc}</Option>
 		});
 
@@ -150,8 +134,8 @@ class Detail extends React.Component{
 			return <li key={item.id} value={item.id} onClick={self.clickStore}>{item.properties.re_name}</li>;
 		});
 
-		const _item = this.props.store.store[0];
-		const isDisable = (_item && _item.action=='SHOW') ? true : false;
+		const _item = this.props.store.curStore[0];
+		const isDisable = this.props.control.isActive ? false : true;
 		const storeName = (_item && _item.feature) ? _item.feature.properties.re_name : '';
 		const storeType = (_item && _item.feature) ? _item.feature.properties.re_type : '';
 
@@ -172,12 +156,7 @@ class Detail extends React.Component{
 									</Select>
 								</div>
 
-								{/*<p className="line-tit">招商平台信息</p>
-								<div className="line">
-									<label className="txt">地图ID：</label>
-									<span className="txt2">ALF0237</span>
-								</div>
-								<div className="line">
+								{/*<div className="line">
 									<RadioGroup onChange={this.onRadioChange} value={this.state.zsRadio}>
 										<Radio value={1}>品牌名称</Radio>
 										<Radio value={2}>铺位编号</Radio>
@@ -189,36 +168,9 @@ class Detail extends React.Component{
 									<Input placeholder="请输入铺位编号" style={{'display' : `${this.state.zsRadio==2?'inline-block':'none'}`}} />
 								</div>
 								<div className="line">
-									<label className="txt">项目方系统编号：</label>
-									<Input placeholder="请输入系统内标铺位编号" />
-								</div>
-								<div className="line">
 									<label className="txt">铺位合同到期日期：</label>
 									<DatePicker />
-								</div>
-								<div className="line">
-									<label className="txt">全景视频／图片：</label>
-									<Input placeholder="请输入在线文件地址" />
-								</div>
-	
-
-								<p className="line-tit">楼层工程信息</p>
-								<div className="line">
-									<label className="txt">套内面积：</label>
-									<Input placeholder="小数点后一位" />m²
-								</div>
-								<div className="line">
-									<label className="txt">建筑面积：</label>
-									<Input placeholder="小数点后一位" />m²
-								</div>
-								<div className="line">
-									<label className="txt">地面至楼板最低高度：</label>
-									<Input placeholder="小数点后一位" />m
-								</div>
-								<div className="line">
-									<label className="txt">地板至不可拆卸管道最低高度：</label>
-									<Input placeholder="小数点后一位" />m
-								</div>*/}
+								</div>	*/}
 
 
 							</div>

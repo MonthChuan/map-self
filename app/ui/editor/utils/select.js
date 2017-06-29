@@ -18,7 +18,9 @@ const setSelect = (item, value) => {
   if (value) {
     L.DomUtil.addClass(item.getElement(), 'selected');
   } else {
-    L.DomUtil.removeClass(item.getElement(), 'selected');
+    if(L.DomUtil.hasClass(item.getElement(), 'selected')) {
+      L.DomUtil.removeClass(item.getElement(), 'selected');
+    }
   }
 };
 

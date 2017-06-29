@@ -3,7 +3,7 @@
  */
 
 //初始化
-const initial = {
+let initial = {
   isAdd : false,
   isEdit : false,
   isDelete : false,
@@ -16,7 +16,7 @@ const initial = {
 };
 
 //开始编辑
-const start = {
+let start = {
     isAdd : true,
     isEdit : true,
     isDelete : true,
@@ -24,11 +24,11 @@ const start = {
     isSubMerge : false,
     isZT : true,
     isStart : false,
-    isActive : false
+    isActive : true
 };
 
 //保存
-const save = {
+let save = {
     isAdd : true,
     isEdit : true,
     isDelete : true,
@@ -40,7 +40,7 @@ const save = {
 };
 
 //新增商铺
-const add = {
+let add = {
     isAdd : true,
     isEdit : false,
     isDelete : false,
@@ -52,7 +52,7 @@ const add = {
 };
 
 //商铺编辑
-const edit = {
+let edit = {
     isAdd : false,
     isEdit : true,
     isDelete : false,
@@ -64,7 +64,7 @@ const edit = {
 };
 
 //商铺删除
-const sdelete = {
+let sdelete = {
     isAdd : false,
     isEdit : false,
     isDelete : true,
@@ -76,7 +76,7 @@ const sdelete = {
 };
 
 //商铺合并
-const merge = {
+let merge = {
     isAdd : false,
     isEdit : false,
     isDelete : false,
@@ -88,7 +88,7 @@ const merge = {
 };
 
 //取消操作
-const cancel = {
+let cancel = {
     isAdd : true,
     isEdit : true,
     isDelete : true,
@@ -100,7 +100,7 @@ const cancel = {
 };
 
 //结束编辑提交审核
-const editEnd = {
+let editEnd = {
     isAdd : false,
     isEdit : false,
     isDelete : false,
@@ -112,14 +112,27 @@ const editEnd = {
 };
 
 
+let active = {
+    // isAdd : true,
+    // isEdit : true,
+    // isDelete : true,
+    // isMerge : true,
+    // isSubMerge : false,
+    // isZT : true,
+    // isStart : false,
+    isActive : true
+};
+
+
+
 export default {
     initial,
     start,
-    save,
-    add,
-    edit,
-    sdelete,
-    merge,
     cancel,
     editEnd
+    
+    
+    // ,
+
+    // active
 }

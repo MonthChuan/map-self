@@ -5,6 +5,7 @@ import { Button, message, Menu, Dropdown, Icon, Modal } from 'antd';
 import SaveConfirm from '../utils/saveConfirm.jsx';
 import { getSelect, setSelect } from '../utils/select';
 import { formatStore } from '../utils/formatStore';
+import { fixToNormal } from '../utils/regionFunc';
 
 import * as Service from '../../../services/index';
 import { SET_STATUS, SET_STORE, SET_BKSTORE, INCREASE_MAXNUM } from '../../../action/actionTypes';
@@ -23,10 +24,16 @@ class Control extends React.Component{
     this.editRegion = this.editRegion.bind(this);
     this.submitAll = this.submitAll.bind(this);
 
-    this.checkAct = this.checkAct.bind(this);
+    // this.checkAct = this.checkAct.bind(this);
     this.cancelAct = this.cancelAct.bind(this);
 
     this.fixStoreParam = this.fixStoreParam.bind(this);
+    this.clearSelect = this.clearSelect.bind(this);
+  }
+  clearSelect() {
+    this.props.store.curStore.map(i => {
+      setSelect(i, false);
+    })
   }
 
 	fixStoreParam(obj) {
@@ -71,25 +78,26 @@ class Control extends React.Component{
         });
       },
       () => {
-        if(storeList[0].transform) {
-          storeList[0].transform.enable({
-            rotation: false,
-            scaling : false
-          });
-        }
+        // if(storeList[0].transform) {
+        //   storeList[0].transform.enable({
+        //     rotation: false,
+        //     scaling : false
+        //   });
+        // }
 
-        if(storeList[0].dragging) {
-          storeList[0].dragging.disable();
-        }
+        // if(storeList[0].dragging) {
+        //   storeList[0].dragging.disable();
+        // }
 
-        if(storeList[0].eachLayer) {
-          storeList[0].eachLayer( i => {
-            i.disableEdit();
-          });
-        }
-        else {
-          storeList[0].disableEdit();
-        }
+        // if(storeList[0].eachLayer) {
+        //   storeList[0].eachLayer( i => {
+        //     i.disableEdit();
+        //   });
+        // }
+        // else {
+        //   storeList[0].disableEdit();
+        // }
+        fixToNormal(storeList[0]);
 
         this.props.dispatch({
           type : SET_STATUS,
@@ -110,7 +118,7 @@ class Control extends React.Component{
 
   //合并
   setMerge() {
-    if(!this.checkAct()) {return}
+    // if(!this.checkAct()) {return}
     this.props.dispatch({
       type : SET_STATUS,
       status : STATUSCONF.merge
@@ -172,32 +180,54 @@ class Control extends React.Component{
 
   //delete
   deleteStore() {
-    if(!this.checkAct()) {return}
+    // if(!this.checkAct()) {return}
+    // this.props.dispatch({
+    //   type : SET_STATUS,
+    //   status : STATUSCONF.active
+    // });
+
+    this.clearSelect();
+    let cur = this.props.store.curStore[0];
+    cur.action = 'DELETE';
     this.props.dispatch({
-      type : SET_STATUS,
-      status : STATUSCONF.sdelete
+      type : SET_STORE,
+      data : {
+        store : [cur]
+      }
     });
   }
 
   //商铺编辑
   editRegion() {
-    if(!this.checkAct()) {return}
+    // if(!this.checkAct()) {return}
 
+    // this.props.dispatch({
+    //   type : SET_STATUS,
+    //   status : STATUSCONF.active
+    // });
+    this.props.store.curStore.map(item => {
+			setSelect(item, false);
+		});
+
+    let cur = this.props.store.curStore[0];
+    cur.action = 'UPDATE';
     this.props.dispatch({
-      type : SET_STATUS,
-      status : STATUSCONF.edit
+      type : SET_STORE,
+      data : {
+        store : [cur]
+      }
     });
   }
 
   //检查是否可以进行下面操作
-  checkAct() {
-    const storeList = this.props.store.store;
-    if(storeList.length > 0 && storeList[0].action != 'SHOW') {
-      message.warning('您正在编辑状态，请先完成操作并保存，再进行其他操作！', 3);
-      return false;
-    }
-    return true;
-  }
+  // checkAct() {
+  //   const storeList = this.props.store.store;
+  //   if(storeList.length > 0 && storeList[0].action != 'SHOW') {
+  //     message.warning('您正在编辑状态，请先完成操作并保存，再进行其他操作！', 3);
+  //     return false;
+  //   }
+  //   return true;
+  // }
 
   //开始编辑
   editStart() {
@@ -214,7 +244,7 @@ class Control extends React.Component{
 
   //新增商铺
   drawPloy() {
-    if(!this.checkAct()) {return}
+    // if(!this.checkAct()) {return}
 
     const newStore = this.props.map.ffmap.startPolygon();
     newStore.action = "NEW";
@@ -227,14 +257,18 @@ class Control extends React.Component{
         };
     }
 
-    this.props.dispatch({
-        type : SET_STATUS,
-        status : STATUSCONF.add
-    });
+    // this.props.dispatch({
+    //     type : SET_STATUS,
+    //     status : STATUSCONF.active
+    // });
 
+    this.clearSelect();
     this.props.dispatch({
       type : SET_STORE,
-      data : [newStore]
+      data : {
+        curStore : [newStore],
+        store : [newStore]
+      }
     });
 
     newStore.on('click', e => {
@@ -342,7 +376,7 @@ class Control extends React.Component{
     const name2 = "s-btn s-edit clearfix" + (data.isEdit ? '' : ' disable');
     const name3 = "s-btn s-delete clearfix" + (data.isDelete ? '' : ' disable');
     const name4 = "s-btn s-merge clearfix" + (data.isMerge ? '' : ' disable');
-    const name5 = "s-btn s-zt clearfix" + (data.isZT ? '' : ' disable');
+    // const name5 = "s-btn s-zt clearfix" + (data.isZT ? '' : ' disable');
 
     const mergeStyle = {'display' : (data.isSubMerge ? 'none' : 'inline-block')};
     const submergeStyle = {'display' : (data.isSubMerge ? 'inline-block' : 'none')};

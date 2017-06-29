@@ -9,9 +9,10 @@ import Detail from './detail/detail.jsx';
 import Submit from './submit/submit.jsx';
 import { message, Modal, Popconfirm } from 'antd'; 
 import { getSelect, setSelect } from './utils/select';
+import { fixToNormal } from './utils/regionFunc';
 
 import * as Service from '../../services/index';
-import { ADD_MAP, SET_PLAZAID, SET_STATUS, SET_FLOORINFO, SET_STORE, SET_BKSTORE, SET_CONFIRMSHOW } from '../../action/actionTypes';
+import { ADD_MAP, SET_PLAZAID, SET_STATUS, SET_FLOORINFO, SET_STORE, SET_CONFIRMSHOW } from '../../action/actionTypes';
 
 class EditorPage extends React.Component{
 	constructor(props) {
@@ -28,100 +29,127 @@ class EditorPage extends React.Component{
 
 		const control = this.props.control;
 		const storeList = this.props.store.store;
-		if(storeList.length > 2 || (control.isZT && control.isActive)) {
-				message.warning('您正在编辑状态，请先完成操作并保存，再进行其他操作！', 3);
-				return;
+		const curStoreList = this.props.store.curStore;
+
+		curStoreList.map(item => {
+			setSelect(item, false);
+			fixToNormal(item)
+		});
+
+		if(getSelect(_store)) {
+			return;
+		}
+		setSelect(_store, true);
+		if(control.isActive && (control.isMerge || isSubMerge)) {
+			// this.props.dispatch({
+			// 	type : SET_STATUS,
+			// 	status : {
+			// 		isAdd : false,
+			// 		isEdit : false,
+			// 		isDelete : false,
+			// 		isMerge : false,
+			// 		isSubMerge : true,
+			// 		isZT : false,
+			// 		isStart : false,
+			// 		isActive : true
+			// 	}
+			// });
+	
+			if(curStoreList.length == 2 ) {
+				const _oStore = curStoreList.pop();
+				setSelect(_oStore, false);
 			}
-			if(control.isStart || !control.isActive) {
-				//查看店铺信息
-				_store.action = 'SHOW';
-			}
-			else {
-				//去掉重复操作
-				if((_store.editEnabled && _store.editEnabled()) || getSelect(_store)) {
-					return;
-				}
-				if(storeList.length > 0 && storeList[0].action != 'SHOW' && !(control.isMerge || control.isSubMerge)) {
-					message.warning('您正在编辑状态，请先完成操作并保存，再进行其他操作！', 3);
-					return;
-				}
+			setSelect(_store, true);
+			const _s = [_store].concat(curStoreList);
 
-				if(control.isEdit) {
-					_store.action = 'UPDATE';
-					if(_store.enableEdit) {
-						_store.enableEdit();
-					}
-					else {
-						_store.eachLayer(i => {
-							i.enableEdit();
-						});
-					}
-					const _latlngList = _store.getLatLngs()[0].length > 1 ? _store.getLatLngs()[0] : _store.getLatLngs()[0][0];
-					const _latlng = _latlngList.map(item => {
-						return Object.assign({}, item);
-					});
-
-					this.props.dispatch({
-						type : SET_STORE,
-						data : [_store]
-					});
-
-					this.props.dispatch({
-						type : SET_BKSTORE,
-						data : [{
-							name : _store.name,
-							regionType : _store.regionType,
-							latlng : [[_latlng]]
-						}]
-					});
-					return;
-				}
-				else if(control.isDelete) {
-					this.props.dispatch({
-						type : SET_CONFIRMSHOW,
-						data : true
-					});
-					this.refs.popconfirmChild.click();
-
-					setSelect(_store, true);
-					this.preDeleteStore = _store;
-					return;
-				}
-				else if(control.isMerge || control.isSubMerge) {
-					this.props.dispatch({
-						type : SET_STATUS,
-						status : {
-							isAdd : false,
-							isEdit : false,
-							isDelete : false,
-							isMerge : false,
-							isSubMerge : true,
-							isZT : false,
-							isStart : false,
-							isActive : true
-						}
-					});
-			
-					if(storeList.length == 2 ) {
-						const _oStore = storeList.pop();
-						setSelect(_oStore, false);
-					}
-					setSelect(_store, true);
-					const _s = [_store].concat(storeList);
-
-					this.props.dispatch({
-						type : SET_STORE,
-						data : _s
-					});
-					return;
-				}
-
-			}
-			
 			this.props.dispatch({
 				type : SET_STORE,
-				data : [_store]
+				data : {curStore : _s}
 			});
+			return;
+		}
+		else {
+			//去掉重复操作
+			// if((_store.editEnabled && _store.editEnabled()) || getSelect(_store)) {
+			// 	return;
+			// }
+
+			// if(control.isEdit) {
+			// 	_store.action = 'UPDATE';
+			// 	if(_store.enableEdit) {
+			// 		_store.enableEdit();
+			// 	}
+			// 	else {
+			// 		_store.eachLayer(i => {
+			// 			i.enableEdit();
+			// 		});
+			// 	}
+			// 	const _latlngList = _store.getLatLngs()[0].length > 1 ? _store.getLatLngs()[0] : _store.getLatLngs()[0][0];
+			// 	const _latlng = _latlngList.map(item => {
+			// 		return Object.assign({}, item);
+			// 	});
+
+			// 	this.props.dispatch({
+			// 		type : SET_STORE,
+			// 		data : [_store]
+			// 	});
+
+			// 	this.props.dispatch({
+			// 		type : SET_BKSTORE,
+			// 		data : [{
+			// 			name : _store.name,
+			// 			regionType : _store.regionType,
+			// 			latlng : [[_latlng]]
+			// 		}]
+			// 	});
+			// 	return;
+			// }
+			// else if(control.isDelete) {
+			// 	this.props.dispatch({
+			// 		type : SET_CONFIRMSHOW,
+			// 		data : true
+			// 	});
+			// 	this.refs.popconfirmChild.click();
+
+			// 	setSelect(_store, true);
+			// 	this.preDeleteStore = _store;
+			// 	return;
+			// }
+			// else if(control.isMerge || control.isSubMerge) {
+			// 	this.props.dispatch({
+			// 		type : SET_STATUS,
+			// 		status : {
+			// 			isAdd : false,
+			// 			isEdit : false,
+			// 			isDelete : false,
+			// 			isMerge : false,
+			// 			isSubMerge : true,
+			// 			isZT : false,
+			// 			isStart : false,
+			// 			isActive : true
+			// 		}
+			// 	});
+		
+			// 	if(storeList.length == 2 ) {
+			// 		const _oStore = storeList.pop();
+			// 		setSelect(_oStore, false);
+			// 	}
+			// 	setSelect(_store, true);
+			// 	const _s = [_store].concat(storeList);
+
+			// 	this.props.dispatch({
+			// 		type : SET_STORE,
+			// 		data : _s
+			// 	});
+			// 	return;
+			// }
+
+		}
+		
+		this.props.dispatch({
+			type : SET_STORE,
+			data : {curStore : [_store]}
+		});
 	}
 
 	//DOM加载完毕之后，初始化map

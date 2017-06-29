@@ -74,3 +74,14 @@ export const submitCheckAjax = (url, checkStatus, success) => {
         }
     );
 }
+
+//获取业态分类数据
+export const getCatgoryAjax = (success) => {
+    $get(
+        'http://yunjin.intra.sit.ffan.com/mapeditor/category/categoryCodes',
+        null,
+        (req) => {
+            callback(req, success);
+        }
+    );
+}
