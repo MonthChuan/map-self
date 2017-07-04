@@ -1,7 +1,8 @@
 import './detail.css';
 import React from 'react';  
 import { connect } from 'react-redux';
-import { SET_STORE, GET_STORECATGORY } from '../../../action/actionTypes';
+import { getSelect, setSelect } from '../utils/select';
+import { SET_STORE, GET_STORECATGORY, RESET_STORE } from '../../../action/actionTypes';
 import * as Service from '../../../services/index';
 import { Input, Select, Tabs, Radio, DatePicker } from 'antd'; 
 const Option = Select.Option;
@@ -13,16 +14,15 @@ class Detail extends React.Component{
 	constructor(props) {
 		super(props);
 
-		this.selectChange = this.selectChange.bind(this);
-		this.selectChangeName = this.selectChangeName.bind(this);
 		this.clickStore = this.clickStore.bind(this);
 		this.searchStore = this.searchStore.bind(this);
+		this.propertyChange = this.propertyChange.bind(this);
 
 		this.beforeEditDetail = this.beforeEditDetail.bind(this);
 	}
 
 	beforeEditDetail() {
-		const store0 = this.props.store.store[0];
+		const store0 = this.props.store.curStore[0];
 		if(!store0) {
 			return false;
 		}
@@ -43,35 +43,64 @@ class Detail extends React.Component{
 			this.props.newNameLabel(center, sourceLayer, store0);
 		}
 
+		if( !store0.feature ) {
+			store0.feature = {
+				properties : {
+					re_name : '',
+					re_type : ''
+				}
+			};
+		}
+
 		return true;
 	}
 
-	selectChangeName(event) {
-		const { value } = event.target;
+	propertyChange(event) {
+		let value = '';
+		let opt = null;
+
 		if(this.beforeEditDetail()) {
-			const store = this.props.store.store[0];
+			const curStoreList = this.props.store.curStore;
+			const store = curStoreList[0];
+			let newCurSlist = [];
+			let newStoreList = this.props.store.store;
+			let newBkStore = this.props.store.bkStore;
 
-			store.label.setContent(value);
-			Object.assign(store.feature.properties, {'re_name' : value});
-			const newSlist = [store].concat(this.props.store.store.slice(1));
+			if(!store.action) {
+				store.action = 'UPDATE';
+			}
+
+			if(event.target) {
+				value = event.target.value;
+				opt = {'re_name' : value};
+				store.label.setContent(value);
+			}
+			else {
+				value = event;
+				opt = {'re_type' : value};
+			}
+
+			if(newStoreList.indexOf(store) < 0) {
+				newBkStore = [{
+					re_name : store.feature.properties.re_name,
+					re_type : store.feature.properties.re_type
+				}];
+			}
+					
+			Object.assign(store.feature.properties, opt);
+			
+			if(newStoreList.indexOf(store) < 0) {
+				newStoreList = [store].concat(newStoreList.slice(0));
+			}
+
+			newCurSlist = [store].concat(curStoreList.slice(1));			
 			this.props.dispatch({
-				type : SET_STORE,
-				data : newSlist
-			})
-		}
-
-		
-	}
-
-	selectChange(value) {
-		if(this.beforeEditDetail()) {
-			const store = this.props.store.store[0];
-
-			Object.assign(store.feature.properties, {'re_type' : value});
-			const newSlist = [store].concat(this.props.store.store.slice(1));
-			this.props.dispatch({
-				type : SET_STORE,
-				data : newSlist
+				type : RESET_STORE,
+				data : {
+					curStore : newCurSlist,
+					store : newStoreList,
+					bkStore : newBkStore
+				}
 			})
 		}
 	}
@@ -90,14 +119,15 @@ class Detail extends React.Component{
 
 	clickStore(event) {
 		const id = event.target.getAttribute('value');
-		const s = this.props.state.ffmap.searchStoreByID(id);
+		const s = this.props.map.ffmap.searchStoreByID(id);
 		
-		if(s.length==0 || s[0].selected) {
+		if(s.length==0 || getSelect(s[0])) {
 			return;
 		}
-		s[0].selected = true;
+		// s[0].selected = true;
+		setSelect(s[0], true);
 		const timer = setTimeout(function() {
-			s[0].selected = false;
+			setSelect(s[0], false);
 			clearTimeout(timer);
 		}, 3000);
 	}
@@ -147,11 +177,11 @@ class Detail extends React.Component{
 							<div className="y-scroll info-wrap">
 								<div className="line">
 									<label className="txt">店铺名称：</label>
-									<Input placeholder="店铺名称" disabled={isDisable} value={storeName} onChange={this.selectChangeName} />
+									<Input placeholder="店铺名称" disabled={isDisable} value={storeName} onChange={this.propertyChange} />
 								</div>
 								<div className="line">
 									<label className="txt">业态：</label>
-									<Select placeholder="店铺类型" disabled={isDisable} value={storeType} onChange={this.selectChange}>
+									<Select placeholder="店铺类型" disabled={isDisable} value={storeType} onChange={this.propertyChange}>
 										{typelistTpl}
 									</Select>
 								</div>

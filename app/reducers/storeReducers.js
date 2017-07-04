@@ -14,10 +14,8 @@ function store(previousState = initialState, action) {
                 action.data.store = action.data.store.concat(previousState.store);
             }
             return Object.assign({}, previousState, action.data);
-        // case 'setBKStore':
-        //     return Object.assign({}, previousState, {bkStore : action.data});
-        // case 'setCurrentStore':
-        //     return Object.assign({}, previousState, {curStore : action.data});
+        case 'resetStore':
+            return Object.assign({}, previousState, action.data);
         case 'getStoreCatgory':
             return Object.assign({}, previousState, {catgory : action.catgory});
         default:

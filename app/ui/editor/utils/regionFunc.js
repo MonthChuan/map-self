@@ -20,3 +20,23 @@ export const fixToNormal = (store) => {
         store.disableEdit();
     }
 }
+
+export const cancelDraw = (store) => {
+    if(store._proxy && store._proxy.editor.map.editTools) {
+        store._proxy.editor.map.editTools.stopDrawing();
+    }
+    
+    if(store.graphics) {
+        store.graphics.remove();
+    }
+    else {
+        if(store.transform) {
+        store.transform.disable();
+        }
+        store.remove();
+    }
+
+    if(store.label) {
+        store.label.remove();
+    }
+}

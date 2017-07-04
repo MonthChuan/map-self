@@ -5,10 +5,11 @@ import { Button, message, Menu, Dropdown, Icon, Modal } from 'antd';
 import SaveConfirm from '../utils/saveConfirm.jsx';
 import { getSelect, setSelect } from '../utils/select';
 import { formatStore } from '../utils/formatStore';
-import { fixToNormal } from '../utils/regionFunc';
+import { fixToNormal, cancelDraw } from '../utils/regionFunc';
+import { noCurStore } from '../utils/storeListCheck';
 
 import * as Service from '../../../services/index';
-import { SET_STATUS, SET_STORE, SET_BKSTORE, INCREASE_MAXNUM } from '../../../action/actionTypes';
+import { SET_STATUS, SET_STORE, INCREASE_MAXNUM, SET_CONFIRMSHOW, RESET_STORE } from '../../../action/actionTypes';
 import STATUSCONF from '../../../config/status';
 
 class Control extends React.Component{
@@ -56,13 +57,9 @@ class Control extends React.Component{
     const map = this.props.map;
 
     if(storeList.length == 0) {
-      message.warning('没有正在编辑的商铺！', 3);
+      message.warning('没有未保存的操作！', 3);
 			return;
     }
-    if( control.isSubMerge && storeList.length < 3 ) {
-			message.warning('商铺合并操作未完成，请继续操作！', 3);
-			return;
-		}
 
     const regionParam = storeList.map(item => {
 			return this.fixStoreParam(item);
@@ -78,25 +75,6 @@ class Control extends React.Component{
         });
       },
       () => {
-        // if(storeList[0].transform) {
-        //   storeList[0].transform.enable({
-        //     rotation: false,
-        //     scaling : false
-        //   });
-        // }
-
-        // if(storeList[0].dragging) {
-        //   storeList[0].dragging.disable();
-        // }
-
-        // if(storeList[0].eachLayer) {
-        //   storeList[0].eachLayer( i => {
-        //     i.disableEdit();
-        //   });
-        // }
-        // else {
-        //   storeList[0].disableEdit();
-        // }
         fixToNormal(storeList[0]);
 
         this.props.dispatch({
@@ -105,12 +83,12 @@ class Control extends React.Component{
         });
 
         this.props.dispatch({
-          type : SET_STORE,
-          data : []
-        })
-        this.props.dispatch({
-          type : SET_BKSTORE,
-          data : []
+          type : RESET_STORE,
+          data : {
+            curStore : [],
+            store : [],
+            bkStore : []
+          }
         })
       }
     );
@@ -119,6 +97,11 @@ class Control extends React.Component{
   //合并
   setMerge() {
     // if(!this.checkAct()) {return}
+
+    this.props.store.curStore.map((i) => {
+      fixToNormal(i)
+    })
+
     this.props.dispatch({
       type : SET_STATUS,
       status : STATUSCONF.merge
@@ -126,9 +109,13 @@ class Control extends React.Component{
   }
 
   mergeStore(store) {
-    const storeList = this.props.store.store;
+    const storeList = this.props.store.curStore;
     if(storeList.length < 2) {
-      message.warning('无法合并！', 3);
+      // message.warning('无法合并！', 3);
+      Modal.warning({
+        title : '提示',
+        content : '请先选择两个合并对象！'
+      });
     }
     else {
       const s0 = storeList[0];
@@ -159,10 +146,14 @@ class Control extends React.Component{
 
         layer.coords = coords;
         layer.action = 'NEW';
+        layer.coorChange = true;
         const _s = [layer].concat(storeList);
         this.props.dispatch({
           type : SET_STORE,
-          data : _s
+          data : {
+            curStore : _s,
+            store : _s
+          }
         });
         //手动添加一个名称label
         const centerLatLng = layer.getBounds().getCenter();
@@ -173,61 +164,71 @@ class Control extends React.Component{
         });
       }
       else {
-        message.error('无法合并！', 3);
+        // message.error('无法合并！', 3);
+        Modal.warning({
+          title : '提示',
+          content : '无法合并！'
+        });
       }
     }
   }
 
   //delete
   deleteStore() {
-    // if(!this.checkAct()) {return}
-    // this.props.dispatch({
-    //   type : SET_STATUS,
-    //   status : STATUSCONF.active
-    // });
+    if(!noCurStore(this.props.store.curStore)) return;
 
-    this.clearSelect();
     let cur = this.props.store.curStore[0];
     cur.action = 'DELETE';
-    this.props.dispatch({
-      type : SET_STORE,
-      data : {
-        store : [cur]
-      }
-    });
-  }
-
-  //商铺编辑
-  editRegion() {
-    // if(!this.checkAct()) {return}
-
     // this.props.dispatch({
-    //   type : SET_STATUS,
-    //   status : STATUSCONF.active
+    //   type : SET_STORE,
+    //   data : {
+    //     store : [cur]
+    //   }
     // });
-    this.props.store.curStore.map(item => {
-			setSelect(item, false);
-		});
 
+    this.props.dispatch({
+      type : SET_CONFIRMSHOW,
+      data : true
+    });
+    this.props.openConfirm(cur);
+  }
+
+  //商铺修型
+  editRegion() {
+    if(!noCurStore(this.props.store.curStore)) return;
     let cur = this.props.store.curStore[0];
-    cur.action = 'UPDATE';
+    if(!cur.action) {
+      cur.action = 'UPDATE';
+    }
+    cur.coorChange = true;
+
+    if(cur.enableEdit) {
+      cur.enableEdit();
+    }
+    else {
+      cur.eachLayer(i => {
+        i.enableEdit();
+      });
+    }
+
+    const _latlngList = cur.getLatLngs()[0].length > 1 ? cur.getLatLngs()[0] : cur.getLatLngs()[0][0];
+    const _latlng = _latlngList.map(item => {
+      return Object.assign({}, item);
+    });
+
+
     this.props.dispatch({
       type : SET_STORE,
       data : {
-        store : [cur]
+        store : [cur],
+        bkStore : [{
+          re_name : cur.feature.properties.re_name,
+          re_type : cur.feature.properties.re_type,
+          latlng : [[_latlng]]
+        }]
       }
     });
   }
-
-  //检查是否可以进行下面操作
-  // checkAct() {
-  //   const storeList = this.props.store.store;
-  //   if(storeList.length > 0 && storeList[0].action != 'SHOW') {
-  //     message.warning('您正在编辑状态，请先完成操作并保存，再进行其他操作！', 3);
-  //     return false;
-  //   }
-  //   return true;
-  // }
 
   //开始编辑
   editStart() {
@@ -244,18 +245,17 @@ class Control extends React.Component{
 
   //新增商铺
   drawPloy() {
-    // if(!this.checkAct()) {return}
-
     const newStore = this.props.map.ffmap.startPolygon();
     newStore.action = "NEW";
-    if( !newStore.feature ) {
-        newStore.feature = {
-            properties : {
-              re_name : '',
-              re_type : ''
-            }
-        };
-    }
+    newStore.coorChange = true;
+    // if( !newStore.feature ) {
+    //     newStore.feature = {
+    //         properties : {
+    //           re_name : '',
+    //           re_type : ''
+    //         }
+    //     };
+    // }
 
     // this.props.dispatch({
     //     type : SET_STATUS,
@@ -304,41 +304,28 @@ class Control extends React.Component{
 
   //取消操作
   cancelAct() {
-    for(let i = 0, l = this.props.store.store.length; i < l; i++) {
-      let item = this.props.store.store[i];
+    for(var i = 0, l = this.props.store.curStore.length; i < l; i++) {
+      let item = this.props.store.curStore[i];
       let bkItem = this.props.store.bkStore[i];
       if(item.action == 'NEW') {
-        if(item._proxy) {
-          item._proxy.editor.map.editTools.stopDrawing();
-        }
-        
-        if(item.graphics) {
-          item.graphics.remove();
-        }
-        else {
-          if(item.transform) {
-            item.transform.disable();
-          }
-          item.remove();
-        }
-
-        if(item.label) {
-          item.label.remove();
-        }
+        cancelDraw(item);
       }
       else if(item.action == 'UPDATE') {
         item.disableEdit();
-        item.setLatLngs(bkItem.latlng);
-        if(item.name != bkItem.name) {
-          item.re_name = bkItem.name;
-          item.name = bkItem.name;
+        if(item.coorChange) {
+          item.setLatLngs(bkItem.latlng);
+        }
+        
+        if(item.feature.properties.re_name != bkItem.re_name) {
+          item.feature.properties.re_name = bkItem.re_name;
+          // item.name = bkItem.name;
           if(item.label) {
-            item.label.setContent(bkItem.name);
+            item.label.setContent(bkItem.re_name);
           }
         }
 
-        if(item.re_type != bkItem.re_type) {
-          item.re_type = bkItem.re_type;
+        if(item.feature.properties.re_type != bkItem.re_type) {
+          item.feature.properties.re_type = bkItem.re_type;
         }
       }
       else if(item.action == 'DELETE') {
@@ -359,12 +346,12 @@ class Control extends React.Component{
       status : STATUSCONF.cancel
     })
     this.props.dispatch({
-      type : SET_STORE,
-      data : []
-    })
-    this.props.dispatch({
-      type : SET_BKSTORE,
-      data : []
+      type : RESET_STORE,
+      data : {
+        curStore : [],
+        store : this.props.store.store.slice(l),
+        bkStore : []
+      }
     })
     
   }
@@ -372,11 +359,10 @@ class Control extends React.Component{
   render() {
     const data = this.props.control;
     const name0 = "s-btn s-cancel clearfix" + (data.isActive === true ? '' : ' disable');
-    const name1 = "s-btn s-add clearfix" + (data.isAdd ? '' : ' disable');
-    const name2 = "s-btn s-edit clearfix" + (data.isEdit ? '' : ' disable');
-    const name3 = "s-btn s-delete clearfix" + (data.isDelete ? '' : ' disable');
+    const name1 = "s-btn s-add clearfix" + (data.isActive === true ? '' : ' disable');
+    const name2 = "s-btn s-edit clearfix" + (data.isActive === true ? '' : ' disable');
+    const name3 = "s-btn s-delete clearfix" + (data.isActive === true ? '' : ' disable');
     const name4 = "s-btn s-merge clearfix" + (data.isMerge ? '' : ' disable');
-    // const name5 = "s-btn s-zt clearfix" + (data.isZT ? '' : ' disable');
 
     const mergeStyle = {'display' : (data.isSubMerge ? 'none' : 'inline-block')};
     const submergeStyle = {'display' : (data.isSubMerge ? 'inline-block' : 'none')};
@@ -387,10 +373,10 @@ class Control extends React.Component{
     return (
       <div className="control">
         <a className={name0} onClick={this.cancelAct}>取消操作</a>
-        <a className={name1} onClick={this.drawPloy}><i className="s-icon"></i>新增商铺</a>
-        <a className={name2} onClick={this.editRegion} ><i className="s-icon"></i>商铺编辑</a>
-        <a className={name3} onClick={this.deleteStore}><i className="s-icon"></i>删除商铺</a>
-        <a className={name4} style={mergeStyle} onClick={this.setMerge}><i className="s-icon"></i>商铺合并</a>
+        <a className={name1} onClick={this.drawPloy}><i className="s-icon"></i>新增</a>
+        <a className={name2} onClick={this.editRegion} ><i className="s-icon"></i>修型</a>
+        <a className={name3} onClick={this.deleteStore}><i className="s-icon"></i>删除</a>
+        <a className={name4} style={mergeStyle} onClick={this.setMerge}><i className="s-icon"></i>合并</a>
         <a className="s-btn s-merge clearfix" style={submergeStyle} onClick={this.mergeStore}><i className="s-icon"></i>执行合并</a>
 
         <Button className="e-save" style={startStyle} type="primary" onClick={this.editStart}>开始编辑</Button>

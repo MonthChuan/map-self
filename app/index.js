@@ -22,6 +22,12 @@ const Root = ({ store }) => (
 Root.propTypes = { store: PropTypes.object.isRequired };
 // create store
 let store = createStore(editorReducers);
+
+store.subscribe(() => { //监听state变化
+    console.log(store.getState().store.store)
+});
+
+
 // render
 ReactDOM.render(
   <Root store={store} />,

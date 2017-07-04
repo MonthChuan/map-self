@@ -22,25 +22,23 @@ class EditorPage extends React.Component{
 		this.initFeatureClick = this.initFeatureClick.bind(this);
 		this.deleteStoreConfirmOk = this.deleteStoreConfirmOk.bind(this);
 		this.deleteStoreConfirmCancel = this.deleteStoreConfirmCancel.bind(this);
+
+		this.openConfirm = this.openConfirm.bind(this);
 	} 
 
 	initFeatureClick(event) {
 		const _store = event.layer || event.target;
-
 		const control = this.props.control;
 		const storeList = this.props.store.store;
 		const curStoreList = this.props.store.curStore;
-
-		curStoreList.map(item => {
-			setSelect(item, false);
-			fixToNormal(item)
-		});
+		// let storeArr = [];
 
 		if(getSelect(_store)) {
 			return;
 		}
+
 		setSelect(_store, true);
-		if(control.isActive && (control.isMerge || isSubMerge)) {
+		if(control.isSubMerge) {
 			// this.props.dispatch({
 			// 	type : SET_STATUS,
 			// 	status : {
@@ -64,11 +62,23 @@ class EditorPage extends React.Component{
 
 			this.props.dispatch({
 				type : SET_STORE,
-				data : {curStore : _s}
+				data : {
+					curStore : _s
+					// ,
+					// store : storeArr
+				}
 			});
 			return;
 		}
 		else {
+
+			curStoreList.map(item => {
+				setSelect(item, false);
+				// fixToNormal(item);
+				// if(item && item.action) {
+				// 	storeArr.push(item);
+				// }
+			});
 			//去掉重复操作
 			// if((_store.editEnabled && _store.editEnabled()) || getSelect(_store)) {
 			// 	return;
@@ -145,10 +155,17 @@ class EditorPage extends React.Component{
 			// }
 
 		}
+
+		curStoreList.map(item => {
+			fixToNormal(item);
+		});
 		
 		this.props.dispatch({
 			type : SET_STORE,
-			data : {curStore : [_store]}
+			data : {
+				curStore : [_store]
+				// store : storeArr
+			}
 		});
 	}
 
@@ -224,7 +241,9 @@ class EditorPage extends React.Component{
 		
 		this.props.dispatch({
 			type : SET_STORE,
-			data : [this.preDeleteStore]
+			data : {
+				store : [this.preDeleteStore]
+			}
 		});
 		const store0 = this.preDeleteStore;
 		if(store0.graphics) {
@@ -247,6 +266,11 @@ class EditorPage extends React.Component{
 		})
 	}
 
+	openConfirm(item) {
+		this.preDeleteStore = item;
+		this.refs.popconfirmChild.click();
+	}
+
 	render () {
 	    return (
 			<div className="page" id="editor">
@@ -256,6 +280,7 @@ class EditorPage extends React.Component{
 						<Control 
 							newNameLabel={this.newNameLabel} 
 							initFeatureClick={this.initFeatureClick}
+							openConfirm={this.openConfirm}
 						/>
 					</div>
 				</div>
