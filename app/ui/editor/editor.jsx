@@ -12,7 +12,7 @@ import { getSelect, setSelect } from './utils/select';
 import { fixToNormal } from './utils/regionFunc';
 
 import * as Service from '../../services/index';
-import { ADD_MAP, SET_PLAZAID, SET_STATUS, SET_FLOORINFO, SET_STORE, SET_CONFIRMSHOW } from '../../action/actionTypes';
+import { ADD_MAP, SET_PLAZAID, SET_STATUS, SET_FLOORINFO, RESET_STORE, SET_CONFIRMSHOW } from '../../action/actionTypes';
 
 class EditorPage extends React.Component{
 	constructor(props) {
@@ -33,26 +33,12 @@ class EditorPage extends React.Component{
 		const curStoreList = this.props.store.curStore;
 		// let storeArr = [];
 
-		if(getSelect(_store)) {
+		if(getSelect(_store) || curStoreList.indexOf(_store) > -1) {
 			return;
 		}
 
 		setSelect(_store, true);
 		if(control.isSubMerge) {
-			// this.props.dispatch({
-			// 	type : SET_STATUS,
-			// 	status : {
-			// 		isAdd : false,
-			// 		isEdit : false,
-			// 		isDelete : false,
-			// 		isMerge : false,
-			// 		isSubMerge : true,
-			// 		isZT : false,
-			// 		isStart : false,
-			// 		isActive : true
-			// 	}
-			// });
-	
 			if(curStoreList.length == 2 ) {
 				const _oStore = curStoreList.pop();
 				setSelect(_oStore, false);
@@ -61,7 +47,7 @@ class EditorPage extends React.Component{
 			const _s = [_store].concat(curStoreList);
 
 			this.props.dispatch({
-				type : SET_STORE,
+				type : RESET_STORE,
 				data : {
 					curStore : _s
 					// ,
@@ -74,86 +60,7 @@ class EditorPage extends React.Component{
 
 			curStoreList.map(item => {
 				setSelect(item, false);
-				// fixToNormal(item);
-				// if(item && item.action) {
-				// 	storeArr.push(item);
-				// }
 			});
-			//去掉重复操作
-			// if((_store.editEnabled && _store.editEnabled()) || getSelect(_store)) {
-			// 	return;
-			// }
-
-			// if(control.isEdit) {
-			// 	_store.action = 'UPDATE';
-			// 	if(_store.enableEdit) {
-			// 		_store.enableEdit();
-			// 	}
-			// 	else {
-			// 		_store.eachLayer(i => {
-			// 			i.enableEdit();
-			// 		});
-			// 	}
-			// 	const _latlngList = _store.getLatLngs()[0].length > 1 ? _store.getLatLngs()[0] : _store.getLatLngs()[0][0];
-			// 	const _latlng = _latlngList.map(item => {
-			// 		return Object.assign({}, item);
-			// 	});
-
-			// 	this.props.dispatch({
-			// 		type : SET_STORE,
-			// 		data : [_store]
-			// 	});
-
-			// 	this.props.dispatch({
-			// 		type : SET_BKSTORE,
-			// 		data : [{
-			// 			name : _store.name,
-			// 			regionType : _store.regionType,
-			// 			latlng : [[_latlng]]
-			// 		}]
-			// 	});
-			// 	return;
-			// }
-			// else if(control.isDelete) {
-			// 	this.props.dispatch({
-			// 		type : SET_CONFIRMSHOW,
-			// 		data : true
-			// 	});
-			// 	this.refs.popconfirmChild.click();
-
-			// 	setSelect(_store, true);
-			// 	this.preDeleteStore = _store;
-			// 	return;
-			// }
-			// else if(control.isMerge || control.isSubMerge) {
-			// 	this.props.dispatch({
-			// 		type : SET_STATUS,
-			// 		status : {
-			// 			isAdd : false,
-			// 			isEdit : false,
-			// 			isDelete : false,
-			// 			isMerge : false,
-			// 			isSubMerge : true,
-			// 			isZT : false,
-			// 			isStart : false,
-			// 			isActive : true
-			// 		}
-			// 	});
-		
-			// 	if(storeList.length == 2 ) {
-			// 		const _oStore = storeList.pop();
-			// 		setSelect(_oStore, false);
-			// 	}
-			// 	setSelect(_store, true);
-			// 	const _s = [_store].concat(storeList);
-
-			// 	this.props.dispatch({
-			// 		type : SET_STORE,
-			// 		data : _s
-			// 	});
-			// 	return;
-			// }
-
 		}
 
 		curStoreList.map(item => {
@@ -161,7 +68,7 @@ class EditorPage extends React.Component{
 		});
 		
 		this.props.dispatch({
-			type : SET_STORE,
+			type : RESET_STORE,
 			data : {
 				curStore : [_store]
 				// store : storeArr
@@ -239,10 +146,12 @@ class EditorPage extends React.Component{
 		})
 		this.preDeleteStore.action = 'DELETE';
 		
+		this.props.store.actionCommand.initial(this.props.store.store);
+        const newList = this.props.store.actionCommand.execute([this.preDeleteStore]);
 		this.props.dispatch({
-			type : SET_STORE,
+			type : RESET_STORE,
 			data : {
-				store : [this.preDeleteStore]
+				store : newList
 			}
 		});
 		const store0 = this.preDeleteStore;

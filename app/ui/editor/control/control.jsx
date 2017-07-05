@@ -7,9 +7,10 @@ import { getSelect, setSelect } from '../utils/select';
 import { formatStore } from '../utils/formatStore';
 import { fixToNormal, cancelDraw } from '../utils/regionFunc';
 import { noCurStore } from '../utils/storeListCheck';
+// import { AciontCommand } from '../utils/aciontCommand';
 
 import * as Service from '../../../services/index';
-import { SET_STATUS, SET_STORE, INCREASE_MAXNUM, SET_CONFIRMSHOW, RESET_STORE } from '../../../action/actionTypes';
+import { SET_STATUS, INCREASE_MAXNUM, SET_CONFIRMSHOW, RESET_STORE } from '../../../action/actionTypes';
 import STATUSCONF from '../../../config/status';
 
 class Control extends React.Component{
@@ -24,8 +25,6 @@ class Control extends React.Component{
     this.saveEdit = this.saveEdit.bind(this);
     this.editRegion = this.editRegion.bind(this);
     this.submitAll = this.submitAll.bind(this);
-
-    // this.checkAct = this.checkAct.bind(this);
     this.cancelAct = this.cancelAct.bind(this);
 
     this.fixStoreParam = this.fixStoreParam.bind(this);
@@ -96,8 +95,6 @@ class Control extends React.Component{
 
   //合并
   setMerge() {
-    // if(!this.checkAct()) {return}
-
     this.props.store.curStore.map((i) => {
       fixToNormal(i)
     })
@@ -111,7 +108,6 @@ class Control extends React.Component{
   mergeStore(store) {
     const storeList = this.props.store.curStore;
     if(storeList.length < 2) {
-      // message.warning('无法合并！', 3);
       Modal.warning({
         title : '提示',
         content : '请先选择两个合并对象！'
@@ -135,6 +131,12 @@ class Control extends React.Component{
         s0.action = 'DELETE';
         s1.action = 'DELETE';
         this.props.map.ffmap.addOverlay(layer);
+        layer.feature = {
+          properties : {
+            re_name : '',
+            re_type : ''
+          }
+        };
               
         const coordObj = turf.coordAll(union).map(item => {
           return {
@@ -148,11 +150,14 @@ class Control extends React.Component{
         layer.action = 'NEW';
         layer.coorChange = true;
         const _s = [layer].concat(storeList);
+
+        this.props.store.actionCommand.initial(this.props.store.store);
+        const newList = this.props.store.actionCommand.execute(_s);
         this.props.dispatch({
-          type : SET_STORE,
+          type : RESET_STORE,
           data : {
             curStore : _s,
-            store : _s
+            store : newList
           }
         });
         //手动添加一个名称label
@@ -164,7 +169,6 @@ class Control extends React.Component{
         });
       }
       else {
-        // message.error('无法合并！', 3);
         Modal.warning({
           title : '提示',
           content : '无法合并！'
@@ -179,13 +183,6 @@ class Control extends React.Component{
 
     let cur = this.props.store.curStore[0];
     cur.action = 'DELETE';
-    // this.props.dispatch({
-    //   type : SET_STORE,
-    //   data : {
-    //     store : [cur]
-    //   }
-    // });
-
     this.props.dispatch({
       type : SET_CONFIRMSHOW,
       data : true
@@ -195,11 +192,11 @@ class Control extends React.Component{
 
   //商铺修型
   editRegion() {
-    if(!noCurStore(this.props.store.curStore)) return;
-    let cur = this.props.store.curStore[0];
-    if(!cur.action) {
-      cur.action = 'UPDATE';
-    }
+    const curStoreList = this.props.store.curStore;
+    if(!noCurStore(curStoreList)) return;
+    let cur = curStoreList[0];
+    
+    cur.action = 'UPDATE';
     cur.coorChange = true;
 
     if(cur.enableEdit) {
@@ -216,11 +213,12 @@ class Control extends React.Component{
       return Object.assign({}, item);
     });
 
-
+    this.props.store.actionCommand.initial(this.props.store.store);
+    const newList = this.props.store.actionCommand.execute([cur]);
     this.props.dispatch({
-      type : SET_STORE,
+      type : RESET_STORE,
       data : {
-        store : [cur],
+        store : newList,
         bkStore : [{
           re_name : cur.feature.properties.re_name,
           re_type : cur.feature.properties.re_type,
@@ -248,26 +246,22 @@ class Control extends React.Component{
     const newStore = this.props.map.ffmap.startPolygon();
     newStore.action = "NEW";
     newStore.coorChange = true;
-    // if( !newStore.feature ) {
-    //     newStore.feature = {
-    //         properties : {
-    //           re_name : '',
-    //           re_type : ''
-    //         }
-    //     };
-    // }
 
-    // this.props.dispatch({
-    //     type : SET_STATUS,
-    //     status : STATUSCONF.active
-    // });
-
+    newStore.feature = {
+      properties : {
+        re_name : '',
+        re_type : ''
+      }
+    };
     this.clearSelect();
+
+    this.props.store.actionCommand.initial(this.props.store.store);
+    const newList = this.props.store.actionCommand.execute([newStore]);
     this.props.dispatch({
-      type : SET_STORE,
+      type : RESET_STORE,
       data : {
         curStore : [newStore],
-        store : [newStore]
+        store : newList
       }
     });
 
@@ -304,7 +298,7 @@ class Control extends React.Component{
 
   //取消操作
   cancelAct() {
-    for(var i = 0, l = this.props.store.curStore.length; i < l; i++) {
+    for(let i = 0, l = this.props.store.curStore.length; i < l; i++) {
       let item = this.props.store.curStore[i];
       let bkItem = this.props.store.bkStore[i];
       if(item.action == 'NEW') {
@@ -318,7 +312,7 @@ class Control extends React.Component{
         
         if(item.feature.properties.re_name != bkItem.re_name) {
           item.feature.properties.re_name = bkItem.re_name;
-          // item.name = bkItem.name;
+
           if(item.label) {
             item.label.setContent(bkItem.re_name);
           }
@@ -345,11 +339,14 @@ class Control extends React.Component{
       type : SET_STATUS,
       status : STATUSCONF.cancel
     })
+
+    // this.props.store.actionCommand.initial(this.props.store.store);
+    const preList = this.props.store.actionCommand.undo();
     this.props.dispatch({
       type : RESET_STORE,
       data : {
         curStore : [],
-        store : this.props.store.store.slice(l),
+        store : preList,
         bkStore : []
       }
     })

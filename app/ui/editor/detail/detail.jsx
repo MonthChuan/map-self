@@ -43,15 +43,6 @@ class Detail extends React.Component{
 			this.props.newNameLabel(center, sourceLayer, store0);
 		}
 
-		if( !store0.feature ) {
-			store0.feature = {
-				properties : {
-					re_name : '',
-					re_type : ''
-				}
-			};
-		}
-
 		return true;
 	}
 
@@ -90,6 +81,7 @@ class Detail extends React.Component{
 			Object.assign(store.feature.properties, opt);
 			
 			if(newStoreList.indexOf(store) < 0) {
+				this.props.store.actionCommand.initial(newStoreList);
 				newStoreList = [store].concat(newStoreList.slice(0));
 			}
 
@@ -124,7 +116,7 @@ class Detail extends React.Component{
 		if(s.length==0 || getSelect(s[0])) {
 			return;
 		}
-		// s[0].selected = true;
+
 		setSelect(s[0], true);
 		const timer = setTimeout(function() {
 			setSelect(s[0], false);
