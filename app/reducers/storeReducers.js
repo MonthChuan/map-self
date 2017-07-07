@@ -1,29 +1,9 @@
-/**
- * AciontCommand用来管理每次操作，记录操作之前的数据和操作后的数据，为取消操作做准备
- */
-const AciontCommand = () => {
-    // this.data = [];
-}
-
-AciontCommand.prototype = {
-    data : [],
-    initial(data = []) {
-        this.data = data.slice(0);
-    },
-    execute(arg = []) {
-        return arg.concat(this.data);
-    },
-    undo() {
-        return this.data;
-    }
-}
-
 const initialState = {
     store : [], //最后提交的时候
-    bkStore : [], //取消操作数据备份
+    // bkStore : [], //取消操作数据备份
     curStore : [], //当前处理的store
     catgory : [], //业态数据
-    actionCommand : new AciontCommand()
+    actionCommand : [] //修改的历史记录
 };
 
 function store(previousState = initialState, action) {

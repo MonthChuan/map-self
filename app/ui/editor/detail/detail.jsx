@@ -2,6 +2,7 @@ import './detail.css';
 import React from 'react';  
 import { connect } from 'react-redux';
 import { getSelect, setSelect } from '../utils/select';
+import AciontCommand from '../utils/actionCommand';
 import { SET_STORE, GET_STORECATGORY, RESET_STORE } from '../../../action/actionTypes';
 import * as Service from '../../../services/index';
 import { Input, Select, Tabs, Radio, DatePicker } from 'antd'; 
@@ -14,9 +15,12 @@ class Detail extends React.Component{
 	constructor(props) {
 		super(props);
 
+		this.tmpProperty = {};
+
 		this.clickStore = this.clickStore.bind(this);
 		this.searchStore = this.searchStore.bind(this);
 		this.propertyChange = this.propertyChange.bind(this);
+		this.proertyChangeEnd = this.proertyChangeEnd.bind(this);
 
 		this.beforeEditDetail = this.beforeEditDetail.bind(this);
 	}
@@ -48,7 +52,7 @@ class Detail extends React.Component{
 
 	propertyChange(event) {
 		let value = '';
-		let opt = null;
+		let opt = {};
 
 		if(this.beforeEditDetail()) {
 			const curStoreList = this.props.store.curStore;
@@ -56,6 +60,7 @@ class Detail extends React.Component{
 			let newCurSlist = [];
 			let newStoreList = this.props.store.store;
 			let newBkStore = this.props.store.bkStore;
+			let propertyType = '';
 
 			if(!store.action) {
 				store.action = 'UPDATE';
@@ -63,38 +68,42 @@ class Detail extends React.Component{
 
 			if(event.target) {
 				value = event.target.value;
-				opt = {'re_name' : value};
+				propertyType = event.target.dataSet.type;
 				store.label.setContent(value);
 			}
 			else {
 				value = event;
-				opt = {'re_type' : value};
+				propertyType = 're_type';
 			}
 
-			if(newStoreList.indexOf(store) < 0) {
-				newBkStore = [{
-					re_name : store.feature.properties.re_name,
-					re_type : store.feature.properties.re_type
-				}];
-			}
+			opt[propertyType] = value;
+
+			// if(newStoreList.indexOf(store) < 0) {
+			this.tmpProperty = opt;
+			const aciontCommand = new AciontCommand();
+			// }
 					
 			Object.assign(store.feature.properties, opt);
 			
-			if(newStoreList.indexOf(store) < 0) {
-				this.props.store.actionCommand.initial(newStoreList);
-				newStoreList = [store].concat(newStoreList.slice(0));
-			}
+			// if(newStoreList.indexOf(store) < 0) {
+			// 	this.props.store.actionCommand.initial(newStoreList);
+			// 	newStoreList = [store].concat(newStoreList.slice(0));
+			// }
 
 			newCurSlist = [store].concat(curStoreList.slice(1));			
 			this.props.dispatch({
 				type : RESET_STORE,
 				data : {
-					curStore : newCurSlist,
-					store : newStoreList,
-					bkStore : newBkStore
+					curStore : newCurSlist
+					// store : newStoreList,
+					// bkStore : newBkStore
 				}
 			})
 		}
+	}
+
+	proertyChangeEnd(event) {
+		// console.log(event)
 	}
 
 	//第一次渲染组件之后，异步获取数据
@@ -169,11 +178,24 @@ class Detail extends React.Component{
 							<div className="y-scroll info-wrap">
 								<div className="line">
 									<label className="txt">店铺名称：</label>
-									<Input placeholder="店铺名称" disabled={isDisable} value={storeName} onChange={this.propertyChange} />
+									<Input 
+										data-type="re_name"
+										placeholder="店铺名称" 
+										disabled={isDisable} 
+										value={storeName} 
+										onChange={this.propertyChange} 
+										onBlur={this.proertyChangeEnd}
+									/>
 								</div>
 								<div className="line">
 									<label className="txt">业态：</label>
-									<Select placeholder="店铺类型" disabled={isDisable} value={storeType} onChange={this.propertyChange}>
+									<Select 
+										placeholder="店铺类型" 
+										disabled={isDisable} 
+										value={storeType} 
+										onChange={this.propertyChange}
+										onBlur={this.proertyChangeEnd}
+									>
 										{typelistTpl}
 									</Select>
 								</div>

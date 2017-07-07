@@ -10,6 +10,7 @@ import Submit from './submit/submit.jsx';
 import { message, Modal, Popconfirm } from 'antd'; 
 import { getSelect, setSelect } from './utils/select';
 import { fixToNormal } from './utils/regionFunc';
+import AciontCommand from './utils/actionCommand';
 
 import * as Service from '../../services/index';
 import { ADD_MAP, SET_PLAZAID, SET_STATUS, SET_FLOORINFO, RESET_STORE, SET_CONFIRMSHOW } from '../../action/actionTypes';
@@ -31,7 +32,10 @@ class EditorPage extends React.Component{
 		const control = this.props.control;
 		const storeList = this.props.store.store;
 		const curStoreList = this.props.store.curStore;
-		// let storeArr = [];
+
+		if(storeList.length > 4) {
+			message.warning('您有较多操作未保存，请保存！', 3);
+		}
 
 		if(getSelect(_store) || curStoreList.indexOf(_store) > -1) {
 			return;
@@ -50,8 +54,6 @@ class EditorPage extends React.Component{
 				type : RESET_STORE,
 				data : {
 					curStore : _s
-					// ,
-					// store : storeArr
 				}
 			});
 			return;
@@ -71,7 +73,6 @@ class EditorPage extends React.Component{
 			type : RESET_STORE,
 			data : {
 				curStore : [_store]
-				// store : storeArr
 			}
 		});
 	}

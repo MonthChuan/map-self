@@ -195,7 +195,7 @@ class Control extends React.Component{
     const curStoreList = this.props.store.curStore;
     if(!noCurStore(curStoreList)) return;
     let cur = curStoreList[0];
-    
+
     cur.action = 'UPDATE';
     cur.coorChange = true;
 
@@ -369,7 +369,7 @@ class Control extends React.Component{
   
     return (
       <div className="control">
-        <a className={name0} onClick={this.cancelAct}>取消操作</a>
+        <a className={name0} onClick={this.cancelAct}>回退</a>
         <a className={name1} onClick={this.drawPloy}><i className="s-icon"></i>新增</a>
         <a className={name2} onClick={this.editRegion} ><i className="s-icon"></i>修型</a>
         <a className={name3} onClick={this.deleteStore}><i className="s-icon"></i>删除</a>
