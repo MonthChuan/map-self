@@ -32,6 +32,7 @@ class EditorPage extends React.Component{
 		const control = this.props.control;
 		const storeList = this.props.store.store;
 		const curStoreList = this.props.store.curStore;
+		// let storeArr = [];
 
 		if(storeList.length > 4) {
 			message.warning('您有较多操作未保存，请保存！', 3);
@@ -72,7 +73,10 @@ class EditorPage extends React.Component{
 		this.props.dispatch({
 			type : RESET_STORE,
 			data : {
-				curStore : [_store]
+				curStore : [_store],
+				bkStore : [{
+					properties : Object.assign({}, _store.feature.properties)
+				}]
 			}
 		});
 	}

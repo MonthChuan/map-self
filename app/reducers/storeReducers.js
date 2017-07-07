@@ -1,6 +1,6 @@
 const initialState = {
     store : [], //最后提交的时候
-    // bkStore : [], //取消操作数据备份
+    bkStore : [], //取消操作数据备份
     curStore : [], //当前处理的store
     catgory : [], //业态数据
     actionCommand : [] //修改的历史记录

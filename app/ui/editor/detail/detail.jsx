@@ -15,7 +15,7 @@ class Detail extends React.Component{
 	constructor(props) {
 		super(props);
 
-		this.tmpProperty = {};
+		// this.tmpProperty = {};
 
 		this.clickStore = this.clickStore.bind(this);
 		this.searchStore = this.searchStore.bind(this);
@@ -68,7 +68,7 @@ class Detail extends React.Component{
 
 			if(event.target) {
 				value = event.target.value;
-				propertyType = event.target.dataSet.type;
+				propertyType = event.target.dataset.type;
 				store.label.setContent(value);
 			}
 			else {
@@ -79,7 +79,6 @@ class Detail extends React.Component{
 			opt[propertyType] = value;
 
 			// if(newStoreList.indexOf(store) < 0) {
-			this.tmpProperty = opt;
 			const aciontCommand = new AciontCommand();
 			// }
 					
@@ -103,7 +102,7 @@ class Detail extends React.Component{
 	}
 
 	proertyChangeEnd(event) {
-		// console.log(event)
+		console.log(event)
 	}
 
 	//第一次渲染组件之后，异步获取数据
