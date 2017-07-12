@@ -7,7 +7,7 @@ import { getSelect, setSelect } from '../utils/select';
 import { formatStore } from '../utils/formatStore';
 import { fixToNormal, cancelDraw } from '../utils/regionFunc';
 import { noCurStore } from '../utils/storeListCheck';
-// import { AciontCommand } from '../utils/aciontCommand';
+import ActionCommand from '../utils/actionCommand';
 
 import * as Service from '../../../services/index';
 import { SET_STATUS, INCREASE_MAXNUM, SET_CONFIRMSHOW, RESET_STORE } from '../../../action/actionTypes';
@@ -28,25 +28,37 @@ class Control extends React.Component{
     this.cancelAct = this.cancelAct.bind(this);
 
     this.fixStoreParam = this.fixStoreParam.bind(this);
-    this.clearSelect = this.clearSelect.bind(this);
+    this.clearActiveState = this.clearActiveState.bind(this);
+    this.newStoreId = this.newStoreId.bind(this);
   }
-  clearSelect() {
+
+  newStoreId() {
+    const floor = this.props.map;
+    this.props.dispatch({
+      type : INCREASE_MAXNUM
+    });
+
+    return floor.plazaId + '_' + floor.floorName + '_' + floor.floorMaxNum;
+  }
+
+  clearActiveState() {
     this.props.store.curStore.map(i => {
       setSelect(i, false);
+      fixToNormal(i);
     })
   }
 
 	fixStoreParam(obj) {
-    const getNewStoreId = () => {
-      const floor = this.props.map;
-      this.props.dispatch({
-        type : INCREASE_MAXNUM
-      });
+    // const getNewStoreId = () => {
+    //   const floor = this.props.map;
+    //   this.props.dispatch({
+    //     type : INCREASE_MAXNUM
+    //   });
 
-			return floor.plazaId + '_' + floor.floorName + '_' + floor.floorMaxNum;
-    };
+		// 	return floor.plazaId + '_' + floor.floorName + '_' + floor.floorMaxNum;
+    // };
 
-    return formatStore(obj, getNewStoreId);
+    return formatStore(obj);
 	}
 
   //保存
@@ -60,8 +72,11 @@ class Control extends React.Component{
 			return;
     }
 
-    const regionParam = storeList.map(item => {
-			return this.fixStoreParam(item);
+    let regionParam = [];
+    storeList.map(item => {
+      if(item.action && item.action != '') {
+        regionParam.push( this.fixStoreParam(item) );
+      }
 		});
 
     Service.saveDataAjax(
@@ -86,7 +101,8 @@ class Control extends React.Component{
           data : {
             curStore : [],
             store : [],
-            bkStore : []
+            bkStore : [],
+            actionCommand : []
           }
         })
       }
@@ -127,11 +143,11 @@ class Control extends React.Component{
 
         s1.remove();
         s1.label.remove();
-
-        s0.action = 'DELETE';
-        s1.action = 'DELETE';
         this.props.map.ffmap.addOverlay(layer);
+
+        let newId = this.newStoreId();
         layer.feature = {
+          id : newId,
           properties : {
             re_name : '',
             re_type : ''
@@ -146,18 +162,30 @@ class Control extends React.Component{
         });
         coords = FMap.Utils.getOriginalByLatlngs(coordObj);
 
-        layer.coords = coords;
-        layer.action = 'NEW';
+        layer.coordinates = coords;
         layer.coorChange = true;
         const _s = [layer].concat(storeList);
 
-        this.props.store.actionCommand.initial(this.props.store.store);
-        const newList = this.props.store.actionCommand.execute(_s);
+        for(let i = _s.length; i > 0; i--) {
+          let item = _s[i - 1];
+          let actCommand = new ActionCommand({
+            action : item.action || '',
+            id : item.feature.id,
+            properties : item.feature.properties
+          });
+          this.props.store.actionCommand.unshift(actCommand);
+
+        }
+
+        s0.action = 'DELETE';
+        s1.action = 'DELETE';
+        layer.action = 'NEW';
+
         this.props.dispatch({
           type : RESET_STORE,
           data : {
             curStore : _s,
-            store : newList
+            store : _s
           }
         });
         //手动添加一个名称label
@@ -179,9 +207,10 @@ class Control extends React.Component{
 
   //delete
   deleteStore() {
-    if(!noCurStore(this.props.store.curStore)) return;
+    const curStoreList = this.props.store.curStore;
+    if(!noCurStore(curStoreList)) return;
 
-    let cur = this.props.store.curStore[0];
+    let cur = curStoreList[0];
     cur.action = 'DELETE';
     this.props.dispatch({
       type : SET_CONFIRMSHOW,
@@ -213,19 +242,20 @@ class Control extends React.Component{
       return Object.assign({}, item);
     });
 
-    this.props.store.actionCommand.initial(this.props.store.store);
-    const newList = this.props.store.actionCommand.execute([cur]);
+    // this.props.store.actionCommand.initial(this.props.store.store);
+    // const newList = this.props.store.actionCommand.execute([cur]);
+    this.props.store.bkStore[0].coordinates = [[_latlng]];
+    this.props.store.actionCommand.unshift(new ActionCommand(this.props.store.bkStore[0]));
+
     this.props.dispatch({
       type : RESET_STORE,
       data : {
-        store : newList,
-        bkStore : [{
-          re_name : cur.feature.properties.re_name,
-          re_type : cur.feature.properties.re_type,
-          latlng : [[_latlng]]
-        }]
+        store : [cur]
       }
     });
+
+
+    
   }
 
   //开始编辑
@@ -247,21 +277,26 @@ class Control extends React.Component{
     newStore.action = "NEW";
     newStore.coorChange = true;
 
+    const newId = this.newStoreId();
     newStore.feature = {
+      id : newId,
       properties : {
         re_name : '',
         re_type : ''
       }
     };
-    this.clearSelect();
+    this.clearActiveState();
 
-    this.props.store.actionCommand.initial(this.props.store.store);
-    const newList = this.props.store.actionCommand.execute([newStore]);
+    this.props.store.actionCommand.unshift(new ActionCommand({
+      action : '',
+      id : '',
+      properties : {}
+    }));
     this.props.dispatch({
       type : RESET_STORE,
       data : {
         curStore : [newStore],
-        store : newList
+        store : [newStore]
       }
     });
 
@@ -298,55 +333,51 @@ class Control extends React.Component{
 
   //取消操作
   cancelAct() {
-    for(let i = 0, l = this.props.store.curStore.length; i < l; i++) {
-      let item = this.props.store.curStore[i];
-      let bkItem = this.props.store.bkStore[i];
+    const curStoreList = this.props.store.curStore;
+    if(!noCurStore(curStoreList)) return;
+
+    for(let i = 0, l = curStoreList.length; i < l; i++) {
+      let item = curStoreList[i];
+      // let bkItem = this.props.store.bkStore[i]; 
+      let actionCommand = this.props.store.actionCommand[i];
+      const upData = actionCommand.undo(); //本次修改之前的数据
+      
       if(item.action == 'NEW') {
         cancelDraw(item);
       }
-      else if(item.action == 'UPDATE') {
-        item.disableEdit();
-        if(item.coorChange) {
-          item.setLatLngs(bkItem.latlng);
+      else {
+        if(item.action == 'UPDATE' && item.coorChange) {
+          item.disableEdit();
+          item.setLatLngs(upData.coordinates);
         }
         
-        if(item.feature.properties.re_name != bkItem.re_name) {
-          item.feature.properties.re_name = bkItem.re_name;
-
-          if(item.label) {
-            item.label.setContent(bkItem.re_name);
-          }
+        if(item.action == 'DELETE') {
+          this.props.map.ffmap.addOverlay(item);
+          this.props.newNameLabel(item.getCenter(), item, item);
         }
-
-        if(item.feature.properties.re_type != bkItem.re_type) {
-          item.feature.properties.re_type = bkItem.re_type;
+      
+        if(upData.properties.re_name) {
+          item.label.setContent(upData.properties.re_name);
         }
+        Object.assign(item, {feature : {properties : upData.properties}});
       }
-      else if(item.action == 'DELETE') {
-        this.props.map.ffmap.addOverlay(item);
-        this.props.newNameLabel(item.getCenter(), item, item);
-        item.label.setContent(item.feature.properties.re_name);
-      }
-
+      item.action = upData.action;
       if(getSelect(item)) {
         setSelect(item, false);
       }
       
     }
 
-
     this.props.dispatch({
       type : SET_STATUS,
       status : STATUSCONF.cancel
     })
 
-    // this.props.store.actionCommand.initial(this.props.store.store);
-    const preList = this.props.store.actionCommand.undo();
     this.props.dispatch({
       type : RESET_STORE,
       data : {
         curStore : [],
-        store : preList,
+        actionCommand : this.props.store.actionCommand.slice(1),
         bkStore : []
       }
     })

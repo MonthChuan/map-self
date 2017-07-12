@@ -7,12 +7,13 @@ export const formatStore = (obj, getId) => {
     let paramId = '';
     let param = null;
 
-    if(obj.action == 'NEW') {
-        paramId = getId();
-    }
-    else {
-        paramId = obj.feature.properties.region_id;
-    }
+    // if(obj.action == 'NEW') {
+    //     paramId = getId();
+    // }
+    // else {
+    //     paramId = obj.feature.properties.region_id;
+    // }
+    paramId = obj.feature.id;
 
     param = {
         type : 'Feature',

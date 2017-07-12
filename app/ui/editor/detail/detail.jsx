@@ -2,7 +2,7 @@ import './detail.css';
 import React from 'react';  
 import { connect } from 'react-redux';
 import { getSelect, setSelect } from '../utils/select';
-import AciontCommand from '../utils/actionCommand';
+import ActionCommand from '../utils/actionCommand';
 import { SET_STORE, GET_STORECATGORY, RESET_STORE } from '../../../action/actionTypes';
 import * as Service from '../../../services/index';
 import { Input, Select, Tabs, Radio, DatePicker } from 'antd'; 
@@ -15,8 +15,9 @@ class Detail extends React.Component{
 	constructor(props) {
 		super(props);
 
-		// this.tmpProperty = {};
-
+		this.actionCommand = {};
+		this.propertyObj = {};
+		// this.isPushStore = false;
 		this.clickStore = this.clickStore.bind(this);
 		this.searchStore = this.searchStore.bind(this);
 		this.propertyChange = this.propertyChange.bind(this);
@@ -59,7 +60,7 @@ class Detail extends React.Component{
 			const store = curStoreList[0];
 			let newCurSlist = [];
 			let newStoreList = this.props.store.store;
-			let newBkStore = this.props.store.bkStore;
+			let bkStore = this.props.store.bkStore;
 			let propertyType = '';
 
 			if(!store.action) {
@@ -78,11 +79,18 @@ class Detail extends React.Component{
 
 			opt[propertyType] = value;
 
-			// if(newStoreList.indexOf(store) < 0) {
-			const aciontCommand = new AciontCommand();
-			// }
+			if( this.props.store.actionCommand.length > 0 && (store.feature.id == this.props.store.actionCommand[0].id) ) {
+				this.actionCommand = this.props.store.actionCommand[0];
+				// this.isPushStore = false;
+			}
+			else {
+				this.actionCommand = new ActionCommand(bkStore[0]);
+				this.props.store.actionCommand.unshift(this.actionCommand);
+				// this.isPushStore = true;
+			}
 					
 			Object.assign(store.feature.properties, opt);
+			this.propertyObj = opt;
 			
 			// if(newStoreList.indexOf(store) < 0) {
 			// 	this.props.store.actionCommand.initial(newStoreList);
@@ -102,7 +110,17 @@ class Detail extends React.Component{
 	}
 
 	proertyChangeEnd(event) {
-		console.log(event)
+		if(this.actionCommand && this.actionCommand.execute) {
+			this.actionCommand.execute(this.propertyObj);
+		}
+		
+		this.props.dispatch({
+			type : RESET_STORE,
+			data : {
+				store : this.props.store.curStore,
+				curStore : this.props.store.curStore
+			}
+		})
 	}
 
 	//第一次渲染组件之后，异步获取数据

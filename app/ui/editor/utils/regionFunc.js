@@ -1,11 +1,11 @@
 //将传入的store修改为normal状态
 export const fixToNormal = (store) => {
-    if(store.transform) {
-        store.transform.enable({
-            rotation: false,
-            scaling : false
-        });
-    }
+    // if(store.transform) {
+    //     store.transform.enable({
+    //         rotation: false,
+    //         scaling : false
+    //     });
+    // }
 
     if(store.dragging) {
         store.dragging.disable();
@@ -36,6 +36,19 @@ export const cancelDraw = (store) => {
         store.remove();
     }
 
+    if(store.label) {
+        store.label.remove();
+    }
+}
+
+export const deleteStore = (store) => {
+    if(store.graphics) {
+        store.graphics.remove();
+    }
+    else {
+        store.remove();
+    }
+    
     if(store.label) {
         store.label.remove();
     }

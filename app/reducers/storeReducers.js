@@ -16,6 +16,15 @@ function store(previousState = initialState, action) {
         //     }
         //     return Object.assign({}, previousState, action.data);
         case 'resetStore':
+            if(action.data.store) {
+                for(let i = 0, len = action.data.store.length; i < len; i++) {
+                    const item = action.data.store[len - i -1];
+                    if(previousState.store.indexOf(item) < 0) {
+                        previousState.store.unshift(item);
+                    }
+                }
+                action.data.store = previousState.store;
+            }
             return Object.assign({}, previousState, action.data);
         case 'getStoreCatgory':
             return Object.assign({}, previousState, {catgory : action.catgory});

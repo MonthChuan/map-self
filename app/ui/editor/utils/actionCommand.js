@@ -1,24 +1,23 @@
 /**
  * AciontCommand用来记录每次操作
  */
-let AciontCommand = () => {
-    // this.data = data;
-    // this.newData = data;
+let ActionCommand = function(oldData = {}) {
+    this.oldData = Object.assign({}, oldData);
+    this.id = oldData.id || '';
+    this.newData = {};
 }
 
-AciontCommand.prototype = {
-    oldData : {},
-    newData : {}, 
-    execute(store, obj = {}) {
-        const keyList = Object.keys(obj);
-        keyList.map( item => {
-            if(item != 'coordinates') {
-                oldData[item] = store.feature.properties[item];
-            }
-            else {
-                oldData[item] = store.feature.geometry.coordinates;
-            }
-        });
+ActionCommand.prototype = {
+    execute(obj = {}) {
+        // const keyList = Object.keys(obj);
+        // keyList.map( item => {
+        //     if(item != 'coordinates') {
+        //         oldData[item] = store.feature.properties[item];
+        //     }
+        //     else {
+        //         oldData[item] = store.feature.geometry.coordinates;
+        //     }
+        // });
 
         this.newData = obj;
     },
@@ -27,5 +26,4 @@ AciontCommand.prototype = {
     }
 }
 
-
-export default AciontCommand;
+export default ActionCommand;

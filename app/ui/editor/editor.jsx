@@ -7,10 +7,10 @@ import PlazaSelect from './plazaselect/plazaselect.jsx';
 import Control from './control/control.jsx';  
 import Detail from './detail/detail.jsx';
 import Submit from './submit/submit.jsx';
-import { message, Modal, Popconfirm } from 'antd'; 
+import { message, Popconfirm } from 'antd'; 
 import { getSelect, setSelect } from './utils/select';
-import { fixToNormal } from './utils/regionFunc';
-import AciontCommand from './utils/actionCommand';
+import { fixToNormal, deleteStore } from './utils/regionFunc';
+import ActionCommand from './utils/actionCommand';
 
 import * as Service from '../../services/index';
 import { ADD_MAP, SET_PLAZAID, SET_STATUS, SET_FLOORINFO, RESET_STORE, SET_CONFIRMSHOW } from '../../action/actionTypes';
@@ -75,6 +75,8 @@ class EditorPage extends React.Component{
 			data : {
 				curStore : [_store],
 				bkStore : [{
+					action : _store.action || '',
+					id : _store.feature.id,
 					properties : Object.assign({}, _store.feature.properties)
 				}]
 			}
@@ -144,32 +146,24 @@ class EditorPage extends React.Component{
 	}
 
 	deleteStoreConfirmOk(e) {
-		setSelect(this.preDeleteStore, false);
+		const store0 = this.preDeleteStore;
+		setSelect(store0, false);
 		this.props.dispatch({
 			type : SET_CONFIRMSHOW,
 			data : false
 		})
-		this.preDeleteStore.action = 'DELETE';
+		store0.action = 'DELETE';
 		
-		this.props.store.actionCommand.initial(this.props.store.store);
-        const newList = this.props.store.actionCommand.execute([this.preDeleteStore]);
+		const actCommand = new ActionCommand(this.props.store.bkStore[0]);
+		this.props.store.actionCommand.unshift(actCommand);
 		this.props.dispatch({
 			type : RESET_STORE,
 			data : {
-				store : newList
+				store : [store0]
 			}
 		});
-		const store0 = this.preDeleteStore;
-		if(store0.graphics) {
-			store0.graphics.remove();
-		}
-		else {
-			store0.remove();
-		}
-		
-		if(store0.label) {
-			store0.label.remove();
-		}	
+
+		deleteStore(store0);	
 	}
 
 	deleteStoreConfirmCancel(e) {
