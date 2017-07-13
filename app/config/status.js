@@ -10,8 +10,7 @@ let initial = {
   isMerge : false,
   isSubMerge : false,
   isStart : true,
-  isActive : false,
-  isSubmit : false
+  isActive : false
 };
 
 //开始编辑

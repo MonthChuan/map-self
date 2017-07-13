@@ -32,9 +32,8 @@ class EditorPage extends React.Component{
 		const control = this.props.control;
 		const storeList = this.props.store.store;
 		const curStoreList = this.props.store.curStore;
-		// let storeArr = [];
 
-		if(storeList.length > 4) {
+		if(storeList.length > 9) {
 			message.warning('您有较多操作未保存，请保存！', 3);
 		}
 
@@ -114,7 +113,10 @@ class EditorPage extends React.Component{
 			});
 
 			event.regionGroup.on('click', e => {
-				this.initFeatureClick(e);
+				const s = e.layer || e.target;
+				if(s.feature.properties.re_type != '020000') {
+					this.initFeatureClick(e);
+				}
 			});
 
 			let maxNum = numList[0];

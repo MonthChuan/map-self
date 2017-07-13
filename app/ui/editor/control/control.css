@@ -15,10 +15,10 @@
   font-size: 14px;
   height: 32px;
   line-height: 32px;
-  border-right: 1px solid #e5e5e5;
+  /*border-right: 1px solid #e5e5e5;*/
   position: relative;
   padding: 0 15px;
-  min-width: 120px;
+  min-width: 100px;
   white-space: nowrap;
   margin-top: 19px;
 }

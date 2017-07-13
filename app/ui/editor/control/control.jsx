@@ -91,10 +91,10 @@ class Control extends React.Component{
       () => {
         fixToNormal(storeList[0]);
 
-        this.props.dispatch({
-          type : SET_STATUS,
-          status : STATUSCONF.save
-        });
+        // this.props.dispatch({
+        //   type : SET_STATUS,
+        //   status : STATUSCONF.save
+        // });
 
         this.props.dispatch({
           type : RESET_STORE,
@@ -191,9 +191,14 @@ class Control extends React.Component{
         //手动添加一个名称label
         const centerLatLng = layer.getBounds().getCenter();
         this.props.newNameLabel(centerLatLng, layer, layer);
-
+        layer.centerPoint = centerLatLng;
         layer.on('click', e => {
           this.props.initFeatureClick(e);
+        });
+
+        this.props.dispatch({
+          type : SET_STATUS,
+          status : STATUSCONF.start
         });
       }
       else {
@@ -341,6 +346,11 @@ class Control extends React.Component{
       // let bkItem = this.props.store.bkStore[i]; 
       let actionCommand = this.props.store.actionCommand[i];
       const upData = actionCommand.undo(); //本次修改之前的数据
+
+      if(upData.id != item.feature.id) {
+        message.warning('没有可回退的操作！');
+        return;
+      }
       
       if(item.action == 'NEW') {
         cancelDraw(item);

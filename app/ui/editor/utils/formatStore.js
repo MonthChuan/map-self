@@ -7,28 +7,16 @@ export const formatStore = (obj, getId) => {
     let paramId = '';
     let param = null;
 
-    // if(obj.action == 'NEW') {
-    //     paramId = getId();
-    // }
-    // else {
-    //     paramId = obj.feature.properties.region_id;
-    // }
     paramId = obj.feature.id;
 
     param = {
         type : 'Feature',
         id : paramId,
         properties : {
-            // centerx : centerPointXY.x,
-            // centery : centerPointXY.y,
             re_name : obj.feature.properties.re_name || '',
             re_type : obj.feature.properties.re_type || '',
             region_id : paramId
         }
-        // geometry : {
-        //     type : 'MultiPolygon',
-        //     coordinates : [[coords.concat(coords.slice(0,1))]]
-        // }
     };
 
     if(obj.coorChange) {
@@ -42,19 +30,29 @@ export const formatStore = (obj, getId) => {
                 centerPoint = obj.getBounds().getCenter();
             } 
             else {
-                if(obj.getCenter) {
-                    centerPoint = obj.getCenter();
+                if(obj.centerPoint) {
+                    centerPoint = obj.centerPoint;
                 }
                 else {
-                    centerPoint = obj[layerType].getCenter();
+                    if(obj.getCenter) {
+                        centerPoint = obj.getCenter();
+                    }
+                    else {
+                        centerPoint = obj[layerType].getCenter();
+                    }
                 }
                 
-                coordsList = FMap.Utils.getOriginalByLatlngs(obj.getLatLngs());
-                if(coordsList[0].length > 1) {
-                    coords = coordsList[0];
+                if(obj.coordinates) {
+                    coords = obj.coordinates;
                 }
                 else {
-                    coords = coordsList[0][0];
+                    coordsList = FMap.Utils.getOriginalByLatlngs(obj.getLatLngs());
+                    if(coordsList[0].length > 1) {
+                        coords = coordsList[0];
+                    }
+                    else {
+                        coords = coordsList[0][0];
+                    }
                 }
             }
             
