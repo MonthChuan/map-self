@@ -14,6 +14,7 @@ import ActionCommand from './utils/actionCommand';
 
 import * as Service from '../../services/index';
 import { ADD_MAP, SET_PLAZAID, SET_STATUS, SET_FLOORINFO, RESET_STORE, SET_CONFIRMSHOW } from '../../action/actionTypes';
+import STATUSCONF from '../../config/status';
 
 class EditorPage extends React.Component{
 	constructor(props) {
@@ -68,6 +69,13 @@ class EditorPage extends React.Component{
 		curStoreList.map(item => {
 			fixToNormal(item);
 		});
+
+		if(this.props.control.isActive) {
+			this.props.dispatch({
+				type: SET_STATUS,
+				status : STATUSCONF.start
+			});
+		}
 		
 		this.props.dispatch({
 			type : RESET_STORE,
@@ -137,6 +145,30 @@ class EditorPage extends React.Component{
 			});
 		});
 
+		map.on('editable:editing', event => {
+			if(this.props.control.activeType != '') {
+				this.props.dispatch({
+					type: SET_STATUS,
+					status : STATUSCONF.start
+				});
+			}
+		});
+
+		map.on('editable:dragend', event => {
+			const region = event.layer;
+			let latlng = null;
+			if(!region.label) {
+				return;
+			}
+			if(region.centerPoint) {
+				latlng = region.centerPoint;
+			}
+			else {
+				latlng = region.getCenter();
+			}
+			region.label.setLatLngs(latlng);
+		});
+
 		this.refs.map.style.height = '100%';
 	}
 
@@ -164,6 +196,10 @@ class EditorPage extends React.Component{
 				store : [store0]
 			}
 		});
+		this.props.dispatch({
+			type: SET_STATUS,
+			status : STATUSCONF.start
+		});
 
 		deleteStore(store0);	
 	}
@@ -173,7 +209,12 @@ class EditorPage extends React.Component{
 		this.props.dispatch({
 			type : SET_CONFIRMSHOW,
 			data : false
-		})
+		});
+
+		this.props.dispatch({
+			type: SET_STATUS,
+			status : STATUSCONF.start
+		});
 	}
 
 	openConfirm(item) {

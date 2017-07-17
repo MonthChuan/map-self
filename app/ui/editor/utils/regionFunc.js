@@ -16,7 +16,7 @@ export const fixToNormal = (store) => {
             i.disableEdit();
         });
     }
-    else {
+    else if(store.disableEdit) {
         store.disableEdit();
     }
 }

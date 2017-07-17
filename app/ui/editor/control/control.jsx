@@ -6,7 +6,7 @@ import SaveConfirm from '../utils/saveConfirm.jsx';
 import { getSelect, setSelect } from '../utils/select';
 import { formatStore } from '../utils/formatStore';
 import { fixToNormal, cancelDraw } from '../utils/regionFunc';
-import { noCurStore } from '../utils/storeListCheck';
+import { noCurStore, noCancelStore } from '../utils/storeListCheck';
 import ActionCommand from '../utils/actionCommand';
 
 import * as Service from '../../../services/index';
@@ -27,7 +27,6 @@ class Control extends React.Component{
     this.submitAll = this.submitAll.bind(this);
     this.cancelAct = this.cancelAct.bind(this);
 
-    this.fixStoreParam = this.fixStoreParam.bind(this);
     this.clearActiveState = this.clearActiveState.bind(this);
     this.newStoreId = this.newStoreId.bind(this);
   }
@@ -48,19 +47,6 @@ class Control extends React.Component{
     })
   }
 
-	fixStoreParam(obj) {
-    // const getNewStoreId = () => {
-    //   const floor = this.props.map;
-    //   this.props.dispatch({
-    //     type : INCREASE_MAXNUM
-    //   });
-
-		// 	return floor.plazaId + '_' + floor.floorName + '_' + floor.floorMaxNum;
-    // };
-
-    return formatStore(obj);
-	}
-
   //保存
   saveEdit() {
     const storeList = this.props.store.store;
@@ -75,7 +61,7 @@ class Control extends React.Component{
     let regionParam = [];
     storeList.map(item => {
       if(item.action && item.action != '') {
-        regionParam.push( this.fixStoreParam(item) );
+        regionParam.push( formatStore(item) );
       }
 		});
 
@@ -119,6 +105,15 @@ class Control extends React.Component{
       type : SET_STATUS,
       status : STATUSCONF.merge
     });
+
+    if(this.props.store.curStore[0] && !this.props.store.curStore[0].selected) {
+      this.props.dispatch({
+				type : RESET_STORE,
+				data : {
+					curStore : []
+				}
+			});
+    }
   }
 
   mergeStore(store) {
@@ -134,38 +129,45 @@ class Control extends React.Component{
       const s1 = storeList[1];
 
       if( s0.getBounds().intersects(s1.getBounds()) ) {
-        let coords = [];
         const union = turf.union(s0.toGeoJSON(), s1.toGeoJSON());
-        const layer = this.props.map.ffmap.drawGeoJSON(union, {editable: true});
-
-        s0.remove();
-        s0.label.remove();
-
-        s1.remove();
-        s1.label.remove();
-        this.props.map.ffmap.addOverlay(layer);
-
-        let newId = this.newStoreId();
-        layer.feature = {
+        const newId = this.newStoreId();
+        Object.assign(union, {
           id : newId,
           properties : {
             re_name : '',
-            re_type : ''
+            re_type : '',
+            region_id : newId
           }
-        };
-              
+        });
         const coordObj = turf.coordAll(union).map(item => {
           return {
             lat : item[1],
             lng : item[0]
           };
         });
-        coords = FMap.Utils.getOriginalByLatlngs(coordObj);
+        const coords = FMap.Utils.getOriginalByLatlngs(coordObj);
+        union.coordinates = coords;
+        union.coorChange = true;
 
-        layer.coordinates = coords;
-        layer.coorChange = true;
+        s0.remove();
+        if(s0.label) {
+          s0.label.remove();
+        }
+        s1.remove();
+        if(s1.label) {
+          s1.label.remove();
+        }
+
+        const layerGroup = this.props.map.ffmap.drawGeoJSON(union, {editable: true});
+        let layer = null;
+        layerGroup.eachLayer(i => {
+          if(!layer) {
+            layer = i;
+          }
+        });
+        this.props.map.ffmap.addOverlay(layer);
+
         const _s = [layer].concat(storeList);
-
         for(let i = _s.length; i > 0; i--) {
           let item = _s[i - 1];
           let actCommand = new ActionCommand({
@@ -175,11 +177,12 @@ class Control extends React.Component{
           });
           this.props.store.actionCommand.unshift(actCommand);
 
+          setSelect(item, false);
         }
-
         s0.action = 'DELETE';
         s1.action = 'DELETE';
         layer.action = 'NEW';
+
 
         this.props.dispatch({
           type : RESET_STORE,
@@ -188,7 +191,7 @@ class Control extends React.Component{
             store : _s
           }
         });
-        //手动添加一个名称label
+        // 手动添加一个名称label
         const centerLatLng = layer.getBounds().getCenter();
         this.props.newNameLabel(centerLatLng, layer, layer);
         layer.centerPoint = centerLatLng;
@@ -222,6 +225,11 @@ class Control extends React.Component{
       data : true
     });
     this.props.openConfirm(cur);
+
+    this.props.dispatch({
+      type: SET_STATUS,
+      status : STATUSCONF.deleteS
+    });
   }
 
   //商铺修型
@@ -247,16 +255,20 @@ class Control extends React.Component{
       return Object.assign({}, item);
     });
 
-    // this.props.store.actionCommand.initial(this.props.store.store);
-    // const newList = this.props.store.actionCommand.execute([cur]);
-    this.props.store.bkStore[0].coordinates = [[_latlng]];
-    this.props.store.actionCommand.unshift(new ActionCommand(this.props.store.bkStore[0]));
+    const bkStore0 = this.props.store.bkStore[0] || {};
+    bkStore0.coordinates = [[_latlng]];
+    this.props.store.actionCommand.unshift(new ActionCommand(bkStore0));
 
     this.props.dispatch({
       type : RESET_STORE,
       data : {
         store : [cur]
       }
+    });
+
+    this.props.dispatch({
+      type: SET_STATUS,
+      status : STATUSCONF.editS
     });
 
 
@@ -294,7 +306,7 @@ class Control extends React.Component{
 
     this.props.store.actionCommand.unshift(new ActionCommand({
       action : '',
-      id : '',
+      id : newId,
       properties : {}
     }));
     this.props.dispatch({
@@ -305,8 +317,22 @@ class Control extends React.Component{
       }
     });
 
+    this.props.dispatch({
+      type: SET_STATUS,
+      status : STATUSCONF.addS
+    });
+
     newStore.on('click', e => {
       this.props.initFeatureClick(e);
+    });
+
+    newStore.on('editable:dragend', event => {
+      const region = event.target;
+      const latlng = region.graphics.getCenter();
+      if(!region.label) {
+				return;
+			}
+      region.label.setLatLngs(latlng);
     });
   }
 
@@ -339,12 +365,12 @@ class Control extends React.Component{
   //取消操作
   cancelAct() {
     const curStoreList = this.props.store.curStore;
-    if(!noCurStore(curStoreList)) return;
+    const actionList = this.props.store.actionCommand;
+    if(!noCancelStore(curStoreList, actionList)) return;
 
     for(let i = 0, l = curStoreList.length; i < l; i++) {
-      let item = curStoreList[i];
-      // let bkItem = this.props.store.bkStore[i]; 
-      let actionCommand = this.props.store.actionCommand[i];
+      let item = curStoreList[i]; 
+      let actionCommand = actionList[i];
       const upData = actionCommand.undo(); //本次修改之前的数据
 
       if(upData.id != item.feature.id) {
@@ -380,14 +406,14 @@ class Control extends React.Component{
 
     this.props.dispatch({
       type : SET_STATUS,
-      status : STATUSCONF.cancel
+      status : STATUSCONF.start
     })
 
     this.props.dispatch({
       type : RESET_STORE,
       data : {
         curStore : [],
-        actionCommand : this.props.store.actionCommand.slice(1),
+        actionCommand : actionList.slice(1),
         bkStore : []
       }
     })
@@ -396,11 +422,33 @@ class Control extends React.Component{
 
   render() {
     const data = this.props.control;
-    const name0 = "s-btn s-cancel clearfix" + (data.isActive === true ? '' : ' disable');
-    const name1 = "s-btn s-add clearfix" + (data.isActive === true ? '' : ' disable');
-    const name2 = "s-btn s-edit clearfix" + (data.isActive === true ? '' : ' disable');
-    const name3 = "s-btn s-delete clearfix" + (data.isActive === true ? '' : ' disable');
-    const name4 = "s-btn s-merge clearfix" + (data.isMerge ? '' : ' disable');
+
+    // const name0 = "s-btn s-cancel clearfix" + (data.isActive === true ? '' : ' disable');
+    // const name1 = "s-btn s-add clearfix" + (data.isActive === true ? '' : ' disable');
+    // const name2 = "s-btn s-edit clearfix" + (data.isActive === true ? '' : ' disable');
+    // const name3 = "s-btn s-delete clearfix" + (data.isActive === true ? '' : ' disable');
+    // const name4 = "s-btn s-merge clearfix" + (data.isMerge ? '' : ' disable');
+    // const name5 = "s-btn s-merge clearfix";
+    let nameList = [];
+    ['cancel', 'add', 'edit', 'delete', 'merge', 'submerge'].map((type) => {
+      let isDisable = '';
+      if(type == 'merge') {
+        isDisable = data.isMerge ? '' : ' disable';
+      }
+      else if(type == 'submerge') {
+        isDisable = '';
+      }
+      else {
+        isDisable = data.isActive === true ? '' : ' disable';
+      }
+      nameList.push([
+        's-btn clerfix s-' , 
+        type , 
+        data.activeType == type ? ' s-active' : '',
+        isDisable
+        ].join('')
+      )
+    });
 
     const mergeStyle = {'display' : (data.isSubMerge ? 'none' : 'inline-block')};
     const submergeStyle = {'display' : (data.isSubMerge ? 'inline-block' : 'none')};
@@ -410,12 +458,22 @@ class Control extends React.Component{
   
     return (
       <div className="control">
-        <a className={name0} onClick={this.cancelAct}>回退</a>
-        <a className={name1} onClick={this.drawPloy}><i className="s-icon"></i>新增</a>
-        <a className={name2} onClick={this.editRegion} ><i className="s-icon"></i>修型</a>
-        <a className={name3} onClick={this.deleteStore}><i className="s-icon"></i>删除</a>
-        <a className={name4} style={mergeStyle} onClick={this.setMerge}><i className="s-icon"></i>合并</a>
-        <a className="s-btn s-merge clearfix" style={submergeStyle} onClick={this.mergeStore}><i className="s-icon"></i>执行合并</a>
+        <a className={nameList[0]} onClick={this.cancelAct}>回退</a>
+        <a className={nameList[1]} onClick={this.drawPloy}>
+            <i className="s-icon"></i>新增
+        </a>
+        <a className={nameList[2]} onClick={this.editRegion} >
+          <i className="s-icon"></i>修型
+        </a>
+        <a className={nameList[3]} onClick={this.deleteStore}>
+          <i className="s-icon"></i>删除
+        </a>
+        <a className={nameList[4]} style={mergeStyle} onClick={this.setMerge}>
+          <i className="s-icon"></i>合并
+        </a>
+        <a className={nameList[5]} style={submergeStyle} onClick={this.mergeStore}>
+          <i className="s-icon"></i>执行合并
+        </a>
 
         <Button className="e-save" style={startStyle} type="primary" onClick={this.editStart}>开始编辑</Button>
         <Button className="e-save" style={saveStyle} type="primary" onClick={this.saveEdit}>保存</Button>

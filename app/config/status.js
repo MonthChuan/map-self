@@ -10,7 +10,8 @@ let initial = {
   isMerge : false,
   isSubMerge : false,
   isStart : true,
-  isActive : false
+  isActive : false,
+    activeType : ''
 };
 
 //开始编辑
@@ -21,56 +22,56 @@ let start = {
     isMerge : true,
     isSubMerge : false,
     isStart : false,
-    isActive : true
+    isActive : true,
+    activeType : ''
 };
 
-//保存
-// let save = {
+let addS = {
+    isAdd : true,
+    isEdit : true,
+    isDelete : true,
+    isMerge : true,
+    isSubMerge : false,
+    isStart : false,
+    isActive : true,
+    activeType : 'add'
+};
+
+let editS = {
+    isAdd : true,
+    isEdit : true,
+    isDelete : true,
+    isMerge : true,
+    isSubMerge : false,
+    isStart : false,
+    isActive : true,
+    activeType : 'edit'
+};
+
+let deleteS = {
+    isAdd : true,
+    isEdit : true,
+    isDelete : true,
+    isMerge : true,
+    isSubMerge : false,
+    isStart : false,
+    isActive : true,
+    activeType : 'delete'
+};
+
+// //取消操作
+// let cancel = {
 //     isAdd : true,
 //     isEdit : true,
 //     isDelete : true,
 //     isMerge : true,
 //     isSubMerge : false,
-//     isZT : true,
 //     isStart : false,
-//     isActive : false
+//     isActive : true,
+//     activeType : ''
 // };
 
-//新增商铺
-// let add = {
-//     isAdd : true,
-//     isEdit : false,
-//     isDelete : false,
-//     isMerge : false,
-//     isSubMerge : false,
-//     isZT : false,
-//     isStart : false,
-//     isActive : true
-// };
 
-//商铺编辑
-// let edit = {
-//     isAdd : false,
-//     isEdit : true,
-//     isDelete : false,
-//     isMerge : false,
-//     isSubMerge : false,
-//     isZT : false,
-//     isStart : false,
-//     isActive : true
-// };
-
-//商铺删除
-// let sdelete = {
-//     isAdd : false,
-//     isEdit : false,
-//     isDelete : true,
-//     isMerge : false,
-//     isSubMerge : false,
-//     isZT : false,
-//     isStart : false,
-//     isActive : true
-// };
 
 //商铺合并
 let merge = {
@@ -80,28 +81,8 @@ let merge = {
     isMerge : false,
     isSubMerge : true,
     isStart : false,
-    isActive : true
-};
-
-// let subMerge = {
-//     isAdd : true,
-//     isEdit : true,
-//     isDelete : true,
-//     isMerge : false,
-//     isSubMerge : 2,
-//     isStart : false,
-//     isActive : true
-// };
-
-//取消操作
-let cancel = {
-    isAdd : true,
-    isEdit : true,
-    isDelete : true,
-    isMerge : true,
-    isSubMerge : false,
-    isStart : false,
-    isActive : true
+    isActive : true,
+    activeType : 'submerge'
 };
 
 //结束编辑提交审核
@@ -112,31 +93,22 @@ let editEnd = {
     isMerge : false,
     isSubMerge : false,
     isStart : false,
-    isActive : 2
+    isActive : 2,
+    activeType : ''
 };
-
-
-// let active = {
-//     isAdd : true,
-//     isEdit : true,
-//     isDelete : true,
-//     isMerge : true,
-//     isSubMerge : false,
-//     isStart : false,
-//     isActive : true
-// };
-
-
 
 export default {
     initial,
     start,
-    cancel,
+    addS,
+    editS,
+    deleteS,
+    // cancel,
+
+
+
+
+
     editEnd,
     merge
-    
-    
-    // ,
-
-    // active
 }
