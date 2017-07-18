@@ -1,3 +1,6 @@
+/**
+ * 编辑页面对应的ajax请求
+ */
 import { $ajax, $get, $post } from './ajax.js';
 import { Modal } from 'antd';
 

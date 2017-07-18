@@ -1,5 +1,4 @@
 import './editorpage.css';
-import 'antd/dist/antd.css';
 import React from 'react'; 
 import { connect } from 'react-redux';
 
@@ -19,6 +18,11 @@ import STATUSCONF from '../../config/status';
 class EditorPage extends React.Component{
 	constructor(props) {
 		super(props);
+
+console.log(this.props.params.plazaId)
+
+
+
 		this.preDeleteStore = null;
 		this.newNameLabel = this.newNameLabel.bind(this);
 		this.initFeatureClick = this.initFeatureClick.bind(this);
