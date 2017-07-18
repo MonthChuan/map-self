@@ -31594,6 +31594,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _react2 = _interopRequireDefault(_react);
 	
+	var _reactRedux = __webpack_require__(210);
+	
 	var _jsMd = __webpack_require__(459);
 	
 	var _jsMd2 = _interopRequireDefault(_jsMd);
@@ -31761,6 +31763,13 @@ return /******/ (function(modules) { // webpackBootstrap
 		}
 	
 		_createClass(LoginPage, [{
+			key: 'componentDidMount',
+			value: function componentDidMount() {
+				if (this.props.map.ffmap) {
+					this.props.map.ffmap.destroy();
+				}
+			}
+		}, {
 			key: 'render',
 			value: function render() {
 				return _react2.default.createElement(LoginForm, null);
@@ -31769,10 +31778,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 		return LoginPage;
 	}(_react2.default.Component);
-	// export default Login;
 	
-	
-	exports.default = LoginPage;
+	function mapStateToProps(state) {
+		return state;
+	}
+	exports.default = (0, _reactRedux.connect)(mapStateToProps)(LoginPage);
 
 /***/ }),
 /* 293 */
@@ -57606,6 +57616,7 @@ return /******/ (function(modules) { // webpackBootstrap
 					});
 	
 					if (_this2.props.map.ffmap) {
+						console.log('componentDidMount loadbuilding');
 						_this2.props.map.ffmap.loadBuilding(_this2.props.map.plazaId);
 					}
 				});
@@ -57619,6 +57630,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				});
 	
 				if (this.props.map.ffmap) {
+					console.log('handleChange loadbuilding');
 					this.props.map.ffmap.loadBuilding(value);
 				}
 				this.props.dispatch({
