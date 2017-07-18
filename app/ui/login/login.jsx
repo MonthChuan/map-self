@@ -1,5 +1,6 @@
 import './loginpage.css';
 import React from 'react'; 
+import { connect } from 'react-redux';
 import { Form, Icon, Input, Button, Checkbox } from 'antd';
 import md5 from 'js-md5';
 const FormItem = Form.Item;    
@@ -107,14 +108,24 @@ class Login extends React.Component{
 	}
 }
 const LoginForm = Form.create()(Login);
-export default class LoginPage extends React.Component{
+class LoginPage extends React.Component{
 	constructor(props) {
 		super(props);
+	}
+
+	componentDidMount() {
+		if(this.props.map.ffmap) {
+			this.props.map.ffmap.destroy();
+		}
 	}
 
 	render() {
 		return (<LoginForm />);
 	}
 }
-// export default Login;
+
+function mapStateToProps(state) {
+  return state;
+}
+export default connect(mapStateToProps)(LoginPage);
 

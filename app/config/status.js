@@ -3,123 +3,112 @@
  */
 
 //初始化
-const initial = {
+let initial = {
   isAdd : false,
   isEdit : false,
   isDelete : false,
   isMerge : false,
   isSubMerge : false,
-  isZT : false,
   isStart : true,
   isActive : false,
-  isSubmit : false
+    activeType : ''
 };
 
 //开始编辑
-const start = {
+let start = {
     isAdd : true,
     isEdit : true,
     isDelete : true,
     isMerge : true,
     isSubMerge : false,
-    isZT : true,
     isStart : false,
-    isActive : false
+    isActive : true,
+    activeType : ''
 };
 
-//保存
-const save = {
+let addS = {
     isAdd : true,
     isEdit : true,
     isDelete : true,
     isMerge : true,
     isSubMerge : false,
-    isZT : true,
     isStart : false,
-    isActive : false
+    isActive : true,
+    activeType : 'add'
 };
 
-//新增商铺
-const add = {
+let editS = {
     isAdd : true,
-    isEdit : false,
-    isDelete : false,
-    isMerge : false,
-    isSubMerge : false,
-    isZT : false,
-    isStart : false,
-    isActive : true
-};
-
-//商铺编辑
-const edit = {
-    isAdd : false,
     isEdit : true,
-    isDelete : false,
-    isMerge : false,
+    isDelete : true,
+    isMerge : true,
     isSubMerge : false,
-    isZT : false,
     isStart : false,
-    isActive : true
+    isActive : true,
+    activeType : 'edit'
 };
 
-//商铺删除
-const sdelete = {
-    isAdd : false,
-    isEdit : false,
+let deleteS = {
+    isAdd : true,
+    isEdit : true,
     isDelete : true,
-    isMerge : false,
+    isMerge : true,
     isSubMerge : false,
-    isZT : false,
     isStart : false,
-    isActive : true
+    isActive : true,
+    activeType : 'delete'
 };
+
+// //取消操作
+// let cancel = {
+//     isAdd : true,
+//     isEdit : true,
+//     isDelete : true,
+//     isMerge : true,
+//     isSubMerge : false,
+//     isStart : false,
+//     isActive : true,
+//     activeType : ''
+// };
+
+
 
 //商铺合并
-const merge = {
-    isAdd : false,
-    isEdit : false,
-    isDelete : false,
-    isMerge : true,
-    isSubMerge : false,
-    isZT : false,
-    isStart : false,
-    isActive : true
-};
-
-//取消操作
-const cancel = {
+let merge = {
     isAdd : true,
     isEdit : true,
     isDelete : true,
-    isMerge : true,
-    isSubMerge : false,
-    isZT : true,
+    isMerge : false,
+    isSubMerge : true,
     isStart : false,
-    isActive : false
+    isActive : true,
+    activeType : 'submerge'
 };
 
 //结束编辑提交审核
-const editEnd = {
+let editEnd = {
     isAdd : false,
     isEdit : false,
     isDelete : false,
     isMerge : false,
     isSubMerge : false,
-    isZT : false,
     isStart : false,
-    isActive : 2
+    isActive : 2,
+    activeType : ''
 };
-
 
 export default {
     initial,
     start,
-    save,
-    add,
-    edit,
-    sdelete,
-    merge,
-    cancel,
-    editEnd
+    addS,
+    editS,
+    deleteS,
+    // cancel,
+
+
+
+
+
+    editEnd,
+    merge
 }

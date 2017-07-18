@@ -15,10 +15,20 @@ const setSelect = (item, value) => {
   }
   item.selected = value;
 
-  if (value) {
-    L.DomUtil.addClass(item.getElement(), 'selected');
-  } else {
-    L.DomUtil.removeClass(item.getElement(), 'selected');
+  let itemElement = null;
+  if(item.getElement) {
+    itemElement = item.getElement();
+  }
+  else if(item.graphics) {
+    itemElement = item.graphics.getElement();
+  }
+
+  if(itemElement && itemElement.className) {
+    if (value) {
+      L.DomUtil.addClass(itemElement, 'selected');
+    } else {
+      L.DomUtil.removeClass(itemElement, 'selected');
+    }
   }
 };
 

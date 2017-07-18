@@ -29,6 +29,7 @@ class PlazaSelect extends React.Component{
 			});
 
 			if(this.props.map.ffmap) {
+				console.log('componentDidMount loadbuilding')
 				this.props.map.ffmap.loadBuilding(this.props.map.plazaId);
 			}
 
@@ -42,6 +43,7 @@ class PlazaSelect extends React.Component{
 		});
 
 		if(this.props.map.ffmap) {
+			console.log('handleChange loadbuilding')
 			this.props.map.ffmap.loadBuilding(value);
 		}
 		this.props.dispatch({

@@ -15,15 +15,12 @@
   font-size: 14px;
   height: 32px;
   line-height: 32px;
-  border-right: 1px solid #e5e5e5;
+  /*border-right: 1px solid #e5e5e5;*/
   position: relative;
   padding: 0 15px;
-  min-width: 120px;
+  min-width: 100px;
   white-space: nowrap;
   margin-top: 19px;
-}
-.control .s-merge {
-  border-right : none;
 }
 .control .s-btn .s-icon {
   display: block;
@@ -39,6 +36,7 @@
 .control .s-add .s-icon {background-position: 0 -18px;}
 .control .s-edit .s-icon {background-position: 0 -54px;}
 .control .s-delete .s-icon {background-position: 0 -90px;}
+.control .s-submerge .s-icon,
 .control .s-merge .s-icon {background-position: 0 -126px;}
 .control .s-zt .s-icon {background-position: 0 -162px;}
 
@@ -46,9 +44,13 @@
 .control .s-add.disable .s-icon {background-position: 0 0px;}
 .control .s-edit.disable .s-icon {background-position: 0 -36px;}
 .control .s-delete.disable .s-icon {background-position: 0 -72px;}
+.control .s-submerge.disable .s-icon,
 .control .s-merge.disable .s-icon {background-position: 0 -108px;}
 .control .s-zt.disable .s-icon {background-position: 0 -144px;}
 
+.control .s-active {
+  color: #108ee9;
+}
 .control .disable {
   color: #e2e2e3; 
   cursor: not-allowed;

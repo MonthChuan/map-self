@@ -1,7 +1,10 @@
 import './detail.css';
 import React from 'react';  
 import { connect } from 'react-redux';
-import { SET_STORE } from '../../../action/actionTypes';
+import { getSelect, setSelect } from '../utils/select';
+import ActionCommand from '../utils/actionCommand';
+import { SET_STORE, GET_STORECATGORY, RESET_STORE } from '../../../action/actionTypes';
+import * as Service from '../../../services/index';
 import { Input, Select, Tabs, Radio, DatePicker } from 'antd'; 
 const Option = Select.Option;
 const TabPane = Tabs.TabPane;
@@ -11,22 +14,20 @@ const RadioGroup = Radio.Group;
 class Detail extends React.Component{
 	constructor(props) {
 		super(props);
-		this.state = {};
-		this.state.zsRadio = 1;
-		this.state.typelist = [];
 
-		this.selectChange = this.selectChange.bind(this);
-		this.selectChangeName = this.selectChangeName.bind(this);
+		this.actionCommand = {};
+		this.propertyObj = {};
+		// this.isPushStore = false;
 		this.clickStore = this.clickStore.bind(this);
 		this.searchStore = this.searchStore.bind(this);
-		this.onRadioChange = this.onRadioChange.bind(this);
-		this.onCalendarChange = this.onCalendarChange.bind(this);
+		this.propertyChange = this.propertyChange.bind(this);
+		this.proertyChangeEnd = this.proertyChangeEnd.bind(this);
 
 		this.beforeEditDetail = this.beforeEditDetail.bind(this);
 	}
 
 	beforeEditDetail() {
-		const store0 = this.props.store.store[0];
+		const store0 = this.props.store.curStore[0];
 		if(!store0) {
 			return false;
 		}
@@ -50,70 +51,101 @@ class Detail extends React.Component{
 		return true;
 	}
 
-	selectChangeName(event) {
-		const { value } = event.target;
-		// this.props.editStore({'re_name' : value});
-		if(this.beforeEditDetail()) {
-			const store = this.props.store.store[0];
+	propertyChange(event) {
+		let value = '';
+		let opt = {};
 
-			store.label.setContent(value);
-			Object.assign(store.feature.properties, {'re_name' : value});
-			const newSlist = [store].concat(this.props.store.store.slice(1));
+		if(this.beforeEditDetail()) {
+			const curStoreList = this.props.store.curStore;
+			const store = curStoreList[0];
+			let newCurSlist = [];
+			let newStoreList = this.props.store.store;
+			let bkStore = this.props.store.bkStore;
+			let propertyType = '';
+
+			if(!store.action) {
+				store.action = 'UPDATE';
+			}
+
+			if(event.target) {
+				value = event.target.value;
+				propertyType = event.target.dataset.type;
+				store.label.setContent(value);
+			}
+			else {
+				value = event;
+				propertyType = 're_type';
+			}
+
+			opt[propertyType] = value;
+
+			if( this.props.store.actionCommand.length > 0 && (store.feature.id == this.props.store.actionCommand[0].id) ) {
+				this.actionCommand = this.props.store.actionCommand[0];
+				// this.isPushStore = false;
+			}
+			else {
+				this.actionCommand = new ActionCommand(bkStore[0]);
+				this.props.store.actionCommand.unshift(this.actionCommand);
+				// this.isPushStore = true;
+			}
+					
+			Object.assign(store.feature.properties, opt);
+			this.propertyObj = opt;
+			
+			// if(newStoreList.indexOf(store) < 0) {
+			// 	this.props.store.actionCommand.initial(newStoreList);
+			// 	newStoreList = [store].concat(newStoreList.slice(0));
+			// }
+
+			newCurSlist = [store].concat(curStoreList.slice(1));			
 			this.props.dispatch({
-				type : SET_STORE,
-				data : newSlist
+				type : RESET_STORE,
+				data : {
+					curStore : newCurSlist
+					// store : newStoreList,
+					// bkStore : newBkStore
+				}
 			})
 		}
+	}
 
+	proertyChangeEnd(event) {
+		if(this.actionCommand && this.actionCommand.execute) {
+			this.actionCommand.execute(this.propertyObj);
+		}
 		
+		this.props.dispatch({
+			type : RESET_STORE,
+			data : {
+				store : this.props.store.curStore,
+				curStore : this.props.store.curStore
+			}
+		})
 	}
-
-	selectChange(value) {
-		// this.props.editStore({ 're_type' : value});
-		if(this.beforeEditDetail()) {
-			const store = this.props.store.store[0];
-
-			Object.assign(store.feature.properties, {'re_type' : value});
-			const newSlist = [store].concat(this.props.store.store.slice(1));
-			this.props.dispatch({
-				type : SET_STORE,
-				data : newSlist
-			})
-		}
-	}
-
-	//--------------------------------------------------
 
 	//第一次渲染组件之后，异步获取数据
 	componentDidMount() {
-		$.ajax({
-			'url' : 'http://yunjin.intra.sit.ffan.com/mapeditor/category/categoryCodes',
-			'dataType' : 'json'
-		}).done( req => {
-			if(req.status == 200) {
-				this.setState({typelist : req.data});
+		Service.getCatgoryAjax(
+			(req) => {
+				this.props.dispatch({
+					type: GET_STORECATGORY,
+					catgory : req.data
+				});
 			}
-		});
-	}
-
-	onCalendarChange(value, mode) {}
-
-	onRadioChange(event) {
-		this.setState({
-			zsRadio : event.target.value
-		});
+		)
 	}
 
 	clickStore(event) {
 		const id = event.target.getAttribute('value');
-		const s = this.props.state.ffmap.searchStoreByID(id);
+		const s = this.props.map.ffmap.searchStoreByID(id);
 		
-		if(s.length==0 || s[0].selected) {
+		if(s.length==0 || getSelect(s[0])) {
 			return;
 		}
-		s[0].selected = true;
+
+		setSelect(s[0], true);
 		const timer = setTimeout(function() {
-			s[0].selected = false;
+			setSelect(s[0], false);
 			clearTimeout(timer);
 		}, 3000);
 	}
@@ -138,7 +170,7 @@ class Detail extends React.Component{
 	}
 
 	render() {
-		const typelistTpl = this.state.typelist.map(function(item) {
+		const typelistTpl = this.props.store.catgory.map(function(item) {
 			return <Option key={item.code} value={item.code}>{item.desc}</Option>
 		});
 
@@ -150,8 +182,8 @@ class Detail extends React.Component{
 			return <li key={item.id} value={item.id} onClick={self.clickStore}>{item.properties.re_name}</li>;
 		});
 
-		const _item = this.props.store.store[0];
-		const isDisable = (_item && _item.action=='SHOW') ? true : false;
+		const _item = this.props.store.curStore[0];
+		const isDisable = this.props.control.isActive ? false : true;
 		const storeName = (_item && _item.feature) ? _item.feature.properties.re_name : '';
 		const storeType = (_item && _item.feature) ? _item.feature.properties.re_type : '';
 
@@ -163,21 +195,29 @@ class Detail extends React.Component{
 							<div className="y-scroll info-wrap">
 								<div className="line">
 									<label className="txt">店铺名称：</label>
-									<Input placeholder="店铺名称" disabled={isDisable} value={storeName} onChange={this.selectChangeName} />
+									<Input 
+										data-type="re_name"
+										placeholder="店铺名称" 
+										disabled={isDisable} 
+										value={storeName} 
+										onChange={this.propertyChange} 
+										onBlur={this.proertyChangeEnd}
+									/>
 								</div>
 								<div className="line">
 									<label className="txt">业态：</label>
-									<Select placeholder="店铺类型" disabled={isDisable} value={storeType} onChange={this.selectChange}>
+									<Select 
+										placeholder="店铺类型" 
+										disabled={isDisable} 
+										value={storeType} 
+										onChange={this.propertyChange}
+										onBlur={this.proertyChangeEnd}
+									>
 										{typelistTpl}
 									</Select>
 								</div>
 
-								{/*<p className="line-tit">招商平台信息</p>
-								<div className="line">
-									<label className="txt">地图ID：</label>
-									<span className="txt2">ALF0237</span>
-								</div>
-								<div className="line">
+								{/*<div className="line">
 									<RadioGroup onChange={this.onRadioChange} value={this.state.zsRadio}>
 										<Radio value={1}>品牌名称</Radio>
 										<Radio value={2}>铺位编号</Radio>
@@ -189,36 +229,9 @@ class Detail extends React.Component{
 									<Input placeholder="请输入铺位编号" style={{'display' : `${this.state.zsRadio==2?'inline-block':'none'}`}} />
 								</div>
 								<div className="line">
-									<label className="txt">项目方系统编号：</label>
-									<Input placeholder="请输入系统内标铺位编号" />
-								</div>
-								<div className="line">
 									<label className="txt">铺位合同到期日期：</label>
 									<DatePicker />
-								</div>
-								<div className="line">
-									<label className="txt">全景视频／图片：</label>
-									<Input placeholder="请输入在线文件地址" />
-								</div>
-	
-
-								<p className="line-tit">楼层工程信息</p>
-								<div className="line">
-									<label className="txt">套内面积：</label>
-									<Input placeholder="小数点后一位" />m²
-								</div>
-								<div className="line">
-									<label className="txt">建筑面积：</label>
-									<Input placeholder="小数点后一位" />m²
-								</div>
-								<div className="line">
-									<label className="txt">地面至楼板最低高度：</label>
-									<Input placeholder="小数点后一位" />m
-								</div>
-								<div className="line">
-									<label className="txt">地板至不可拆卸管道最低高度：</label>
-									<Input placeholder="小数点后一位" />m
-								</div>*/}
+								</div>	*/}
 
 
 							</div>

@@ -7,11 +7,14 @@ import PlazaSelect from './plazaselect/plazaselect.jsx';
 import Control from './control/control.jsx';  
 import Detail from './detail/detail.jsx';
 import Submit from './submit/submit.jsx';
-import { message, Modal, Popconfirm } from 'antd'; 
+import { message, Popconfirm } from 'antd'; 
 import { getSelect, setSelect } from './utils/select';
+import { fixToNormal, deleteStore } from './utils/regionFunc';
+import ActionCommand from './utils/actionCommand';
 
 import * as Service from '../../services/index';
-import { ADD_MAP, SET_PLAZAID, SET_STATUS, SET_FLOORINFO, SET_STORE, SET_BKSTORE, SET_CONFIRMSHOW } from '../../action/actionTypes';
+import { ADD_MAP, SET_PLAZAID, SET_STATUS, SET_FLOORINFO, RESET_STORE, SET_CONFIRMSHOW } from '../../action/actionTypes';
+import STATUSCONF from '../../config/status';
 
 class EditorPage extends React.Component{
 	constructor(props) {
@@ -21,107 +24,70 @@ class EditorPage extends React.Component{
 		this.initFeatureClick = this.initFeatureClick.bind(this);
 		this.deleteStoreConfirmOk = this.deleteStoreConfirmOk.bind(this);
 		this.deleteStoreConfirmCancel = this.deleteStoreConfirmCancel.bind(this);
+
+		this.openConfirm = this.openConfirm.bind(this);
 	} 
 
 	initFeatureClick(event) {
 		const _store = event.layer || event.target;
-
 		const control = this.props.control;
 		const storeList = this.props.store.store;
-		if(storeList.length > 2 || (control.isZT && control.isActive)) {
-				message.warning('您正在编辑状态，请先完成操作并保存，再进行其他操作！', 3);
-				return;
+		const curStoreList = this.props.store.curStore;
+
+		if(storeList.length > 9) {
+			message.warning('您有较多操作未保存，请保存！', 3);
+		}
+
+		if(getSelect(_store) || curStoreList.indexOf(_store) > -1) {
+			return;
+		}
+
+		setSelect(_store, true);
+		if(control.isSubMerge) {
+			if(curStoreList.length == 2 ) {
+				const _oStore = curStoreList.pop();
+				setSelect(_oStore, false);
 			}
-			if(control.isStart || !control.isActive) {
-				//查看店铺信息
-				_store.action = 'SHOW';
-			}
-			else {
-				//去掉重复操作
-				if((_store.editEnabled && _store.editEnabled()) || getSelect(_store)) {
-					return;
-				}
-				if(storeList.length > 0 && storeList[0].action != 'SHOW' && !(control.isMerge || control.isSubMerge)) {
-					message.warning('您正在编辑状态，请先完成操作并保存，再进行其他操作！', 3);
-					return;
-				}
+			setSelect(_store, true);
+			const _s = [_store].concat(curStoreList);
 
-				if(control.isEdit) {
-					_store.action = 'UPDATE';
-					if(_store.enableEdit) {
-						_store.enableEdit();
-					}
-					else {
-						_store.eachLayer(i => {
-							i.enableEdit();
-						});
-					}
-					const _latlngList = _store.getLatLngs()[0].length > 1 ? _store.getLatLngs()[0] : _store.getLatLngs()[0][0];
-					const _latlng = _latlngList.map(item => {
-						return Object.assign({}, item);
-					});
-
-					this.props.dispatch({
-						type : SET_STORE,
-						data : [_store]
-					});
-
-					this.props.dispatch({
-						type : SET_BKSTORE,
-						data : [{
-							name : _store.name,
-							regionType : _store.regionType,
-							latlng : [[_latlng]]
-						}]
-					});
-					return;
-				}
-				else if(control.isDelete) {
-					this.props.dispatch({
-						type : SET_CONFIRMSHOW,
-						data : true
-					});
-					this.refs.popconfirmChild.click();
-
-					setSelect(_store, true);
-					this.preDeleteStore = _store;
-					return;
-				}
-				else if(control.isMerge || control.isSubMerge) {
-					this.props.dispatch({
-						type : SET_STATUS,
-						status : {
-							isAdd : false,
-							isEdit : false,
-							isDelete : false,
-							isMerge : false,
-							isSubMerge : true,
-							isZT : false,
-							isStart : false,
-							isActive : true
-						}
-					});
-			
-					if(storeList.length == 2 ) {
-						const _oStore = storeList.pop();
-						setSelect(_oStore, false);
-					}
-					setSelect(_store, true);
-					const _s = [_store].concat(storeList);
-
-					this.props.dispatch({
-						type : SET_STORE,
-						data : _s
-					});
-					return;
-				}
-
-			}
-			
 			this.props.dispatch({
-				type : SET_STORE,
-				data : [_store]
+				type : RESET_STORE,
+				data : {
+					curStore : _s
+				}
 			});
+			return;
+		}
+		else {
+
+			curStoreList.map(item => {
+				setSelect(item, false);
+			});
+		}
+
+		curStoreList.map(item => {
+			fixToNormal(item);
+		});
+
+		if(this.props.control.isActive) {
+			this.props.dispatch({
+				type: SET_STATUS,
+				status : STATUSCONF.start
+			});
+		}
+		
+		this.props.dispatch({
+			type : RESET_STORE,
+			data : {
+				curStore : [_store],
+				bkStore : [{
+					action : _store.action || '',
+					id : _store.feature.id,
+					properties : Object.assign({}, _store.feature.properties)
+				}]
+			}
+		});
 	}
 
 	//DOM加载完毕之后，初始化map
@@ -155,7 +121,10 @@ class EditorPage extends React.Component{
 			});
 
 			event.regionGroup.on('click', e => {
-				this.initFeatureClick(e);
+				const s = e.layer || e.target;
+				if(s.feature.properties.re_type != '020000') {
+					this.initFeatureClick(e);
+				}
 			});
 
 			let maxNum = numList[0];
@@ -176,6 +145,30 @@ class EditorPage extends React.Component{
 			});
 		});
 
+		map.on('editable:editing', event => {
+			if(this.props.control.activeType != '') {
+				this.props.dispatch({
+					type: SET_STATUS,
+					status : STATUSCONF.start
+				});
+			}
+		});
+
+		map.on('editable:dragend', event => {
+			const region = event.layer;
+			let latlng = null;
+			if(!region.label) {
+				return;
+			}
+			if(region.centerPoint) {
+				latlng = region.centerPoint;
+			}
+			else {
+				latlng = region.getCenter();
+			}
+			region.label.setLatLngs(latlng);
+		});
+
 		this.refs.map.style.height = '100%';
 	}
 
@@ -187,28 +180,28 @@ class EditorPage extends React.Component{
 	}
 
 	deleteStoreConfirmOk(e) {
-		setSelect(this.preDeleteStore, false);
+		const store0 = this.preDeleteStore;
+		setSelect(store0, false);
 		this.props.dispatch({
 			type : SET_CONFIRMSHOW,
 			data : false
 		})
-		this.preDeleteStore.action = 'DELETE';
+		store0.action = 'DELETE';
 		
+		const actCommand = new ActionCommand(this.props.store.bkStore[0]);
+		this.props.store.actionCommand.unshift(actCommand);
 		this.props.dispatch({
-			type : SET_STORE,
-			data : [this.preDeleteStore]
+			type : RESET_STORE,
+			data : {
+				store : [store0]
+			}
 		});
-		const store0 = this.preDeleteStore;
-		if(store0.graphics) {
-			store0.graphics.remove();
-		}
-		else {
-			store0.remove();
-		}
-		
-		if(store0.label) {
-			store0.label.remove();
-		}	
+		this.props.dispatch({
+			type: SET_STATUS,
+			status : STATUSCONF.start
+		});
+
+		deleteStore(store0);	
 	}
 
 	deleteStoreConfirmCancel(e) {
@@ -216,7 +209,17 @@ class EditorPage extends React.Component{
 		this.props.dispatch({
 			type : SET_CONFIRMSHOW,
 			data : false
-		})
+		});
+
+		this.props.dispatch({
+			type: SET_STATUS,
+			status : STATUSCONF.start
+		});
+	}
+
+	openConfirm(item) {
+		this.preDeleteStore = item;
+		this.refs.popconfirmChild.click();
 	}
 
 	render () {
@@ -228,6 +231,7 @@ class EditorPage extends React.Component{
 						<Control 
 							newNameLabel={this.newNameLabel} 
 							initFeatureClick={this.initFeatureClick}
+							openConfirm={this.openConfirm}
 						/>
 					</div>
 				</div>
