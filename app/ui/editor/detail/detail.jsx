@@ -5,11 +5,11 @@ import { getSelect, setSelect } from '../utils/select';
 import ActionCommand from '../utils/actionCommand';
 import { SET_STORE, GET_STORECATGORY, RESET_STORE } from '../../../action/actionTypes';
 import * as Service from '../../../services/index';
-import { Input, Select, Tabs, Radio, DatePicker } from 'antd'; 
+import { Input, Select, Tabs } from 'antd'; 
 const Option = Select.Option;
 const TabPane = Tabs.TabPane;
-const Search = Input.Search;
-const RadioGroup = Radio.Group;
+// const Search = Input.Search;
+// const RadioGroup = Radio.Group;
 
 class Detail extends React.Component{
 	constructor(props) {
@@ -190,7 +190,7 @@ class Detail extends React.Component{
 		return (
 			<div className="detail-wrapper">
 				 <div className="card-container">
-					<Tabs size="small">
+					<Tabs>
 						<TabPane tab="属性" key="1">
 							<div className="y-scroll info-wrap">
 								<div className="line">
@@ -216,51 +216,14 @@ class Detail extends React.Component{
 										{typelistTpl}
 									</Select>
 								</div>
-
-								{/*<div className="line">
-									<RadioGroup onChange={this.onRadioChange} value={this.state.zsRadio}>
-										<Radio value={1}>品牌名称</Radio>
-										<Radio value={2}>铺位编号</Radio>
-									</RadioGroup>
-									
-									<Select placeholder="请选择品牌" style={{'display' : `${this.state.zsRadio==1?'inline-block':'none'}`}}>
-										{typelistTpl}
-									</Select>
-									<Input placeholder="请输入铺位编号" style={{'display' : `${this.state.zsRadio==2?'inline-block':'none'}`}} />
-								</div>
-								<div className="line">
-									<label className="txt">铺位合同到期日期：</label>
-									<DatePicker />
-								</div>	*/}
-
-
 							</div>
 						</TabPane>
 						<TabPane tab="商铺" key="2">
 							<div className="y-scroll slist-wrap">
-								<Search
-									placeholder="输入商铺名称关键词，快速检索商铺"
-									style={{ width: '100%' }}
-									onSearch={this.searchStore}
-								/>
 								<ul ref="storeList" className="stores">{storelistTpl}</ul>
 							</div>
 						</TabPane>
 
-						<TabPane tab="楼层" key="3">
-							<div className="y-scroll info-wrap">
-								<div className="line">
-										<label className="txt">楼层业态：</label>
-										<Select placeholder="楼层业态">
-											{typelistTpl}
-										</Select>
-									</div>
-								<div className="line">
-									<label className="txt">全景视频／图片：</label>
-									<Input placeholder="请输入在线文件地址" />
-								</div>
-							</div>
-						</TabPane>
 					</Tabs>
 				</div>
 			</div>

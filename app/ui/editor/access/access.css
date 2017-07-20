@@ -1,0 +1,11 @@
+.access-wrap {
+  float: left;
+}
+
+.access-wrap .btn {
+  /*width: 110px;*/
+  height: 36px;
+  font-size: 14px;
+  margin: 10px 10px 10px 0;
+}
+

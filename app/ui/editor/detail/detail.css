@@ -1,11 +1,15 @@
 .detail-wrapper {
   position: absolute;
-  top: 0;
-  right: 0;
-  width: 274px;
-  height: 100%;
+  top: 10px;
+  left: 10px;
+  width: 270px;
+  height: 500px;
+  /*max-height: 500px;*/
+  /*min-height: 200px;*/
   border: 1px solid #e5e5e5;
   overflow: hidden;
+  z-index: 2;
+  background: #fff;
 }
 
 .detail-wrapper .line {
@@ -26,8 +30,8 @@
 }
 
 .stores li {
-  height: 50px;
-  line-height: 50px;
+  height: 40px;
+  line-height: 40px;
   border-bottom: 1px solid #e5e5e5;
   padding-left: 15px;
   color: #666;
@@ -45,22 +49,20 @@
 .detail-wrapper .ant-tabs-bar {
   margin-bottom: 0;
 }
-.detail-wrapper .ant-tabs-mini .ant-tabs-nav-container {
+/*.detail-wrapper .ant-tabs-mini .ant-tabs-nav-container {
   font-size: 14px;
-}
+}*/
 .detail-wrapper .ant-tabs-nav-scroll {
-  height: 50px;
+  /*height: 50px;*/
   line-height: 50px;
 }
-.detail-wrapper .ant-tabs-mini .ant-tabs-tab {
-  padding: 0;
-  width: 90px;
-  border-right: 1px solid #e5e5e5;
+.detail-wrapper .ant-tabs-tab {
+  padding: 0 25px;
   text-align: center;
 }
-.detail-wrapper .ant-tabs-mini .ant-tabs-tab:last-child {
+/*.detail-wrapper .ant-tabs-mini .ant-tabs-tab:last-child {
   border-right: 0;
-}
+}*/
 .detail-wrapper .ant-tabs-content {
   padding-top: 50px;
   margin-top: -50px;
@@ -95,9 +97,7 @@
 .info-wrap .ant-input {
   width: 145px;
 }
-.info-wrap .ant-radio-group {
-  width: 75px;
-}
+
 
 
 .slist-wrap .ant-input {

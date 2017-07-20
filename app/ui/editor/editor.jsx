@@ -2,10 +2,13 @@ import './editorpage.css';
 import React from 'react'; 
 import { connect } from 'react-redux';
 
-import PlazaSelect from './plazaselect/plazaselect.jsx';  
-import Control from './control/control.jsx';  
+// import PlazaSelect from './plazaselect/plazaselect.jsx';  
+// import Control from './control/control.jsx';  
 import Detail from './detail/detail.jsx';
-import Submit from './submit/submit.jsx';
+// import Submit from './submit/submit.jsx';
+import Access from './access/access';
+import RightBar from './rightbar/rightbar';
+
 import { message, Popconfirm } from 'antd'; 
 import { getSelect, setSelect } from './utils/select';
 import { fixToNormal, deleteStore } from './utils/regionFunc';
@@ -19,7 +22,7 @@ class EditorPage extends React.Component{
 	constructor(props) {
 		super(props);
 
-console.log(this.props.params.plazaId)
+// console.log(this.props.params.plazaId)
 
 
 
@@ -94,9 +97,23 @@ console.log(this.props.params.plazaId)
 		});
 	}
 
+	componentWillMount() {
+		if(this.props.params.plazaId) {
+			this.props.dispatch({
+				type : SET_PLAZAID,
+				id : this.props.params.plazaId
+			});
+		}
+		else {
+			window.history.back(-1);
+		}
+	}
+
 	//DOM加载完毕之后，初始化map
 	componentDidMount() {
 		const map = new FMap.Map('map', {
+			zoomControl : false,
+			floorControl : false,
 			zoom : 20,
 			editable : true,
 			regionInteractive : true,
@@ -106,6 +123,9 @@ console.log(this.props.params.plazaId)
 			type : ADD_MAP,
 			ffmap : map
 		});
+		if(this.props.params.plazaId) {
+			map.loadBuilding(this.props.params.plazaId);
+		}
 
 		// 获取商铺列表
 		map.on('rendered', event => {
@@ -231,12 +251,13 @@ console.log(this.props.params.plazaId)
 			<div className="page" id="editor">
 				<div className="topbar">
 					<div className="mid clearfix">
-						<PlazaSelect />
-						<Control 
+						{/*<Control 
 							newNameLabel={this.newNameLabel} 
 							initFeatureClick={this.initFeatureClick}
 							openConfirm={this.openConfirm}
-						/>
+						/>*/}
+						<Access />
+						<RightBar />
 					</div>
 				</div>
 				<div className="e-content mid">
@@ -252,15 +273,12 @@ console.log(this.props.params.plazaId)
 					>
 						<a ref="popconfirmChild" className="popconfirm-btn"></a>
 					</Popconfirm>
-					<div className="e-content-main clearfix" >
+					<div className="e-content-main" >
+						<Detail newNameLabel={this.newNameLabel} />
 						<div className="map-wrapper">
 							<div ref="map" className="map" id="map" style={{height:700}}></div>
 						</div>
-						<Detail newNameLabel={this.newNameLabel} />
 					</div>
-				</div>
-				<div className="bottom mid">
-					<Submit />
 				</div>
 			</div>
 	    );
