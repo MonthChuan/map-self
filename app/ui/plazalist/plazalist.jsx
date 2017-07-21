@@ -1,5 +1,11 @@
-import React from 'react'; 
+import './plazalistpage.css';
+import React from 'react';
 import { connect } from 'react-redux';
+import Header from './header/header.jsx';
+import Plazatable from './plazatable/plazatable.jsx';
+
+
+
 /**
  * ajax请使用services目录下的ajax.js
  */
@@ -7,12 +13,18 @@ import { connect } from 'react-redux';
 class PlazaList extends React.Component{
 	constructor(props) {
 		super(props);
+		
 	}
-
-	componentDidMount() {}
-
-	render() {
-		return (<p>PlazaList</p>);
+    componentDidMount() {}
+    render() {
+		return (
+			<div id="plazalist">
+				<Header />
+				<div className="table-content">
+					<Plazatable />
+				</div>
+			</div>
+		);
 	}
 }
 
