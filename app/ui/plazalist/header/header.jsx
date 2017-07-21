@@ -18,10 +18,10 @@ class Header extends React.Component{
 		Modal.confirm({
 		    title: '是否要退出当前登录?',
 		    onOk() {
-		      console.log('OK');
+		      location.href = location.pathname + '#/login';
 		    },
 		    onCancel() {
-		      console.log('Cancel');
+		      
 		    },
 		});
 	}

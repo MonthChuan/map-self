@@ -9,14 +9,13 @@ const Search = Input.Search;
 
 class Plazatable extends React.Component{
 	constructor(props) {
-		
 		super(props);
 		this.state ={
 			visible: false,
 			data:[],
 			pagination: {},
     		loading: false,
-		}
+    	}
 		//筛选条件
 		this.item={
 			inEdit:false,
@@ -32,14 +31,18 @@ class Plazatable extends React.Component{
 			  title: '广场ID',
  			  dataIndex: 'plazaFfanId',
 			  key: 'plazaFfanId',
+			  sorter: (a, b) => a.plazaFfanId - b.plazaFfanId,
 			}, {
 			  title: '广场名称',
 			  dataIndex: 'plazaName',
 			  key: 'plazaName',
+			  sorter: (a, b) => a.plazaName.length - b.plazaName.length,
 			}, {
 			  title: '状态',
-			  dataIndex: 'status',
-			  key: 'status',
+			  dataIndex: 'mapState',
+			  key: 'mapState',
+			  render: text => {return text==0?"已完成":"编辑中"} ,
+			  sorter: (a, b) => a.mapState - b.mapState,
 			}, 
 			{
 			  title: '最新编辑',
@@ -50,28 +53,25 @@ class Plazatable extends React.Component{
 			  title: '最近审核',
 			  dataIndex: 'lastExamine',
 			  key: 'lastExamine',
-			  
 			},
 			{
 			  title: '编辑/审核备注',
 			  dataIndex: 'remark',
 			  key: 'remark',
-			  
 			}, {
 			  title: '更新时间',
 			  dataIndex: 'date',
 			  key: 'date',
-			  
 			},{
 			  title: '操作',
 			  key: 'action',
 			  render: (text, record) => (
 			    <span>
-			      <span className="editHistory" onClick={this.showModal.bind(this,record.plazaName)}>编辑历史</span>
+			      <span className="editHistory" onClick={this.showModal.bind(this,record.plazaFfanId,record.plazaName)}>编辑历史</span>
 			      <span className="ant-divider" />
 			      <a href="#">查看</a>
 			      <span className="ant-divider" />
-			      <a href="#">编辑</a>
+			      <a href={"#/editor?plazaFfanId="+record.plazaFfanId}>编辑</a>
 			      <span className="ant-divider" />
 			      <a href="#">审核</a>
 			   </span>
@@ -88,9 +88,11 @@ class Plazatable extends React.Component{
 		this.showModal=this.showModal.bind(this);
 		this.handleCancel=this.handleCancel.bind(this);
 	}
-	showModal(name){
+	showModal(id,name){
 		this.setState({ visible: true });
-		this.setState({ title: '广场编辑历史--'+name});
+		this.setState({ plazaName:name});
+		this.setState({ plazaFfanId:id});
+		
   	}
 	handleCancel(){
    	 	this.setState({ visible: false });
@@ -171,13 +173,13 @@ class Plazatable extends React.Component{
 					<Checkbox onChange={this.inReviewChange}>审核中</Checkbox>
 					<Checkbox onChange={this.editChange}>待审核</Checkbox>
 					<Checkbox onChange={this.myPlazaChange}>我的广场</Checkbox>
-			  		<Search
-				    placeholder="广场ID"
+			  		<Search  
+			  		 placeholder="广场ID"
 				    style={{ width: 200 }}
 				    onSearch={value => this.plazaIdSearch(value)}
 				 	/>
 				 	<Search
-				    placeholder="广场名称"
+				 	placeholder="广场名称"
 				    style={{ width: 200 }}
 				    onSearch={value => this.plazaNameSearch(value)}
 				 	/>
@@ -197,6 +199,9 @@ class Plazatable extends React.Component{
       			<EditHistory  
 	      			visible={this.state.visible}
 	      			onCancel={this.handleCancel}
+	      			plazaFfanId={this.state.plazaFfanId}
+	      			plazaName={this.state.plazaName}
+	      		   
 	      		/>
       		</div>
 		);

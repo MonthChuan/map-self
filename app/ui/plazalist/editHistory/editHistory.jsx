@@ -58,8 +58,8 @@ class EditHistory extends React.Component{
 	    });
 	    
 	    const formatData={};
-	    formatData.results=5;
-	    formatData.page=pagination.current;
+	    formatData.pageSize=5;
+	    formatData.startRow=pagination.current;
 	    this.fetch(formatData);
     }
     fetch(params){
@@ -89,9 +89,10 @@ class EditHistory extends React.Component{
 	render() {
 		return (
 			<Modal 
+				footer={null}
 				visible={this.props.visible}
 				onCancel={this.props.onCancel}
-				title="编辑广场"
+				title={"广场编辑历史--"+this.props.plazaName}
 		    >
 				<Table columns={this.columns}
 				       rowKey={record => record.registered}

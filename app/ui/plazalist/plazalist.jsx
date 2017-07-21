@@ -18,7 +18,7 @@ class PlazaList extends React.Component{
     componentDidMount() {}
     render() {
 		return (
-			<div id="plazalist">
+			<div id="plazalist" className="mid">
 				<Header />
 				<div className="table-content">
 					<Plazatable />
