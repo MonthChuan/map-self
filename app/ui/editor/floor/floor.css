@@ -1,0 +1,15 @@
+.floor-wrap {
+  display: inline-block;
+}
+
+.floor-wrap .ant-select-selection {
+  border: 0;
+}
+
+.floor-wrap .ant-select-focused .ant-select-selection, 
+.floor-wrap .ant-select-selection:focus, 
+.floor-wrap .ant-select-selection:active,
+.floor-wrap .ant-select-open .ant-select-selection {
+  outline: none;
+  box-shadow: none;
+}

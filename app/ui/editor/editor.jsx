@@ -3,7 +3,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 
 // import PlazaSelect from './plazaselect/plazaselect.jsx';  
-// import Control from './control/control.jsx';  
+import Control from './control/control';  
 import Detail from './detail/detail.jsx';
 // import Submit from './submit/submit.jsx';
 import Access from './access/access';
@@ -15,7 +15,7 @@ import { fixToNormal, deleteStore } from './utils/regionFunc';
 import ActionCommand from './utils/actionCommand';
 
 import * as Service from '../../services/index';
-import { ADD_MAP, SET_PLAZAID, SET_STATUS, SET_FLOORINFO, RESET_STORE, SET_CONFIRMSHOW } from '../../action/actionTypes';
+import { ADD_MAP, SET_PAGEINFO, SET_STATUS, SET_FLOORINFO, RESET_STORE, SET_CONFIRMSHOW, ADD_NEWLAYERS } from '../../action/actionTypes';
 import STATUSCONF from '../../config/status';
 
 class EditorPage extends React.Component{
@@ -100,12 +100,19 @@ class EditorPage extends React.Component{
 	componentWillMount() {
 		if(this.props.params.plazaId) {
 			this.props.dispatch({
-				type : SET_PLAZAID,
-				id : this.props.params.plazaId
+				type : SET_PAGEINFO,
+				id : this.props.params.plazaId,
+				pageType : this.props.params.key
 			});
 		}
 		else {
 			window.history.back(-1);
+		}
+	}
+
+	componentWillUnmount() {
+		if(this.props.map.ffmap) {
+			this.props.map.ffmap.destroy();
 		}
 	}
 
@@ -114,6 +121,7 @@ class EditorPage extends React.Component{
 		const map = new FMap.Map('map', {
 			zoomControl : false,
 			floorControl : false,
+			useCache : false,
 			zoom : 20,
 			editable : true,
 			regionInteractive : true,
@@ -169,14 +177,14 @@ class EditorPage extends React.Component{
 			});
 		});
 
-		map.on('editable:editing', event => {
-			if(this.props.control.activeType != '') {
-				this.props.dispatch({
-					type: SET_STATUS,
-					status : STATUSCONF.start
-				});
-			}
-		});
+		// map.on('editable:editing', event => {
+		// 	if(this.props.control.activeType != '') {
+		// 		this.props.dispatch({
+		// 			type: SET_STATUS,
+		// 			status : STATUSCONF.start
+		// 		});
+		// 	}
+		// });
 
 		map.on('editable:dragend', event => {
 			const region = event.layer;
@@ -193,6 +201,17 @@ class EditorPage extends React.Component{
 			region.label.setLatLngs(latlng);
 		});
 
+		map.on('getMapDataSuccess', event => {
+			if(event.floorData) {
+				this.props.dispatch({
+					type : SET_FLOORINFO,
+					info : {
+						floorData : event.floorData
+					}
+				});
+			}
+		});
+
 		this.refs.map.style.height = '100%';
 	}
 
@@ -201,6 +220,11 @@ class EditorPage extends React.Component{
 		const nameLabel = new FMap.PoiLabel(center, '', sourceLayer, { pane : 'markerPane'});
 		this.props.map.ffmap.addOverlay(nameLabel);
 		nameLayer.label = nameLabel;
+
+		this.props.dispatch({
+          type : ADD_NEWLAYERS,
+          data : nameLabel
+        });
 	}
 
 	deleteStoreConfirmOk(e) {
@@ -239,6 +263,13 @@ class EditorPage extends React.Component{
 			type: SET_STATUS,
 			status : STATUSCONF.start
 		});
+		this.props.dispatch({
+			type : RESET_STORE,
+			data : {
+				curStore : [],
+				bkStore : []
+			}
+		})
 	}
 
 	openConfirm(item) {
@@ -251,11 +282,6 @@ class EditorPage extends React.Component{
 			<div className="page" id="editor">
 				<div className="topbar">
 					<div className="mid clearfix">
-						{/*<Control 
-							newNameLabel={this.newNameLabel} 
-							initFeatureClick={this.initFeatureClick}
-							openConfirm={this.openConfirm}
-						/>*/}
 						<Access />
 						<RightBar />
 					</div>
@@ -275,6 +301,11 @@ class EditorPage extends React.Component{
 					</Popconfirm>
 					<div className="e-content-main" >
 						<Detail newNameLabel={this.newNameLabel} />
+						<Control 
+							newNameLabel={this.newNameLabel} 
+							initFeatureClick={this.initFeatureClick}
+							openConfirm={this.openConfirm}
+						/>
 						<div className="map-wrapper">
 							<div ref="map" className="map" id="map" style={{height:700}}></div>
 						</div>

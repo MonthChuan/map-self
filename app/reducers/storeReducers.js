@@ -8,13 +8,8 @@ const initialState = {
 
 function store(previousState = initialState, action) {
     switch(action.type) {
-        case 'editStart':
-            return Object.assign({}, previousState, { status : action.status});
-        // case 'setStore':
-        //     if(action.data.store) {
-        //         action.data.store = action.data.store.concat(previousState.store);
-        //     }
-        //     return Object.assign({}, previousState, action.data);
+        case 'setStore':
+            return Object.assign({}, previousState, action.data);
         case 'resetStore':
             if(action.data.store) {
                 for(let i = 0, len = action.data.store.length; i < len; i++) {

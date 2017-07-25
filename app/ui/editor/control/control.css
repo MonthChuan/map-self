@@ -1,5 +1,9 @@
 .control {
-  float: right;
+  position: absolute;
+  right: 15px;
+  bottom: 15px;
+  z-index: 2;
+  background: #fff;
 }
 
 .control .e-save {
@@ -12,50 +16,62 @@
 .control .s-btn {
   display: inline-block;
   color: #666;
-  font-size: 14px;
-  height: 32px;
-  line-height: 32px;
-  /*border-right: 1px solid #e5e5e5;*/
+  /*font-size: 14px;*/
+  border-right: 1px solid #e5e5e5;
   position: relative;
-  padding: 0 15px;
-  min-width: 100px;
+  padding: 10px 12px;
   white-space: nowrap;
-  margin-top: 19px;
 }
-.control .s-btn .s-icon {
+/*.control .s-btn .s-icon {
   display: block;
   width: 18px;
   height: 18px;
-  margin-right: 10px;
-  margin-top: 6px;
   overflow: hidden;
-  background: url(http://timg.ffan.com/convert/resize/url_T1ZhdTB5Vg1RCvBVdK/tfs/f7414aa028c8edb09820afa4358b1a3f.png) no-repeat;
+  background: url(http://timg.ffan.com/convert/resize/url_T1gEEvByAv1RCvBVdK/tfs/c95a711483f50ae6ad5a4df3de0e9350.png) no-repeat;
   float: left;
+}*/
+.control .s-btn .s-icon {
+  display: inline-block;
+  position: relative;
+  font-size: 12px;
+  padding-left:18px;
+  height: 18px;
+  line-height: 18px;
+      vertical-align: middle;
+}
+.control .s-btn .s-icon:after {
+  display: block;
+  position: absolute;
+  top:0;
+  left: 0;
+  content: " ";
+  width: 18px;
+  height: 18px;
+    background: url(http://timg.ffan.com/convert/resize/url_T1j8bvBXKs1RCvBVdK/tfs/1d9c7128e52e69dcbd12c410366fc8b3.png) no-repeat;
+
 }
 
-.control .s-add .s-icon {background-position: 0 -18px;}
-.control .s-edit .s-icon {background-position: 0 -54px;}
-.control .s-delete .s-icon {background-position: 0 -90px;}
-.control .s-submerge .s-icon,
-.control .s-merge .s-icon {background-position: 0 -126px;}
-.control .s-zt .s-icon {background-position: 0 -162px;}
 
+.control .s-add .s-icon:after {background-position: 0 0px;}
+.control .s-edit .s-icon:after {background-position: 0 -36px;}
+.control .s-delete .s-icon:after {background-position: 0 -72px;}
+.control .s-submerge .s-icon:after,
+.control .s-merge .s-icon:after {background-position: 0 -108px;}
+.control .s-cancel .s-icon:after {background-position: 0 -180px;}
+.control .s-zoomin .s-icon:after {background-position: 0 -216px;}
+.control .s-zoomout .s-icon:after {background-position: 0 -252px;}
 
-.control .s-add.disable .s-icon {background-position: 0 0px;}
-.control .s-edit.disable .s-icon {background-position: 0 -36px;}
-.control .s-delete.disable .s-icon {background-position: 0 -72px;}
-.control .s-submerge.disable .s-icon,
-.control .s-merge.disable .s-icon {background-position: 0 -108px;}
-.control .s-zt.disable .s-icon {background-position: 0 -144px;}
+.control .s-zoomin:active .s-icon:after {background-position: 0 -234px;}
+.control .s-zoomout:active .s-icon:after {background-position: 0 -270px;}
+
+.control .s-add.s-active .s-icon:after {background-position: 0 -18px;}
+.control .s-edit.s-active .s-icon:after {background-position: 0 -54px;}
+.control .s-delete.s-active .s-icon:after {background-position: 0 -90px;}
+.control .s-submerge.s-active .s-icon:after,
+.control .s-merge.s-active .s-icon:after {background-position: 0 -126px;}
 
 .control .s-active {
   color: #108ee9;
 }
-.control .disable {
-  color: #e2e2e3; 
-  cursor: not-allowed;
-  pointer-events: none;
-}
-.control .s-cancel {
-  min-width: 90px;
-}
+
+

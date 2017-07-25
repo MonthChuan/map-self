@@ -16,7 +16,10 @@ const setSelect = (item, value) => {
   item.selected = value;
 
   let itemElement = null;
-  if(item.getElement) {
+  if(item.layerDisplay && item.layerDisplay.getElement) {
+    itemElement = item.layerDisplay.getElement();
+  }
+  else if(item.getElement) {
     itemElement = item.getElement();
   }
   else if(item.graphics) {

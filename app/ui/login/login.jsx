@@ -79,9 +79,13 @@ class Login extends React.Component{
 						<Form onSubmit={this.handleLogin} className="login-form">
 							<FormItem>
 							{getFieldDecorator('phone', {
-								rules: [{ required: true, message: '请您填写用户名' }],
+								rules: [{ 
+									pattern : /^1\d{10}$/,
+									required: true, 
+									message: '请您正确填写手机号' 
+								}],
 							})(
-								<Input onChange={this.clearTxt} prefix={<Icon type="user" style={{ fontSize: 13 }} />} placeholder="请输入用户名" />
+								<Input onChange={this.clearTxt} prefix={<Icon type="user" style={{ fontSize: 13 }} />} placeholder="请输入注册手机号" />
 							)}
 							</FormItem>
 							<FormItem>
@@ -113,11 +117,11 @@ class LoginPage extends React.Component{
 		super(props);
 	}
 
-	componentDidMount() {
-		if(this.props.map.ffmap) {
-			this.props.map.ffmap.destroy();
-		}
-	}
+	// componentDidMount() {
+	// 	if(this.props.map.ffmap) {
+	// 		this.props.map.ffmap.destroy();
+	// 	}
+	// }
 
 	render() {
 		return (<LoginForm />);

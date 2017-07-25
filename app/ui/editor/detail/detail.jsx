@@ -5,7 +5,7 @@ import { getSelect, setSelect } from '../utils/select';
 import ActionCommand from '../utils/actionCommand';
 import { SET_STORE, GET_STORECATGORY, RESET_STORE } from '../../../action/actionTypes';
 import * as Service from '../../../services/index';
-import { Input, Select, Tabs } from 'antd'; 
+import { Input, Select, Tabs, message } from 'antd'; 
 const Option = Select.Option;
 const TabPane = Tabs.TabPane;
 // const Search = Input.Search;
@@ -29,6 +29,7 @@ class Detail extends React.Component{
 	beforeEditDetail() {
 		const store0 = this.props.store.curStore[0];
 		if(!store0) {
+			message.warning('没有可编辑的对象！', 3);
 			return false;
 		}
 
@@ -137,17 +138,16 @@ class Detail extends React.Component{
 
 	clickStore(event) {
 		const id = event.target.getAttribute('value');
-		const s = this.props.map.ffmap.searchStoreByID(id);
+		const list = this.props.map.ffmap.searchStoreByID(id);
 		
-		if(s.length==0 || getSelect(s[0])) {
-			return;
+		if(list.length > 0) {
+			let s = list[0].feature;
+			s.bindPopup(s.feature.properties.re_name, {
+				autoClose : true,
+				keepInView : true
+			});
+			s.openPopup();
 		}
-
-		setSelect(s[0], true);
-		const timer = setTimeout(function() {
-			setSelect(s[0], false);
-			clearTimeout(timer);
-		}, 3000);
 	}
 
 	searchStore(value) {

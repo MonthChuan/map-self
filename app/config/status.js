@@ -3,16 +3,16 @@
  */
 
 //初始化
-let initial = {
-  isAdd : false,
-  isEdit : false,
-  isDelete : false,
-  isMerge : false,
-  isSubMerge : false,
-  isStart : true,
-  isActive : false,
-    activeType : ''
-};
+// let initial = {
+//   isAdd : false,
+//   isEdit : false,
+//   isDelete : false,
+//   isMerge : false,
+//   isSubMerge : false,
+//   isStart : true,
+//   isActive : false,
+//     activeType : ''
+// };
 
 //开始编辑
 let start = {
@@ -98,7 +98,7 @@ let editEnd = {
 };
 
 export default {
-    initial,
+    // initial,
     start,
     addS,
     editS,

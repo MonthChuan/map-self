@@ -66,7 +66,7 @@
 }
 .ant-popover-arrow {display: none!important;}
 
-.leaflet-overlay-pane path.leaflet-interactive.selected:hover,
-.leaflet-overlay-pane path.leaflet-interactive.selected {
+.map-wrapper path.leaflet-interactive.selected:hover,
+.map-wrapper path.leaflet-interactive.selected {
   fill : red;
 }

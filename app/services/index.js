@@ -51,7 +51,7 @@ export const saveDataAjax = (url, regions, success, cb) => {
         {"data" : JSON.stringify(regions)},
         (req) => {
             callback(req, success);
-            cb();
+            // cb();
         }
     );
 };

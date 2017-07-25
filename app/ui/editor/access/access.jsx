@@ -1,26 +1,24 @@
 import './access.css';
 import React from 'react';
 import { connect } from 'react-redux';  
-import { Button } from 'antd'; 
+import { Button, message, Modal } from 'antd'; 
 
 import ActionCommand from '../utils/actionCommand';
 
 import * as Service from '../../../services/index';
-// import {  } from '../../../action/actionTypes';
-// import STATUSCONF from '../../../config/status';
+import { formatStore } from '../utils/formatStore';
+import { fixToNormal, cancelDraw } from '../utils/regionFunc';
+import { RESET_STORE, SET_STATUS, SET_STORE } from '../../../action/actionTypes';
+import { getSelect, setSelect } from '../utils/select';
+
 
 class Access extends React.Component{
   constructor(props) {
     super(props);
-  }
-
-  newStoreId() {
-    const floor = this.props.map;
-    this.props.dispatch({
-      type : INCREASE_MAXNUM
-    });
-
-    return floor.plazaId + '_' + floor.floorName + '_' + floor.floorMaxNum;
+    this.clearActiveState = this.clearActiveState.bind(this);
+    this.saveEdit = this.saveEdit.bind(this);
+    this.editEnd = this.editEnd.bind(this);
+    this.submitCheck = this.submitCheck.bind(this);
   }
 
   clearActiveState() {
@@ -56,45 +54,38 @@ class Access extends React.Component{
           title : '提示',
           content : '保存成功！'
         });
-      },
-      () => {
-        fixToNormal(storeList[0]);
-
-        // this.props.dispatch({
-        //   type : SET_STATUS,
-        //   status : STATUSCONF.save
-        // });
-
-        this.props.dispatch({
-          type : RESET_STORE,
-          data : {
-            curStore : [],
-            store : [],
-            bkStore : [],
-            actionCommand : []
-          }
-        })
       }
+      // ,
+      // () => {
+      //   this.clearActiveState();
+
+      //   this.props.dispatch({
+      //     type : RESET_STORE,
+      //     data : {
+      //       curStore : [],
+      //       store : [],
+      //       bkStore : [],
+      //       actionCommand : []
+      //     }
+      //   })
+      // }
     );
+
+    this.clearActiveState();
+    this.props.dispatch({
+      type : SET_STORE,
+      data : {
+        curStore : [],
+        store : [],
+        bkStore : [],
+        actionCommand : []
+      }
+    })
   }
 
-
-  //开始编辑
-  // editStart() {
-  //   Service.editStartAjax(
-  //     preAjaxUrl + '/mapeditor/map/editStart/' + this.props.map.plazaId + '/' + this.props.map.floorId,
-  //     () => {
-  //         this.props.dispatch({
-  //           type: SET_STATUS,
-  //           status : STATUSCONF.start
-  //         });
-  //     }
-  //   );
-  // }
-
-  submitAll() {
+  editEnd() {
     const store = this.props.store.store;
-    if(store.length > 0 && store[0].action != 'SHOW') {
+    if(store.length > 0) {
       Modal.warning({
           title : '提示',
           content : '您有操作未保存，请先保存！'
@@ -106,6 +97,7 @@ class Access extends React.Component{
     Service.editEndAjax(
       preAjaxUrl + '/mapeditor/map/editEnd/' + this.props.map.plazaId,
       () => {
+        this.clearActiveState();
         Modal.success({
           title : '',
           content : '已经提交审核，请耐心等待！'
@@ -118,14 +110,42 @@ class Access extends React.Component{
     );
   } 
 
+  submitCheck(value) {
+    this.clearActiveState();
+    Service.submitCheckAjax(
+			preAjaxUrl + '/mapeditor/map/editVerify/' + this.props.map.plazaId,
+			value,
+			() => {
+				setTimeout(()=>{
+					location.reload();
+				}, 1000);
+			}
+		)
+  }
 
   render() {
     const data = this.props.control;
+    let btnTpl = '' ;
+    if (this.props.map.pageType && this.props.map.pageType == 'edit') {
+      btnTpl = (
+        <p>
+          <Button className="btn" type="primary" onClick={this.saveEdit}>保存</Button>
+          <Button className="btn" type="primary" onClick={this.editEnd}>结束编辑</Button>
+        </p>
+      );
+    }
+    else if(this.props.map.pageType && this.props.map.pageType == 'review') {
+      btnTpl = (
+        <p>
+          <Button className="btn" type="primary" onClick={()=>{this.submitCheck(1)}}>审核通过</Button>
+          <Button className="btn" type="primary" onClick={()=>{this.submitCheck(0)}}>审核不通过</Button>
+        </p>
+      );
+    }
+
     return (
       <div className="access-wrap">
-        {/*<Button className="e-save" style={startStyle} type="primary" onClick={this.editStart}>开始编辑</Button>*/}
-        <Button className="btn" type="primary" onClick={this.saveEdit}>保存</Button>
-        <Button className="btn" type="primary" onClick={this.submitAll}>结束编辑</Button>
+        {btnTpl}
         {/*<SaveConfirm ref="saveConfirm" />*/}
       </div>
     );

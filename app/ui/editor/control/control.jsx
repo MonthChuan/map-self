@@ -2,7 +2,7 @@ import './control.css';
 import React from 'react';
 import { connect } from 'react-redux';  
 import { Button, message, Menu, Dropdown, Icon, Modal } from 'antd'; 
-import SaveConfirm from '../utils/saveConfirm.jsx';
+// import SaveConfirm from '../utils/saveConfirm.jsx';
 import { getSelect, setSelect } from '../utils/select';
 import { formatStore } from '../utils/formatStore';
 import { fixToNormal, cancelDraw } from '../utils/regionFunc';
@@ -10,8 +10,10 @@ import { noCurStore, noCancelStore } from '../utils/storeListCheck';
 import ActionCommand from '../utils/actionCommand';
 
 import * as Service from '../../../services/index';
-import { SET_STATUS, INCREASE_MAXNUM, SET_CONFIRMSHOW, RESET_STORE } from '../../../action/actionTypes';
+import { SET_STATUS, INCREASE_MAXNUM, SET_CONFIRMSHOW, RESET_STORE, ADD_NEWLAYERS } from '../../../action/actionTypes';
 import STATUSCONF from '../../../config/status';
+
+import Floor from '../floor/floor';
 
 class Control extends React.Component{
   constructor(props) {
@@ -21,14 +23,14 @@ class Control extends React.Component{
     this.setMerge = this.setMerge.bind(this);
     this.deleteStore = this.deleteStore.bind(this);
     this.mergeStore = this.mergeStore.bind(this);
-    this.editStart = this.editStart.bind(this);
-    this.saveEdit = this.saveEdit.bind(this);
     this.editRegion = this.editRegion.bind(this);
-    this.submitAll = this.submitAll.bind(this);
     this.cancelAct = this.cancelAct.bind(this);
 
     this.clearActiveState = this.clearActiveState.bind(this);
     this.newStoreId = this.newStoreId.bind(this);
+
+    this.zoomIn = this.zoomIn.bind(this);
+    this.zoomOut = this.zoomOut.bind(this);
   }
 
   newStoreId() {
@@ -47,52 +49,15 @@ class Control extends React.Component{
     })
   }
 
-  //保存
-  saveEdit() {
-    const storeList = this.props.store.store;
-    const control = this.props.control;
-    const map = this.props.map;
-
-    if(storeList.length == 0) {
-      message.warning('没有未保存的操作！', 3);
-			return;
+  zoomOut() {
+    if(this.props.map.ffmap) {
+      this.props.map.ffmap.zoomOut();
     }
-
-    let regionParam = [];
-    storeList.map(item => {
-      if(item.action && item.action != '') {
-        regionParam.push( formatStore(item) );
-      }
-		});
-
-    Service.saveDataAjax(
-      preAjaxUrl + '/mapeditor/map/plaza/edit/region/' + map.plazaId + '/' + map.floorId,
-      regionParam,
-      () => {
-        Modal.success({
-          title : '提示',
-          content : '保存成功！'
-        });
-      },
-      () => {
-        fixToNormal(storeList[0]);
-
-        // this.props.dispatch({
-        //   type : SET_STATUS,
-        //   status : STATUSCONF.save
-        // });
-
-        this.props.dispatch({
-          type : RESET_STORE,
-          data : {
-            curStore : [],
-            store : [],
-            bkStore : [],
-            actionCommand : []
-          }
-        })
-      }
-    );
+  }
+  zoomIn() {
+    if(this.props.map.ffmap) {
+      this.props.map.ffmap.zoomIn();
+    }
   }
 
   //合并
@@ -147,7 +112,6 @@ class Control extends React.Component{
         });
         const coords = FMap.Utils.getOriginalByLatlngs(coordObj);
         union.coordinates = coords;
-        union.coorChange = true;
 
         s0.remove();
         if(s0.label) {
@@ -182,7 +146,8 @@ class Control extends React.Component{
         s0.action = 'DELETE';
         s1.action = 'DELETE';
         layer.action = 'NEW';
-
+        layer.coorChange = true;
+        layer.coordinates = coords;
 
         this.props.dispatch({
           type : RESET_STORE,
@@ -197,6 +162,11 @@ class Control extends React.Component{
         layer.centerPoint = centerLatLng;
         layer.on('click', e => {
           this.props.initFeatureClick(e);
+        });
+
+        this.props.dispatch({
+          type : ADD_NEWLAYERS,
+          data : layer
         });
 
         this.props.dispatch({
@@ -234,6 +204,10 @@ class Control extends React.Component{
 
   //商铺修型
   editRegion() {
+    this.props.dispatch({
+      type : SET_STATUS,
+      status : STATUSCONF.start
+    });
     const curStoreList = this.props.store.curStore;
     if(!noCurStore(curStoreList)) return;
     let cur = curStoreList[0];
@@ -275,19 +249,6 @@ class Control extends React.Component{
     
   }
 
-  //开始编辑
-  editStart() {
-    Service.editStartAjax(
-      preAjaxUrl + '/mapeditor/map/editStart/' + this.props.map.plazaId + '/' + this.props.map.floorId,
-      () => {
-          this.props.dispatch({
-            type: SET_STATUS,
-            status : STATUSCONF.start
-          });
-      }
-    );
-  }
-
   //新增商铺
   drawPloy() {
     const newStore = this.props.map.ffmap.startPolygon();
@@ -304,18 +265,18 @@ class Control extends React.Component{
     };
     this.clearActiveState();
 
-    this.props.store.actionCommand.unshift(new ActionCommand({
-      action : '',
-      id : newId,
-      properties : {}
-    }));
-    this.props.dispatch({
-      type : RESET_STORE,
-      data : {
-        curStore : [newStore],
-        store : [newStore]
-      }
-    });
+    // this.props.store.actionCommand.unshift(new ActionCommand({
+    //   action : '',
+    //   id : newId,
+    //   properties : {}
+    // }));
+    // this.props.dispatch({
+    //   type : RESET_STORE,
+    //   data : {
+    //     curStore : [newStore],
+    //     store : [newStore]
+    //   }
+    // });
 
     this.props.dispatch({
       type: SET_STATUS,
@@ -334,33 +295,35 @@ class Control extends React.Component{
 			}
       region.label.setLatLngs(latlng);
     });
-  }
 
-  submitAll() {
-    const store = this.props.store.store;
-    if(store.length > 0 && store[0].action != 'SHOW') {
-      Modal.warning({
-          title : '提示',
-          content : '您有操作未保存，请先保存！'
+    // newStore.on('editable:created', event => {
+      this.props.dispatch({
+        type : ADD_NEWLAYERS,
+        data : newStore
       });
-      return;
-    }
-    //todo结束本次编辑。。。
 
-    Service.editEndAjax(
-      preAjaxUrl + '/mapeditor/map/editEnd/' + this.props.map.plazaId,
-      () => {
-        Modal.success({
-          title : '',
-          content : '已经提交审核，请耐心等待！'
-        });
+    // });
+
+    newStore.on('editable:drawing:end', event => {
+       this.props.store.actionCommand.unshift(new ActionCommand({
+          action : '',
+          id : newId,
+          properties : {}
+        }));
         this.props.dispatch({
-          type : SET_STATUS,
-          status : STATUSCONF.editEnd
+          type : RESET_STORE,
+          data : {
+            curStore : [newStore],
+            store : [newStore]
+          }
         });
-      }
-    );
-  } 
+
+        this.props.dispatch({
+					type: SET_STATUS,
+					status : STATUSCONF.start
+				});
+    });
+  }
 
   //取消操作
   cancelAct() {
@@ -423,14 +386,8 @@ class Control extends React.Component{
   render() {
     const data = this.props.control;
 
-    // const name0 = "s-btn s-cancel clearfix" + (data.isActive === true ? '' : ' disable');
-    // const name1 = "s-btn s-add clearfix" + (data.isActive === true ? '' : ' disable');
-    // const name2 = "s-btn s-edit clearfix" + (data.isActive === true ? '' : ' disable');
-    // const name3 = "s-btn s-delete clearfix" + (data.isActive === true ? '' : ' disable');
-    // const name4 = "s-btn s-merge clearfix" + (data.isMerge ? '' : ' disable');
-    // const name5 = "s-btn s-merge clearfix";
     let nameList = [];
-    ['cancel', 'add', 'edit', 'delete', 'merge', 'submerge'].map((type) => {
+    ['zoomin', 'zoomout', 'cancel', 'add', 'edit', 'delete', 'merge', 'submerge'].map((type) => {
       let isDisable = '';
       if(type == 'merge') {
         isDisable = data.isMerge ? '' : ' disable';
@@ -444,8 +401,8 @@ class Control extends React.Component{
       nameList.push([
         's-btn clerfix s-' , 
         type , 
-        data.activeType == type ? ' s-active' : '',
-        isDisable
+        data.activeType == type ? ' s-active' : ''
+        // isDisable
         ].join('')
       )
     });
@@ -453,32 +410,35 @@ class Control extends React.Component{
     const mergeStyle = {'display' : (data.isSubMerge ? 'none' : 'inline-block')};
     const submergeStyle = {'display' : (data.isSubMerge ? 'inline-block' : 'none')};
 
-    const startStyle = {'display' : (data.isStart ? 'inline-block' : 'none')};
-    const saveStyle = {'display' : (data.isStart || (data.isActive == 2) ? 'none' : 'inline-block')};
-  
     return (
       <div className="control">
-        <a className={nameList[0]} onClick={this.cancelAct}>回退</a>
-        <a className={nameList[1]} onClick={this.drawPloy}>
-            <i className="s-icon"></i>新增
+        <a title="放大" className={nameList[0]} onClick={this.zoomIn}>
+            <i className="s-icon"></i>
         </a>
-        <a className={nameList[2]} onClick={this.editRegion} >
-          <i className="s-icon"></i>修型
+        <a title="缩小" className={nameList[1]} onClick={this.zoomOut}>
+            <i className="s-icon"></i>
         </a>
-        <a className={nameList[3]} onClick={this.deleteStore}>
-          <i className="s-icon"></i>删除
+        <a title="回退" className={nameList[2]} onClick={this.cancelAct}>
+            <i className="s-icon"></i>
         </a>
-        <a className={nameList[4]} style={mergeStyle} onClick={this.setMerge}>
-          <i className="s-icon"></i>合并
+        <a title="新增" className={nameList[3]} onClick={this.drawPloy}>
+            <i className="s-icon"></i>
         </a>
-        <a className={nameList[5]} style={submergeStyle} onClick={this.mergeStore}>
+        <a title="修型" className={nameList[4]} onClick={this.editRegion} >
+          <i className="s-icon"></i>
+        </a>
+        <a title="删除" className={nameList[5]} onClick={this.deleteStore}>
+          <i className="s-icon"></i>
+        </a>
+        <a title="合并" className={nameList[6]} style={mergeStyle} onClick={this.setMerge}>
+          <i className="s-icon"></i>
+        </a>
+        <a title="执行合并" className={nameList[7]} style={submergeStyle} onClick={this.mergeStore}>
           <i className="s-icon"></i>执行合并
         </a>
 
-        <Button className="e-save" style={startStyle} type="primary" onClick={this.editStart}>开始编辑</Button>
-        <Button className="e-save" style={saveStyle} type="primary" onClick={this.saveEdit}>保存</Button>
-        <Button className="e-save" type="primary" onClick={this.submitAll} disabled={data.isSubmit}>结束编辑</Button>
-        <SaveConfirm ref="saveConfirm" />
+        <Floor />
+        {/*<SaveConfirm ref="saveConfirm" />*/}
       </div>
     );
   }
