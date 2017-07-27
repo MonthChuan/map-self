@@ -33,6 +33,7 @@ class Login extends React.Component{
 				}).done( req => {
 					if(req.status == 200) {
 						//页面跳转
+						localStorage.setItem("userData",JSON.stringify(req.data));
 						this.props.setUser(req.data);
 					}
 					else {
