@@ -14,13 +14,13 @@ import PlazaList from './ui/plazalist/PlazaList';
 
 // create root component
 const Root = ({ store }) => (
-  <Provider store={store}>
+<Provider store={store}>
     <Router history={hashHistory}>
-      <Route path="/login" component={LoginPage}/>
-      <Route path="/plazalist" component={PlazaList}/>
-      <Route path="/:plazaId(/:key)" component={EditorPage}/>
+    <Route path="/login" component={LoginPage}/>
+    <Route path="/plazalist" component={PlazaList}/>
+    <Route path="/:plazaId(/:key)" component={EditorPage}/>
     </Router>
-  </Provider>
+ </Provider>
 );
 Root.propTypes = { store: PropTypes.object.isRequired };
 let store = createStore(editorReducers);

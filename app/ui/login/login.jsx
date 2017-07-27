@@ -132,7 +132,7 @@ class LoginPage extends React.Component{
 			data : data || {}
 		});
 		document.cookie = 'uuid=' + escape(data.uuid) + ';path=/;domain=ffan.com;expires=' + ((new Date()).getTime() + 1*24*60*60*1000);
-		location.href = location.pathname + '#/';
+		location.href = location.pathname + '#/plazalist';
 	}
 
 	render() {
