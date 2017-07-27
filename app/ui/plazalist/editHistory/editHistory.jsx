@@ -41,7 +41,7 @@ class EditHistory extends React.Component{
 			  key: 'url',
 			  render: (text, record) => (
 			    <span>
-			      <a href={record.url} >下载</a>
+			      <a href={record.url} disabled={record.url!=null?false:true}>下载</a>
 			    </span>
 			  ),
         }];

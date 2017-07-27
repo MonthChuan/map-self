@@ -40,7 +40,7 @@ class Plazatable extends React.Component{
 			  title: '状态',
 			  dataIndex: 'state',
 			  key: 'state',
-			  render: text => {return text==0?"已完成":"编辑中"} ,
+			  //render: text => {return text==0?"已完成":"编辑中"} ,
 			  sorter: (a, b) => a.state - b.state,
 			}, 
 			{
@@ -172,11 +172,29 @@ class Plazatable extends React.Component{
 		sendParams.plazaId = plazaIdValue.value;
 		sendParams.plazaName = plazaNameValue.value;
 		sendParams.userName = userNameValue.value;
+		sendParams.startPage = params.startPage;
+		sendParams.pageSize = params.pageSize;
 	    Service.getPlazaVerifyListAjax(sendParams,(res)=>{
-			//let self=this;
-			console.log(res);
 			const pagination = self.state.pagination;
-			pagination.total = res.data.sum
+			pagination.total = res.data.sum;
+			let pLength = res.data.plazas.length;
+			for(let i=0; i< pLength; i++){
+				if(res.data.plazas[i].state == 0){
+					res.data.plazas[i].state = "";
+				}
+				if(res.data.plazas[i].state == 1){
+					res.data.plazas[i].state = "编辑中";
+				}
+				if(res.data.plazas[i].state == 2){
+					res.data.plazas[i].state = "审核中";
+				}
+				if(res.data.plazas[i].state == 3){
+					res.data.plazas[i].state = "审核不通过";
+				}
+				if(res.data.plazas[i].state == 4){
+					res.data.plazas[i].state = "审核通过";
+				}
+			}
 			self.setState({
 				loading: false,
 				data: res.data.plazas,
@@ -222,27 +240,45 @@ class Plazatable extends React.Component{
 	}
 	inEditChange(e) {
     	this.item.editing=!this.item.editing;
-    	this.fetch(this.item);
+		const formatData=this.item;
+		formatData.pageSize=10;
+		formatData.startPage=1;
+    	this.fetch(formatData);
   	}
     inReviewChange(e) {
   		this.item.verifying =!this.item.verifying;
-    	this.fetch(this.item);
+		const formatData=this.item;
+		formatData.pageSize=10;
+		formatData.startPage=1;
+		this.fetch(formatData);
 	}
     myPlazaChange(e) {
   		this.item.myPlaza=!this.item.myPlaza;
-    	this.fetch(this.item);
+		const formatData=this.item;
+		formatData.pageSize=10;
+		formatData.startPage=1;
+		this.fetch(formatData);
 	}
     plazaIdSearch(value) {
   		this.item.plazaId=value;
-    	this.fetch(this.item);
+		const formatData=this.item;
+		formatData.pageSize=10;
+		formatData.startPage=1;
+		this.fetch(formatData);
 	}
     plazaNameSearch(value) {
   		this.item.plazaName=value;
-    	this.fetch(this.item);
+		const formatData=this.item;
+		formatData.pageSize=10;
+		formatData.startPage=1;
+		this.fetch(formatData);
 	}
     userNameSearch(value) {
   		this.item.userName=value;
-    	this.fetch(this.item);
+		const formatData=this.item;
+		formatData.pageSize=10;
+		formatData.startPage=1;
+		this.fetch(formatData);
 	}
 	render() {
 		return (
