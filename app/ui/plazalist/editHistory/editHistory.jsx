@@ -41,7 +41,7 @@ class EditHistory extends React.Component{
 			  key: 'url',
 			  render: (text, record) => (
 			    <span>
-			      <a href={record.url}>下载</a>
+			      <a href={record.url} disabled={record.url!=null?false:true}>下载</a>
 			    </span>
 			  ),
         }];
@@ -61,39 +61,39 @@ class EditHistory extends React.Component{
 		formatData.plazaId = this.props.plazaId;
 	    formatData.pageSize=10;
 	    formatData.startPage=pagination.current;
-	    this.fetch(formatData);
+	    this.props.fetchHistory(formatData);
     }
-    fetch(params){
-	    console.log('params:', params);
-	    this.setState({ loadingHistory: true });
-	    let self=this;
-	    $ajax({
-		    url: 'http://yunjin.intra.sit.ffan.com/mapeditor/auth/verify/his',
-		    data: {
-		        params
-		    },
-		    success:function(res){
-		    	console.log(res);
-		      	const pagination = self.state.pagination;
-		      	pagination.total = res.data.sum
-		      	self.setState({
-			        loadingHistory: false,
-			        dataHistory: res.data.list,
-					paginationHistory:pagination,
-		      	});
-		    }
-	    });
-  	}
+    //fetch(params){
+	 //   console.log('params:', params);
+	 //   this.setState({ loadingHistory: true });
+	 //   let self=this;
+	 //   $ajax({
+		//    url: 'http://yunjin.intra.sit.ffan.com/mapeditor/auth/verify/his',
+		//    data: {
+		//        params
+		//    },
+		//    success:function(res){
+		//    	console.log(res);
+		//      	const pagination = self.state.pagination;
+		//      	pagination.total = res.data.sum
+		//      	self.setState({
+		//	        loadingHistory: false,
+		//	        dataHistory: res.data.list,
+		//			paginationHistory:pagination,
+		//      	});
+		//    }
+	 //   });
+  	//}
 	componentDidMount() {
 
 	}
 
 	componentWillReceiveProps(nextProps) {
-		if(nextProps.loadingHistory){
-			this.setState({loadingHistory: nextProps.loadingHistory});
-		}
-
-		if(nextProps.dataHistory){
+		//if(nextProps.loadingHistory){
+		//
+		//}
+		this.setState({loadingHistory: nextProps.loadingHistory});
+		if(nextProps.dataHistory && nextProps.dataHistory.length > 0){
 			this.setState({dataHistory: nextProps.dataHistory});
 		}
 
