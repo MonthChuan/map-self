@@ -9,39 +9,39 @@ class EditHistory extends React.Component{
 	constructor(props) {
 		super(props);
 		this.state ={
-			data:[],
-			pagination: {},
+			dataHistory:[],
+			paginationHistory: {},
     		loading: false,
 		}
 		this.columns = [{
 			  title: '广场ID',
- 			  dataIndex: 'plazaFfanId',
-			  key: 'plazaFfanId',
+ 			  dataIndex: 'plazaId',
+			  key: 'plazaId',
 			}, {
 			  title: '广场名称',
 			  dataIndex: 'plazaName',
 			  key: 'plazaName',
 			}, {
-			  title: '状态',
-			  dataIndex: 'status',
-			  key: 'status',
+			  title: '类型',
+			  dataIndex: 'state',
+			  key: 'state',
 			}, 
 			{
-			  title: '最新编辑',
-			  dataIndex: 'lastEdit',
-			  key: 'lastEdit',
+			  title: '人员',
+			  dataIndex: 'operator',
+			  key: 'operator',
 			  
 			}, {
-			  title: '最近审核',
-			  dataIndex: 'lastExamine',
-			  key: 'lastExamine',
+			  title: '时间',
+			  dataIndex: 'time',
+			  key: 'time',
 			  
 			},{
 			  title: '下载',
-			  key: 'download',
+			  key: 'url',
 			  render: (text, record) => (
 			    <span>
-			      <a href="#">下载</a>
+			      <a href={record.url}>下载</a>
 			    </span>
 			  ),
         }];
@@ -49,25 +49,26 @@ class EditHistory extends React.Component{
 		
     }
 	handleTableChange(pagination){
-		const pager = this.state.pagination;
+		const pager = this.state.paginationHistory;
 		//当前页
 	    pager.current = pagination.current;
 	   
 	    this.setState({
-	      pagination: pager,
+			paginationHistory: pager,
 	    });
 	    
-	    const formatData={};
-	    formatData.pageSize=5;
-	    formatData.startRow=pagination.current;
+	    let formatData={};
+		formatData.plazaId = this.props.plazaId;
+	    formatData.pageSize=10;
+	    formatData.startPage=pagination.current;
 	    this.fetch(formatData);
     }
     fetch(params){
 	    console.log('params:', params);
-	    this.setState({ loading: true });
+	    this.setState({ loadingHistory: true });
 	    let self=this;
 	    $ajax({
-		    url: 'http://yunjin.intra.sit.ffan.com/mapeditor/plaza/v1/indoor/plazas',
+		    url: 'http://yunjin.intra.sit.ffan.com/mapeditor/auth/verify/his',
 		    data: {
 		        params
 		    },
@@ -76,16 +77,45 @@ class EditHistory extends React.Component{
 		      	const pagination = self.state.pagination;
 		      	pagination.total = res.data.sum
 		      	self.setState({
-			        loading: false,
-			        data: res.data.list,
-			        pagination,
+			        loadingHistory: false,
+			        dataHistory: res.data.list,
+					paginationHistory:pagination,
 		      	});
 		    }
 	    });
   	}
 	componentDidMount() {
-	     this.fetch(this.item);
+
 	}
+
+	componentWillReceiveProps(nextProps) {
+		if(nextProps.loadingHistory){
+			this.setState({loadingHistory: nextProps.loadingHistory});
+		}
+
+		if(nextProps.dataHistory){
+			this.setState({dataHistory: nextProps.dataHistory});
+		}
+
+		if(nextProps.paginationHistory){
+			this.setState({paginationHistory: nextProps.paginationHistory});
+		}
+	}
+
+	//getTableLoading(loadingHistory){
+	//	this.setState({
+	//		loadingHistory: loadingHistory
+	//	});
+	//}
+    //
+	//getPTableState(loadingHistory,dataHistory,paginationHistory){
+	//	this.setState({
+	//		loadingHistory: loadingHistory,
+	//		dataHistory: dataHistory,
+	//		paginationHistory:paginationHistory
+	//	});
+	//}
+
 	render() {
 		return (
 			<Modal 
@@ -96,9 +126,9 @@ class EditHistory extends React.Component{
 		    >
 				<Table columns={this.columns}
 				       rowKey={record => record.registered}
-				       dataSource={this.state.data}
-				       pagination={this.state.pagination}
-				       loading={this.state.loading}
+				       dataSource={this.state.dataHistory}
+				       pagination={this.state.paginationHistory}
+				       loading={this.state.loadingHistory}
 				       onChange={this.handleTableChange}
 	  			/>
   			</Modal>
