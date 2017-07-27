@@ -280,13 +280,13 @@ class EditorPage extends React.Component{
 	render () {
 	    return (
 			<div className="page" id="editor">
-				<div className="topbar">
-					<div className="mid clearfix">
+				<div className="edit-topbar">
+					<div className="edit-mid clearfix">
 						<Access />
 						<RightBar />
 					</div>
 				</div>
-				<div className="e-content mid">
+				<div className="e-content edit-mid">
 					<Popconfirm 
 						title="确认删除此商铺？"
 						okText="确认" 

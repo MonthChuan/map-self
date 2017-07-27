@@ -4,13 +4,13 @@
   height: 100%;
   overflow: hidden;
 }
-.mid {
+.edit-mid {
   width: 100%;
   min-width: 1200px;
   margin: 0 auto;
 }
 
-.topbar {
+.edit-topbar {
   position: absolute;
   top: 0;
   left: 0;
