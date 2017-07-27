@@ -21,6 +21,7 @@ let start = {
     isDelete : true,
     isMerge : true,
     isSubMerge : false,
+    isSubSplit : false,
     isStart : false,
     isActive : true,
     activeType : ''
@@ -32,6 +33,7 @@ let addS = {
     isDelete : true,
     isMerge : true,
     isSubMerge : false,
+    isSubSplit : false,
     isStart : false,
     isActive : true,
     activeType : 'add'
@@ -43,6 +45,7 @@ let editS = {
     isDelete : true,
     isMerge : true,
     isSubMerge : false,
+    isSubSplit :false,
     isStart : false,
     isActive : true,
     activeType : 'edit'
@@ -54,6 +57,7 @@ let deleteS = {
     isDelete : true,
     isMerge : true,
     isSubMerge : false,
+    isSubSplit :false,
     isStart : false,
     isActive : true,
     activeType : 'delete'
@@ -80,9 +84,23 @@ let merge = {
     isDelete : true,
     isMerge : false,
     isSubMerge : true,
+    isSubSplit : false,
     isStart : false,
     isActive : true,
     activeType : 'submerge'
+};
+
+//商铺拆分
+let splitS = {
+    isAdd : true,
+    isEdit : true,
+    isDelete : true,
+    isMerge : true,
+    isSubMerge : false,
+    isSubSplit : true,
+    isStart : false,
+    isActive : true,
+    activeType : 'subsplit'
 };
 
 //结束编辑提交审核
@@ -92,6 +110,7 @@ let editEnd = {
     isDelete : false,
     isMerge : false,
     isSubMerge : false,
+    isSubSplit : false,
     isStart : false,
     isActive : 2,
     activeType : ''
@@ -103,6 +122,7 @@ export default {
     addS,
     editS,
     deleteS,
+    splitS,
     // cancel,
 
 

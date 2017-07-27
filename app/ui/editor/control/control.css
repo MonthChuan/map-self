@@ -47,8 +47,7 @@
   content: " ";
   width: 18px;
   height: 18px;
-    background: url(http://timg.ffan.com/convert/resize/url_T1j8bvBXKs1RCvBVdK/tfs/1d9c7128e52e69dcbd12c410366fc8b3.png) no-repeat;
-
+  background: url(http://timg.ffan.com/convert/resize/url_T1j8bvBXKs1RCvBVdK/tfs/1d9c7128e52e69dcbd12c410366fc8b3.png) no-repeat;
 }
 
 
@@ -57,6 +56,8 @@
 .control .s-delete .s-icon:after {background-position: 0 -72px;}
 .control .s-submerge .s-icon:after,
 .control .s-merge .s-icon:after {background-position: 0 -108px;}
+.control .s-subsplit .s-icon:after,
+.control .s-split .s-icon:after {background-position: 0 -144px;}
 .control .s-cancel .s-icon:after {background-position: 0 -180px;}
 .control .s-zoomin .s-icon:after {background-position: 0 -216px;}
 .control .s-zoomout .s-icon:after {background-position: 0 -252px;}
@@ -69,9 +70,16 @@
 .control .s-delete.s-active .s-icon:after {background-position: 0 -90px;}
 .control .s-submerge.s-active .s-icon:after,
 .control .s-merge.s-active .s-icon:after {background-position: 0 -126px;}
+.control .s-subsplit.s-active .s-icon:after,
+.control .s-split.s-active .s-icon:after {background-position: 0 -162px;}
 
 .control .s-active {
   color: #108ee9;
+}
+
+.control .split-wrap,
+.control .merge-wrap {
+  display: inline-block;
 }
 
 
