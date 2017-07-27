@@ -19,7 +19,7 @@ const Root = ({ store }) => (
       <Route path="/login" component={LoginPage}/>
       {/*key分为skim：查看页面，edit：编辑页面，review：审核页面, 默认是skim状态*/}
       <Route path="/:plazaId(/:key)" component={EditorPage}/>
-      <Route path="/(plazalist)" component={PlazaList}/>
+      <Route path="(/plazalist)" component={PlazaList}/>
     </Router>
   </Provider>
 );
