@@ -24,7 +24,6 @@ const Root = ({ store }) => (
   </Provider>
 );
 Root.propTypes = { store: PropTypes.object.isRequired };
-// create store
 let store = createStore(editorReducers);
 
 store.subscribe(() => { 

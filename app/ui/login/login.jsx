@@ -2,6 +2,7 @@ import './loginpage.css';
 import React from 'react'; 
 import { connect } from 'react-redux';
 import { Form, Icon, Input, Button, Checkbox } from 'antd';
+import { SET_USERINFO } from '../../action/actionTypes';
 import md5 from 'js-md5';
 const FormItem = Form.Item;    
 
@@ -32,8 +33,7 @@ class Login extends React.Component{
 				}).done( req => {
 					if(req.status == 200) {
 						//页面跳转
-						document.cookie = 'uuid=' + escape(req.data.uuid) + ';path=/;domain=ffan.com;expires=' + ((new Date()).getTime() + 1*24*60*60*1000);
-						location.href = location.pathname + '#/plazalist';
+						this.props.setUser(req.data);
 					}
 					else {
 						this.setState({'reqMessage' : req.message});
@@ -115,6 +115,8 @@ const LoginForm = Form.create()(Login);
 class LoginPage extends React.Component{
 	constructor(props) {
 		super(props);
+
+		this.setUser = this.setUser.bind(this);
 	}
 
 	// componentDidMount() {
@@ -123,8 +125,17 @@ class LoginPage extends React.Component{
 	// 	}
 	// }
 
+	setUser(data) {
+		this.props.dispatch({
+			type : SET_USERINFO,
+			data : data || {}
+		});
+		document.cookie = 'uuid=' + escape(data.uuid) + ';path=/;domain=ffan.com;expires=' + ((new Date()).getTime() + 1*24*60*60*1000);
+		location.href = location.pathname + '#/plazalist';
+	}
+
 	render() {
-		return (<LoginForm />);
+		return (<LoginForm setUser={this.setUser} />);
 	}
 }
 

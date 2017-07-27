@@ -11,6 +11,7 @@ export const SET_CONFIRMSHOW = 'setConfirmShow';
 export const INCREASE_MAXNUM = 'increaseMaxNum';
 export const GET_STORECATGORY = 'getStoreCatgory';
 export const RESET_STORE = 'resetStore';
-
 export const ADD_NEWLAYERS = 'addNewLayers';
 export const RESET_NEWLAYERS = 'resetNewLayers';
+export const SET_USERINFO = 'setUserInfo';
+

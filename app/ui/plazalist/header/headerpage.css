@@ -1,0 +1,21 @@
+.topbar{
+	height:64px;
+    border-bottom: 1px solid #e5e5e5;
+    line-height: 64px;
+    font-size: 1.2em;
+}
+.logo{
+	width: 64px;
+	height: 64px;
+	margin-left: 15px;
+	background: url(http://timg.ffan.com/convert/resize/url_T1egVTBXdb1RCvBVdK/tfs/faf16c506dd0450e10dd13c2bec44215.png) center center no-repeat;
+}
+.username{
+	display: inline-block;
+}
+.quit-btn{
+	margin:0 15px;
+}
+.quit-btn>span{
+	font-size: 1.3em;
+}
