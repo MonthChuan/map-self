@@ -10,7 +10,7 @@
   margin: 0 auto;
 }
 
-.edit-topbar {
+/*.edit-topbar {
   position: absolute;
   top: 0;
   left: 0;
@@ -19,7 +19,7 @@
   border-bottom: 1px solid #e5e5e5;
   z-index: 2;
   box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 6px, rgba(0, 0, 0, 0.1) 0px 1px 4px;
-}
+}*/
 .e-content {
   position: absolute;
   top: 0;

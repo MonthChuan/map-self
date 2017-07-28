@@ -1,0 +1,38 @@
+.page-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 56px;
+  width: 100%;
+  border-bottom: 1px solid #e5e5e5;
+  z-index: 2;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 6px, rgba(0, 0, 0, 0.1) 0px 1px 4px;
+}
+
+.page-header-main {
+  width: 100%;
+  min-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-header-logo {
+	float: left;
+	height: 100%;
+	overflow: hidden;
+	margin-right: 15px;
+}
+
+.page-header-logo .logo-txt {
+	display: inline-block;
+	line-height: 56px;
+	background: #879fb9;
+	color: #fff;
+	padding: 0 20px;
+	font-size: 20px;
+}
+.page-header-logo .logo-txt2 {
+	display: inline-block;
+	padding: 5px 15px;
+	font-size: 20px;
+	border-right : 1px solid #e5e5e5;
+}

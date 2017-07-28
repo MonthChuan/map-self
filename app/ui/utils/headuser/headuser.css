@@ -1,0 +1,12 @@
+.page-headuser {
+	float: right;
+}
+ .page-headuser .username{
+	display: inline-block;
+}
+.page-headuser .quit-btn{
+	margin:0 15px;
+}
+.page-headuser .quit-btn>span{
+	font-size: 1.3em;
+}

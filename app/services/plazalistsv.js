@@ -25,7 +25,7 @@ const callback = (req, suc = ()=>{}, err = ()=>{}) => {
 //广场操作列表
 export const getPlazaVerifyListAjax = (params,success) => {
     $get(
-        'http://yunjin.intra.sit.ffan.com/mapeditor/auth/verify/plazas',
+        preAjaxUrl + '/mapeditor/auth/verify/plazas',
         params,
         (req) => {
             callback(req, success);
@@ -36,7 +36,7 @@ export const getPlazaVerifyListAjax = (params,success) => {
 //广场操作历史
 export const getPlazaHistoryAjax = (params,success) => {
     $get(
-        'http://yunjin.intra.sit.ffan.com/mapeditor/auth/verify/his',
+        preAjaxUrl + '/mapeditor/auth/verify/his',
         params,
         (req) => {
             callback(req, success);
@@ -47,7 +47,7 @@ export const getPlazaHistoryAjax = (params,success) => {
 //审核广场
 export const getVerifyPlazaAjax = (params,success) => {
     $get(
-        'http://yunjin.intra.sit.ffan.com/mapeditor/auth/verify',
+        preAjaxUrl + '/mapeditor/auth/verify',
         params,
         (req) => {
             callback(req, success);

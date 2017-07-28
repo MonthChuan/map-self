@@ -8,6 +8,8 @@ import Detail from './detail/detail.jsx';
 // import Submit from './submit/submit.jsx';
 import Access from './access/access';
 import RightBar from './rightbar/rightbar';
+import Logo from '../utils/headlogo/headlogo';
+import HeadUser from '../utils/headuser/headuser';
 
 import { message, Popconfirm } from 'antd'; 
 import { getSelect, setSelect } from './utils/select';
@@ -280,10 +282,12 @@ class EditorPage extends React.Component{
 	render () {
 	    return (
 			<div className="page" id="editor">
-				<div className="edit-topbar">
-					<div className="edit-mid clearfix">
+				<div className="page-header">
+					<div className="page-header-main clearfix">
+						<Logo />
 						<Access />
 						<RightBar />
+						<HeadUser />
 					</div>
 				</div>
 				<div className="e-content edit-mid">

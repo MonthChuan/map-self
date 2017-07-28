@@ -16,7 +16,7 @@ import Split from './split';
 class Control extends React.Component{
   constructor(props) {
     super(props);
-
+    this.newStore = null;
     this.drawPloy = this.drawPloy.bind(this);
     this.deleteStore = this.deleteStore.bind(this);
     this.editRegion = this.editRegion.bind(this);
@@ -76,6 +76,10 @@ class Control extends React.Component{
 
   //商铺修型
   editRegion() {
+    if(this.newStore) {
+      cancelDraw(this.newStore);
+      this.newStore = null;
+    }
     this.props.dispatch({
       type : SET_STATUS,
       status : STATUSCONF.start
@@ -133,6 +137,7 @@ class Control extends React.Component{
       }
     };
     this.clearActiveState();
+    this.newStore = newStore;
 
     this.props.dispatch({
       type: SET_STATUS,
@@ -158,6 +163,7 @@ class Control extends React.Component{
     });
 
     newStore.on('editable:drawing:end', event => {
+        this.newStore = null;
        this.props.store.actionCommand.unshift(new ActionCommand({
           action : '',
           id : newId,
