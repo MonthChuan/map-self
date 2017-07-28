@@ -5,7 +5,7 @@ import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import { createStore } from 'redux';
 import { Provider } from 'react-redux';
-import { Router, Route, hashHistory } from 'react-router';
+import { Router, Route, hashHistory, Redirect } from 'react-router';
 
 import editorReducers from './reducers';
 import LoginPage from './ui/login/login.jsx';
@@ -18,6 +18,7 @@ const Root = ({ store }) => (
     <Router history={hashHistory}>
     <Route path="/login" component={LoginPage}/>
     <Route path="/plazalist" component={PlazaList}/>
+    <Redirect from="/" to="/plazalist" />
     <Route path="/:plazaId(/:key)" component={EditorPage}/>
     </Router>
  </Provider>
