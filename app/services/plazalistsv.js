@@ -44,10 +44,21 @@ export const getPlazaHistoryAjax = (params,success) => {
     );
 };
 
-//审核广场
-export const getVerifyPlazaAjax = (params,success) => {
-    $get(
+//开始审核广场前调用此接口
+export const postVerifyPlazaAjax = (params,success) => {
+    $post(
         preAjaxUrl + '/mapeditor/auth/verify',
+        params,
+        (req) => {
+            callback(req, success);
+        }
+    );
+};
+
+//开始编辑广场前调用此接口
+export const postEditPlazaAjax = (params,success) => {
+    $post(
+        preAjaxUrl + '/mapeditor/auth/edit',
         params,
         (req) => {
             callback(req, success);
