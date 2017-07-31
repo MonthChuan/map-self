@@ -102,20 +102,6 @@ class EditHistory extends React.Component{
 		}
 	}
 
-	//getTableLoading(loadingHistory){
-	//	this.setState({
-	//		loadingHistory: loadingHistory
-	//	});
-	//}
-    //
-	//getPTableState(loadingHistory,dataHistory,paginationHistory){
-	//	this.setState({
-	//		loadingHistory: loadingHistory,
-	//		dataHistory: dataHistory,
-	//		paginationHistory:paginationHistory
-	//	});
-	//}
-
 	render() {
 		return (
 			<Modal 

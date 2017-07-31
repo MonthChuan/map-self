@@ -71,9 +71,9 @@ class Plazatable extends React.Component{
 			      <span className="ant-divider" />
 			      <a href={"#/"+record.plazaId +"/skim/"+record.plazaName} target="_blank" >查看</a>
 			      <span className="ant-divider" />
-			      <a href={"#/"+record.plazaId +"/edit/"+record.plazaName} target="_blank" >编辑</a>
+					<a href={"#/"+record.plazaId +"/edit/"+record.plazaName} target="_blank" >编辑</a>
 			      <span className="ant-divider" />
-			      <a href={"#/"+record.plazaId +"/review/"+record.plazaName} target="_blank" >审核</a>
+					<a href="#" onClick={this.verifyPlaza.bind(this,record.plazaId,record.plazaName)}>审核</a>
 			   </span>
 			  ),
         }];
@@ -89,6 +89,7 @@ class Plazatable extends React.Component{
 		this.handleCancel=this.handleCancel.bind(this);
 		this.fetchHistory = this.fetchHistory.bind(this);
 		this.verifyPlaza=this.verifyPlaza.bind(this);
+		this.editPlaza = this.editPlaza.bind(this);
 	}
 	showModal(id,name){
 		let formatData={};
@@ -103,8 +104,6 @@ class Plazatable extends React.Component{
   	}
 
 	fetchHistory(params){
-		//this.refs["editHis"].getTableLoading(true);
-		//EditHistory.getTableLoading(true);
 		this.setState({
 			loadingHistory:true
 		});
@@ -112,12 +111,26 @@ class Plazatable extends React.Component{
 		Service.getPlazaHistoryAjax(params,(res)=>{
 			let pagination = {};
 			pagination.total = res.data.sum;
+
+			let pLength = res.data.plazas.length;
+			for(let i=0; i< pLength; i++){
+				if(res.data.plazas[i].state == 0){
+					res.data.plazas[i].state = "";
+				}
+				if(res.data.plazas[i].state == 1){
+					res.data.plazas[i].state = "编辑";
+				}
+				if(res.data.plazas[i].state == 2){
+					res.data.plazas[i].state = "审核";
+				}
+			}
+
 			this.setState({
 				loadingHistory:false,
 				dataHistory:res.data.plazas,
 				paginationHistory:pagination
 			});
-			//self.refs["editHis"].getPTableState(false,res.data.list,pagination);
+
 		});
 	}
 
@@ -205,31 +218,72 @@ class Plazatable extends React.Component{
 
 	verifyPlaza(id,plazaName){
 
-		this.setState({ loading: true });
+		//this.setState({ loading: true });
 		let self=this;
 		let sendParams = {};
 		sendParams.plazaId = id;
 
-		Service.getVerifyPlazaAjax(sendParams,(res)=>{
-			//const pagination = self.state.pagination;
-			//pagination.total = res.data.sum
-			self.setState({
-				loading: false
-			});
+		let winHandler = window;
 
-			let msgInfo = "审核成功";
+		Service.postVerifyPlazaAjax(sendParams,(res)=>{
+			//self.setState({
+			//	loading: false
+			//});
+
+			let msgInfo = "";//审核成功
 			if(res.status != 200){
 				msgInfo = res.message;
+				Modal.info({
+					title: '广场：' + plazaName + "不能审核的原因：",
+					content: (
+						<div>
+							<p>{msgInfo}</p>
+						</div>
+					),
+					onOk() {},
+				});
 			}
-			Modal.info({
-				title: '广场：' + plazaName + "审核结果如下：",
-				content: (
-					<div>
-						<p>{msgInfo}</p>
-					</div>
-				),
-				onOk() {},
-			});
+			else{
+				//var newTab=window.open('about:blank');
+				var newTab=winHandler.open('about:blank');
+				newTab.location.href="#/" + id +"/review/" + plazaName;
+			}
+
+		});
+	}
+
+	editPlaza(id,plazaName){
+
+		//this.setState({ loading: true });
+		let self=this;
+		let sendParams = {};
+		sendParams.plazaId = id;
+
+		//const w=window.open('about:blank');
+		let winHandler = window;
+
+		Service.postEditPlazaAjax(sendParams,(res)=>{
+			//self.setState({
+			//	loading: false
+			//});
+
+			let msgInfo = "";//审核成功
+			if(res.status != 200){
+				msgInfo = res.message;
+				Modal.info({
+					title: '广场：' + plazaName + "不能编辑的原因：",
+					content: (
+						<div>
+							<p>{msgInfo}</p>
+						</div>
+					),
+					onOk() {},
+				});
+			}else{
+				var newTab=winHandler.open('about:blank');
+				newTab.location.href="#/" + id +"/edit/" + plazaName;
+			}
+
 		});
 	}
 
