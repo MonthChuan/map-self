@@ -71,7 +71,7 @@ class Plazatable extends React.Component{
 			      <span className="ant-divider" />
 			      <a href={"#/"+record.plazaId +"/skim/"+record.plazaName} target="_blank" >查看</a>
 			      <span className="ant-divider" />
-					<a href={"#/"+record.plazaId +"/edit/"+record.plazaName} target="_blank" >编辑</a>
+					<a href="#" onClick={this.editPlaza.bind(this,record.plazaId,record.plazaName)}>编辑</a>
 			      <span className="ant-divider" />
 					<a href="#" onClick={this.verifyPlaza.bind(this,record.plazaId,record.plazaName)}>审核</a>
 			   </span>
