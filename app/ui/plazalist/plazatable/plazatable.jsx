@@ -69,11 +69,11 @@ class Plazatable extends React.Component{
 			    <span>
 			      <span className="editHistory" onClick={this.showModal.bind(this,record.plazaId,record.plazaName)}>编辑历史</span>
 			      <span className="ant-divider" />
-			      <a href={"#/"+record.plazaId +"/skim/"} target="_blank" >查看</a>
+			      <a href={"#/"+record.plazaId +"/skim/"+record.plazaName} target="_blank" >查看</a>
 			      <span className="ant-divider" />
-			      <a href={"#/"+record.plazaId +"/edit/"} target="_blank" >编辑</a>
+			      <a href={"#/"+record.plazaId +"/edit/"+record.plazaName} target="_blank" >编辑</a>
 			      <span className="ant-divider" />
-			      <a href={"#/"+record.plazaId +"/review/"} target="_blank" >审核</a>
+			      <a href={"#/"+record.plazaId +"/review/"+record.plazaName} target="_blank" >审核</a>
 			   </span>
 			  ),
         }];

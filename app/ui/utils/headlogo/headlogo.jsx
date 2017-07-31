@@ -19,10 +19,15 @@ class HeadLogo extends React.Component{
 	}
     
     render() {
+		let title = '';
+		if(this.props.title) {
+			title = <span className="logo-tit">{this.props.title}</span>
+		}
 		return (
 			<div className="page-header-logo">
 				<span className="logo-txt">飞凡地图</span>
 				<span className="logo-txt2">室内地图编辑平台</span>
+				{title}
 			</div>
 		);
 	}

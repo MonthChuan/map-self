@@ -19,7 +19,7 @@ const Root = ({ store }) => (
     <Route path="/login" component={LoginPage}/>
     <Route path="/plazalist" component={PlazaList}/>
     <Redirect from="/" to="/plazalist" />
-    <Route path="/:plazaId(/:key)" component={EditorPage}/>
+    <Route path="/:plazaId/:key/:plazaName" component={EditorPage}/>
     </Router>
  </Provider>
 );

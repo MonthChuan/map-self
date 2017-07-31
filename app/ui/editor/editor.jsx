@@ -284,10 +284,10 @@ class EditorPage extends React.Component{
 			<div className="page" id="editor">
 				<div className="page-header">
 					<div className="page-header-main clearfix">
-						<Logo />
+						<Logo title={this.props.params.plazaName +'('+ this.props.params.plazaId+')'} />
 						<Access />
-						<RightBar />
 						<HeadUser />
+						<RightBar />
 					</div>
 				</div>
 				<div className="e-content edit-mid">
