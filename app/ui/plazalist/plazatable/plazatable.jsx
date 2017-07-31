@@ -182,7 +182,12 @@ class Plazatable extends React.Component{
 		let plazaNameValue = document.getElementById("plazaNameS");
 		let userNameValue = document.getElementById("userNameS");
 		//sendParams.plazaId = plazaIdValue.props.value;
-		sendParams.plazaId = plazaIdValue.value;
+		let reg = new RegExp("^[0-9]*$");
+		let idValue = -1;
+		if(reg.test(plazaIdValue.value)){
+			idValue = plazaIdValue.value;
+		}
+		sendParams.plazaId = idValue;
 		sendParams.plazaName = plazaNameValue.value;
 		sendParams.userName = userNameValue.value;
 		sendParams.startPage = params.startPage;
