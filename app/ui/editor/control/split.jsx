@@ -59,10 +59,11 @@ class Split extends React.Component{
     else {
       const s0 = curStoreList[0];
 
-      const tmp = turf.intersect(s0.toGeoJSON(), this.line.graphics.toGeoJSON());
-      console.log(tmp)
-      if( 1 ) {
-        //
+      const intersects = turf.intersect(s0.toGeoJSON(), this.line.graphics.toGeoJSON());
+      console.log(intersects)
+      if( intersects ) {
+        const layer = this.props.map.ffmap.drawGeoJSON(intersects);
+         this.props.map.ffmap.addOverlay(layer);
       }
       else {
         Modal.warning({
