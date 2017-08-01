@@ -111,7 +111,9 @@ class Plazatable extends React.Component{
 		Service.getPlazaHistoryAjax(params,(res)=>{
 			let pagination = {};
 			pagination.total = res.data.sum;
-
+			if(res.data.sum == 0){
+				res.data.plazas = [];
+			}
 			let pLength = res.data.plazas.length;
 			for(let i=0; i< pLength; i++){
 				if(res.data.plazas[i].state == 0){
@@ -195,6 +197,9 @@ class Plazatable extends React.Component{
 	    Service.getPlazaVerifyListAjax(sendParams,(res)=>{
 			const pagination = self.state.pagination;
 			pagination.total = res.data.sum;
+			if(res.data.sum == 0){
+				res.data.plazas = [];
+			}
 			let pLength = res.data.plazas.length;
 			for(let i=0; i< pLength; i++){
 				if(res.data.plazas[i].state == 0){
