@@ -1,25 +1,25 @@
 import './floor.css';
 import React from 'react';
 import { connect } from 'react-redux';  
-import { RESET_NEWLAYERS, SET_STORE } from '../../../action/actionTypes';
+import { RESET_NEWLAYERS, SET_STORE, SET_STATUS, SET_FLOORINFO } from '../../../action/actionTypes';
+import STATUSCONF from '../../../config/status';
 import { Select, Modal } from 'antd'; 
 const Option = Select.Option;
 
 class Floor extends React.Component{
   constructor(props) {
     super(props);
-
     this.floorChange = this.floorChange.bind(this);
   }
 
   floorChange(event) {
-    // if(this.props.control.activeType) {
-    //   Modal.warning({
-    //       title : '提示',
-    //       content : '您有未完成的操作，请先完成！'
-    //   });
-    //   return;
-    // }
+    if(this.props.store.store.length > 0) {
+      Modal.warning({
+          title : '提示',
+          content : '您有操作未保存，请先保存！'
+      });
+      return;
+    }
     const floor = event.key;
     const mapStore = this.props.map;
     if(mapStore.newLayers.length > 0) {
@@ -37,14 +37,24 @@ class Floor extends React.Component{
       });
     }
     mapStore.ffmap.chooseFloor(floor);
+    this.props.map.floorData.currentFloor = floor;
+    this.props.dispatch({
+      type : SET_FLOORINFO,
+      info : {
+        'floorData' : this.props.map.floorData
+      }
+    });
     this.props.dispatch({
       type : SET_STORE,
       data : {
         curStore : [],
         bkStore : []
-
       }
-    })
+    });
+    this.props.dispatch({
+      type: SET_STATUS,
+      status : STATUSCONF.start
+    }); 
   }
   
 
@@ -61,7 +71,7 @@ class Floor extends React.Component{
       
       selectTpl = <Select
           labelInValue 
-          defaultValue={{key : floorData.currentFloor}}
+          value={{key : floorData.currentFloor}}
           onChange={this.floorChange}
         >
           {floorList}

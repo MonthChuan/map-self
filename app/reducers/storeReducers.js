@@ -14,7 +14,8 @@ function store(previousState = initialState, action) {
             if(action.data.store) {
                 for(let i = 0, len = action.data.store.length; i < len; i++) {
                     const item = action.data.store[len - i -1];
-                    if(previousState.store.indexOf(item) < 0) {
+                    const idx = previousState.store.indexOf(item);
+                    if(idx < 0 || (previousState.store[idx] && previousState.store[idx].action != item.action)) {
                         previousState.store.unshift(item);
                     }
                 }

@@ -55,8 +55,8 @@ class Merge extends React.Component{
       });
     }
     else {
-      const s0 = storeList[0];
-      const s1 = storeList[1];
+      const s0 = storeList[0].layerDisplay ? storeList[0].layerDisplay : storeList[0];
+      const s1 = storeList[1].layerDisplay ? storeList[1].layerDisplay : storeList[1];
 
       if( s0.getBounds().intersects(s1.getBounds()) ) {
         const union = turf.union(s0.toGeoJSON(), s1.toGeoJSON());
@@ -108,8 +108,8 @@ class Merge extends React.Component{
 
           setSelect(item, false);
         }
-        s0.action = 'DELETE';
-        s1.action = 'DELETE';
+        s0.action = s0.action=='NEW' ? '' : 'DELETE';
+        s1.action = s1.action=='NEW' ? '' : 'DELETE';
         layer.action = 'NEW';
         layer.coorChange = true;
         layer.coordinates = coords;

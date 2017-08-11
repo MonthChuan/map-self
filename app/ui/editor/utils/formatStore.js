@@ -72,4 +72,15 @@ export const formatStore = (obj, getId) => {
         action : obj.action,
         feature : param
     }
-}
+};
+
+export const formatStoreList = (storeList) => {
+    const regionParam = [];
+    storeList.map(item => {
+      if(item.action && item.action != '') {
+        regionParam.push( formatStore(item) );
+      }
+	});
+
+    return regionParam;
+};

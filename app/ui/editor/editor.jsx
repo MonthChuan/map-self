@@ -236,7 +236,12 @@ class EditorPage extends React.Component{
 			type : SET_CONFIRMSHOW,
 			data : false
 		})
-		store0.action = 'DELETE';
+		if(store0.action == 'NEW') {
+			store0.action = '';
+		}
+		else {
+			store0.action = 'DELETE';
+		}
 		
 		const actCommand = new ActionCommand(this.props.store.bkStore[0]);
 		this.props.store.actionCommand.unshift(actCommand);

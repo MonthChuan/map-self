@@ -6,10 +6,11 @@ import { Button, message, Modal } from 'antd';
 import ActionCommand from '../utils/actionCommand';
 
 import * as Service from '../../../services/index';
-import { formatStore } from '../utils/formatStore';
+import { formatStoreList } from '../utils/formatStore';
 import { fixToNormal, cancelDraw } from '../utils/regionFunc';
 import { RESET_STORE, SET_STATUS, SET_STORE } from '../../../action/actionTypes';
 import { getSelect, setSelect } from '../utils/select';
+import STATUSCONF from '../../../config/status';
 
 
 class Access extends React.Component{
@@ -39,13 +40,7 @@ class Access extends React.Component{
 			return;
     }
 
-    let regionParam = [];
-    storeList.map(item => {
-      if(item.action && item.action != '') {
-        regionParam.push( formatStore(item) );
-      }
-		});
-
+    let regionParam = formatStoreList(storeList);
     Service.saveDataAjax(
       preAjaxUrl + '/mapeditor/map/plaza/edit/region/' + map.plazaId + '/' + map.floorId,
       regionParam,
@@ -55,20 +50,6 @@ class Access extends React.Component{
           content : '保存成功！'
         });
       }
-      // ,
-      // () => {
-      //   this.clearActiveState();
-
-      //   this.props.dispatch({
-      //     type : RESET_STORE,
-      //     data : {
-      //       curStore : [],
-      //       store : [],
-      //       bkStore : [],
-      //       actionCommand : []
-      //     }
-      //   })
-      // }
     );
 
     this.clearActiveState();
@@ -80,7 +61,11 @@ class Access extends React.Component{
         bkStore : [],
         actionCommand : []
       }
-    })
+    });
+    this.props.dispatch({
+      type: SET_STATUS,
+      status : STATUSCONF.start
+    });
   }
 
   editEnd() {
@@ -115,10 +100,10 @@ class Access extends React.Component{
     Service.submitCheckAjax(
 			preAjaxUrl + '/mapeditor/map/editVerify/' + this.props.map.plazaId,
 			value,
-			() => {
-				setTimeout(()=>{
-					location.reload();
-				}, 1000);
+			(req) => {
+				 Modal.success({
+          title: '已成功提交审核！'
+        });
 			}
 		)
   }

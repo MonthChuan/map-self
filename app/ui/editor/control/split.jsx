@@ -15,7 +15,11 @@ class Split extends React.Component{
     this.setSplit = this.setSplit.bind(this);
     this.setSubSplit = this.setSubSplit.bind(this);
     this.newStoreId = this.newStoreId.bind(this);
+
+    // this.whichSide = this.whichSide.bind(this);
   }
+
+  // whichSide(p1, p2, p3) {}
 
   newStoreId() {
     const floor = this.props.map;
@@ -58,12 +62,72 @@ class Split extends React.Component{
     }
     else {
       const s0 = curStoreList[0];
+      const lineGeoJSON = this.line.graphics.toGeoJSON();
+      const intersects = turf.intersect(s0.toGeoJSON(), lineGeoJSON);
 
-      const intersects = turf.intersect(s0.toGeoJSON(), this.line.graphics.toGeoJSON());
-      console.log(intersects)
       if( intersects ) {
+        //todo
+        const leftside = [];
+        const rightside = [];
+        const coords = s0.getLatLngs()[0][0];
+        const line = turf.coordAll(lineGeoJSON).map(item => {
+          return new FMap.Geom.LatLng(item[0], item[1]);
+        });
+        const linePoint = line.map(i => {
+          return FMap.Utils.latLngToPoint(i);
+        });
+        const coordsPoint = coords.map(i => {
+          return FMap.Utils.latLngToPoint(i);
+        });
+
+        //将交点插入feature坐标点数组里面
+        let lock = false;
+        for(let i = 0, len = coordsPoint.length; i < len - 1; i++) {
+          const p1 = coordsPoint[i];
+          const p2 = coordsPoint[i + 1];
+          const tmpLine = turf.lineString([[p1.x, p1.y], [p2.x, p2.y]]);
+
+          const intsct = turf.lineIntersect(lineGeoJSON, tmpLine);
+
+          console.log(intsct)
+
+        }
+
+
+        // leftside.push(leftside[0]);
+        // rightside.push(rightside[0])
+console.log(leftside);
+console.log(rightside)
+
+        //移除旧图层
+        s0.remove();
+        if(s0.label) {
+          s0.label.remove();
+        }
+        this.line.remove();
+        this.line = null;
+
+        //画新图层
+        const layer1 = new FMap.Polygon(rightside);
+        this.props.map.ffmap.addOverlay(layer1);
+        // const layer2 = new FMap.Polygon(leftside);
+        // this.props.map.ffmap.addOverlay(layer2);
+
+
+
+
+
+
+
+
+
         const layer = this.props.map.ffmap.drawGeoJSON(intersects);
-         this.props.map.ffmap.addOverlay(layer);
+        this.props.map.ffmap.addOverlay(layer);
+
+
+
+
+
       }
       else {
         Modal.warning({

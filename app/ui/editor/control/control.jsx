@@ -8,6 +8,7 @@ import { noCurStore, noCancelStore } from '../utils/storeListCheck';
 import ActionCommand from '../utils/actionCommand';
 import { SET_STATUS, INCREASE_MAXNUM, SET_CONFIRMSHOW, RESET_STORE, ADD_NEWLAYERS } from '../../../action/actionTypes';
 import STATUSCONF from '../../../config/status';
+import { regionStyle } from '../../../config/drawstyle';
 
 import Floor from '../floor/floor';
 import Merge from './merge';
@@ -61,7 +62,6 @@ class Control extends React.Component{
     if(!noCurStore(curStoreList)) return;
 
     let cur = curStoreList[0];
-    cur.action = 'DELETE';
     this.props.dispatch({
       type : SET_CONFIRMSHOW,
       data : true
@@ -87,8 +87,9 @@ class Control extends React.Component{
     const curStoreList = this.props.store.curStore;
     if(!noCurStore(curStoreList)) return;
     let cur = curStoreList[0];
-
-    cur.action = 'UPDATE';
+    if(!cur.action) {
+      cur.action = 'UPDATE';
+    }
     cur.coorChange = true;
 
     if(cur.enableEdit) {
@@ -124,7 +125,7 @@ class Control extends React.Component{
 
   //新增商铺
   drawPloy() {
-    const newStore = this.props.map.ffmap.startPolygon();
+    const newStore = this.props.map.ffmap.startPolygon(regionStyle);
     newStore.action = "NEW";
     newStore.coorChange = true;
 
@@ -188,11 +189,15 @@ class Control extends React.Component{
   cancelAct() {
     const curStoreList = this.props.store.curStore;
     const actionList = this.props.store.actionCommand;
-    if(!noCancelStore(curStoreList, actionList)) return;
+    if(!noCancelStore(curStoreList, actionList, this.props.control.activeType)) return;
 
     for(let i = 0, l = curStoreList.length; i < l; i++) {
       let item = curStoreList[i]; 
       let actionCommand = actionList[i];
+      if(getSelect(item)) {
+        setSelect(item, false);
+      }
+      if(!actionCommand) break;
       const upData = actionCommand.undo(); //本次修改之前的数据
 
       if(upData.id != item.feature.id) {
@@ -274,8 +279,8 @@ class Control extends React.Component{
         <a title="删除" className={nameList[5]} onClick={this.deleteStore}>
           <i className="s-icon"></i>
         </a>
-        <Merge newNameLabel={this.props.newNameLabel} />
-        <Split newNameLabel={this.props.newNameLabel} />
+        <Merge newNameLabel={this.props.newNameLabel} initFeatureClick={this.props.initFeatureClick} />
+        <Split newNameLabel={this.props.newNameLabel} initFeatureClick={this.props.initFeatureClick} />
         <Floor />
       </div>
     );

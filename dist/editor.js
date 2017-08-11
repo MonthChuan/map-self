@@ -64268,6 +64268,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'setSubSplit',
 	    value: function setSubSplit(store) {
+	      var _this2 = this;
+	
 	      var curStoreList = this.props.store.curStore;
 	      if (curStoreList.length == 0) {
 	        _modal2.default.warning({
@@ -64276,11 +64278,69 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	      } else {
 	        var s0 = curStoreList[0];
+	        var intersects = turf.intersect(s0.toGeoJSON(), this.line.graphics.toGeoJSON());
+	        console.log(intersects);
+	        if (intersects) {
+	          (function () {
+	            //todo
+	            var leftside = [];
+	            var rightside = [];
+	            var coords = s0.getLatLngs()[0][0];
+	            var line = turf.coordAll(intersects).map(function (item) {
+	              return {
+	                lat: item[0],
+	                lng: item[1]
+	              };
+	            });
 	
-	        var tmp = turf.intersect(s0.toGeoJSON(), this.line.graphics.toGeoJSON());
-	        console.log(tmp);
-	        if (1) {
-	          //
+	            var coords2 = [];
+	            coords2.push(coords[0]);
+	
+	            var _loop = function _loop(i, len) {
+	              var p1 = coords[i];
+	              var p2 = coords[i + 1];
+	              line.map(function (c) {
+	                var tmp = (p1.lat - c.lat) * (p2.lng - c.lng) - (p1.lng - c.lng) * (p2.lat - c.lat);
+	                if (tmp == 0) {
+	                  coords2.push(c);
+	                }
+	              });
+	              coords2.push(p2);
+	            };
+	
+	            for (var i = 0, len = coords.length; i < len - 1; i++) {
+	              _loop(i, len);
+	            }
+	
+	            coords2.map(function (i) {
+	              var s = (line[0].lat - i.lat) * (line[1].lng - i.lng) - (line[0].lng - i.lng) * (line[1].lat - i.lat);
+	              if (s > 0) {
+	                leftside.push(i);
+	              } else if (s == 0) {
+	                leftside.push(i);
+	                rightside.push(i);
+	              } else {
+	                rightside.push(i);
+	              }
+	            });
+	
+	            //移除旧图层
+	            s0.remove();
+	            if (s0.label) {
+	              s0.label.remove();
+	            }
+	            _this2.line.remove();
+	            _this2.line = null;
+	
+	            //画新图层
+	            var layer1 = new FMap.Polygon(rightside);
+	            _this2.props.map.ffmap.addOverlay(layer1);
+	            var layer2 = new FMap.Polygon(leftside);
+	            _this2.props.map.ffmap.addOverlay(layer2);
+	
+	            var layer = _this2.props.map.ffmap.drawGeoJSON(intersects);
+	            _this2.props.map.ffmap.addOverlay(layer);
+	          })();
 	        } else {
 	          _modal2.default.warning({
 	            title: '提示',
@@ -67315,13 +67375,13 @@ return /******/ (function(modules) { // webpackBootstrap
 						_react2.default.createElement('span', { className: 'ant-divider' }),
 						_react2.default.createElement(
 							'a',
-							{ href: "#/" + record.plazaId + "/edit/" + record.plazaName, target: '_blank' },
+							{ href: '#', onClick: _this.editPlaza.bind(_this, record.plazaId, record.plazaName) },
 							'\u7F16\u8F91'
 						),
 						_react2.default.createElement('span', { className: 'ant-divider' }),
 						_react2.default.createElement(
 							'a',
-							{ href: "#/" + record.plazaId + "/review/" + record.plazaName, target: '_blank' },
+							{ href: '#', onClick: _this.verifyPlaza.bind(_this, record.plazaId, record.plazaName) },
 							'\u5BA1\u6838'
 						)
 					);
@@ -67339,6 +67399,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			_this.handleCancel = _this.handleCancel.bind(_this);
 			_this.fetchHistory = _this.fetchHistory.bind(_this);
 			_this.verifyPlaza = _this.verifyPlaza.bind(_this);
+			_this.editPlaza = _this.editPlaza.bind(_this);
 			return _this;
 		}
 	
@@ -67360,8 +67421,6 @@ return /******/ (function(modules) { // webpackBootstrap
 			value: function fetchHistory(params) {
 				var _this2 = this;
 	
-				//this.refs["editHis"].getTableLoading(true);
-				//EditHistory.getTableLoading(true);
 				this.setState({
 					loadingHistory: true
 				});
@@ -67369,12 +67428,27 @@ return /******/ (function(modules) { // webpackBootstrap
 				Service.getPlazaHistoryAjax(params, function (res) {
 					var pagination = {};
 					pagination.total = res.data.sum;
+					if (res.data.sum == 0) {
+						res.data.plazas = [];
+					}
+					var pLength = res.data.plazas.length;
+					for (var i = 0; i < pLength; i++) {
+						if (res.data.plazas[i].state == 0) {
+							res.data.plazas[i].state = "";
+						}
+						if (res.data.plazas[i].state == 1) {
+							res.data.plazas[i].state = "编辑";
+						}
+						if (res.data.plazas[i].state == 2) {
+							res.data.plazas[i].state = "审核";
+						}
+					}
+	
 					_this2.setState({
 						loadingHistory: false,
 						dataHistory: res.data.plazas,
 						paginationHistory: pagination
 					});
-					//self.refs["editHis"].getPTableState(false,res.data.list,pagination);
 				});
 			}
 		}, {
@@ -67428,7 +67502,12 @@ return /******/ (function(modules) { // webpackBootstrap
 				var plazaNameValue = document.getElementById("plazaNameS");
 				var userNameValue = document.getElementById("userNameS");
 				//sendParams.plazaId = plazaIdValue.props.value;
-				sendParams.plazaId = plazaIdValue.value;
+				var reg = new RegExp("^[0-9]*$");
+				var idValue = -1;
+				if (reg.test(plazaIdValue.value)) {
+					idValue = plazaIdValue.value;
+				}
+				sendParams.plazaId = idValue;
 				sendParams.plazaName = plazaNameValue.value;
 				sendParams.userName = userNameValue.value;
 				sendParams.startPage = params.startPage;
@@ -67436,6 +67515,9 @@ return /******/ (function(modules) { // webpackBootstrap
 				Service.getPlazaVerifyListAjax(sendParams, function (res) {
 					var pagination = self.state.pagination;
 					pagination.total = res.data.sum;
+					if (res.data.sum == 0) {
+						res.data.plazas = [];
+					}
 					var pLength = res.data.plazas.length;
 					for (var i = 0; i < pLength; i++) {
 						if (res.data.plazas[i].state == 0) {
@@ -67465,35 +67547,78 @@ return /******/ (function(modules) { // webpackBootstrap
 			key: 'verifyPlaza',
 			value: function verifyPlaza(id, plazaName) {
 	
-				this.setState({ loading: true });
+				//this.setState({ loading: true });
 				var self = this;
 				var sendParams = {};
 				sendParams.plazaId = id;
 	
-				Service.getVerifyPlazaAjax(sendParams, function (res) {
-					//const pagination = self.state.pagination;
-					//pagination.total = res.data.sum
-					self.setState({
-						loading: false
-					});
+				var winHandler = window;
 	
-					var msgInfo = "审核成功";
+				Service.postVerifyPlazaAjax(sendParams, function (res) {
+					//self.setState({
+					//	loading: false
+					//});
+	
+					var msgInfo = ""; //审核成功
 					if (res.status != 200) {
 						msgInfo = res.message;
-					}
-					_modal2.default.info({
-						title: '广场：' + plazaName + "审核结果如下：",
-						content: _react2.default.createElement(
-							'div',
-							null,
-							_react2.default.createElement(
-								'p',
+						_modal2.default.info({
+							title: '广场：' + plazaName + "不能审核的原因：",
+							content: _react2.default.createElement(
+								'div',
 								null,
-								msgInfo
-							)
-						),
-						onOk: function onOk() {}
-					});
+								_react2.default.createElement(
+									'p',
+									null,
+									msgInfo
+								)
+							),
+							onOk: function onOk() {}
+						});
+					} else {
+						//var newTab=window.open('about:blank');
+						var newTab = winHandler.open('about:blank');
+						newTab.location.href = "#/" + id + "/review/" + plazaName;
+					}
+				});
+			}
+		}, {
+			key: 'editPlaza',
+			value: function editPlaza(id, plazaName) {
+	
+				//this.setState({ loading: true });
+				var self = this;
+				var sendParams = {};
+				sendParams.plazaId = id;
+	
+				//const w=window.open('about:blank');
+				var winHandler = window;
+	
+				Service.postEditPlazaAjax(sendParams, function (res) {
+					//self.setState({
+					//	loading: false
+					//});
+	
+					var msgInfo = ""; //审核成功
+					if (res.status != 200) {
+						msgInfo = res.message;
+						_modal2.default.info({
+							title: '广场：' + plazaName + "不能编辑的原因：",
+							content: _react2.default.createElement(
+								'div',
+								null,
+								_react2.default.createElement(
+									'p',
+									null,
+									msgInfo
+								)
+							),
+							onOk: function onOk() {}
+						});
+					} else {
+						var newTab = winHandler.open('about:blank');
+						newTab.location.href = "#/" + id + "/edit/" + plazaName;
+					}
 				});
 			}
 		}, {
@@ -73979,21 +74104,6 @@ return /******/ (function(modules) { // webpackBootstrap
 					this.setState({ paginationHistory: nextProps.paginationHistory });
 				}
 			}
-	
-			//getTableLoading(loadingHistory){
-			//	this.setState({
-			//		loadingHistory: loadingHistory
-			//	});
-			//}
-			//
-			//getPTableState(loadingHistory,dataHistory,paginationHistory){
-			//	this.setState({
-			//		loadingHistory: loadingHistory,
-			//		dataHistory: dataHistory,
-			//		paginationHistory:paginationHistory
-			//	});
-			//}
-	
 		}, {
 			key: 'render',
 			value: function render() {
@@ -74075,7 +74185,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.getVerifyPlazaAjax = exports.getPlazaHistoryAjax = exports.getPlazaVerifyListAjax = undefined;
+	exports.postEditPlazaAjax = exports.postVerifyPlazaAjax = exports.getPlazaHistoryAjax = exports.getPlazaVerifyListAjax = undefined;
 	
 	var _modal = __webpack_require__(579);
 	
@@ -74121,9 +74231,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	};
 	
-	//审核广场
-	var getVerifyPlazaAjax = exports.getVerifyPlazaAjax = function getVerifyPlazaAjax(params, success) {
-	    (0, _ajax.$get)(preAjaxUrl + '/mapeditor/auth/verify', params, function (req) {
+	//开始审核广场前调用此接口
+	var postVerifyPlazaAjax = exports.postVerifyPlazaAjax = function postVerifyPlazaAjax(params, success) {
+	    (0, _ajax.$post)(preAjaxUrl + '/mapeditor/auth/verify', params, function (req) {
+	        callback(req, success);
+	    });
+	};
+	
+	//开始编辑广场前调用此接口
+	var postEditPlazaAjax = exports.postEditPlazaAjax = function postEditPlazaAjax(params, success) {
+	    (0, _ajax.$post)(preAjaxUrl + '/mapeditor/auth/edit', params, function (req) {
 	        callback(req, success);
 	    });
 	};
