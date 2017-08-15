@@ -280,7 +280,7 @@ class Control extends React.Component{
           <i className="s-icon"></i>
         </a>
         <Merge newNameLabel={this.props.newNameLabel} initFeatureClick={this.props.initFeatureClick} />
-        <Split newNameLabel={this.props.newNameLabel} initFeatureClick={this.props.initFeatureClick} />
+        {/*<Split newNameLabel={this.props.newNameLabel} initFeatureClick={this.props.initFeatureClick} />*/}
         <Floor />
       </div>
     );

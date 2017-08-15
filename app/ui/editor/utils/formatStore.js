@@ -42,10 +42,10 @@ export const formatStore = (obj, getId) => {
                     }
                 }
                 
-                if(obj.coordinates) {
-                    coords = obj.coordinates;
-                }
-                else {
+                // if(obj.coordinates) {
+                //     coords = obj.coordinates;
+                // }
+                // else {
                     coordsList = FMap.Utils.getOriginalByLatlngs(obj.getLatLngs());
                     if(coordsList[0].length > 1) {
                         coords = coordsList[0];
@@ -53,7 +53,7 @@ export const formatStore = (obj, getId) => {
                     else {
                         coords = coordsList[0][0];
                     }
-                }
+                // }
             }
             
             centerPointXY = FMap.Utils.toOriginalCoordinates(centerPoint);

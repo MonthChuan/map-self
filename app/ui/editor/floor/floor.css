@@ -1,6 +1,9 @@
 .floor-wrap {
   display: inline-block;
 }
+.floor-wrap .ant-select-selection__rendered {
+  padding: 0 5px;
+}
 
 .floor-wrap .ant-select-selection {
   border: 0;
