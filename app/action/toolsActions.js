@@ -9,7 +9,6 @@ function addRegion() {
 
 
 function editStart() {
-  console.log('action')
   return {
     type : actionTypes.EDIT_START
   }

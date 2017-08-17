@@ -19,13 +19,10 @@ class Submit extends React.Component{
 	}
 
 	onRadioChange(e) {
-		console.log('radio')
 		this.setState({'checkStatus' : e.target.value});
 	}
 
 	submitCheck(e) {
-		console.log('submit')
-
 		Service.submitCheckAjax(
 			preAjaxUrl + '/mapeditor/map/editVerify/' + this.props.map.plazaId,
 			this.state.checkStatus,

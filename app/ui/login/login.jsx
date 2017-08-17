@@ -24,7 +24,6 @@ class Login extends React.Component{
 		e.preventDefault();
 		this.clearTxt();
 		this.props.form.validateFields((err, values) => {
-			console.log(values)
 			values.password = md5.hex(values.password);
 			if (!err) {
 				Service.userLogin(values, (req) => {
