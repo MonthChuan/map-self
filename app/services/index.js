@@ -25,7 +25,7 @@ const callback = (req, suc = ()=>{}, err = ()=>{}) => {
 //获取广场列表
 export const getPlazaListAjax = (success) => {
     $get(
-        'http://yunjin.intra.sit.ffan.com/mapeditor/plaza/v1/indoor/plazas',
+        window.preAjaxUrl + '/mapeditor/plaza/v1/indoor/plazas',
         {'pageSize' : 100},
         (req) => {
             callback(req, success);
@@ -81,10 +81,21 @@ export const submitCheckAjax = (url, checkStatus, success) => {
 //获取业态分类数据
 export const getCatgoryAjax = (success) => {
     $get(
-        'http://yunjin.intra.sit.ffan.com/mapeditor/category/categoryCodes',
+        window.preAjaxUrl + '/mapeditor/category/categoryCodes',
         null,
         (req) => {
             callback(req, success);
         }
     );
 }
+
+//用户登陆
+export const userLogin = (data, success) => {
+     $post(
+        window.preAjaxUrl + '/mapeditor/user/v1/login?phone=' + data.phone + '&password=' + data.password,
+        null,
+        (req) => {
+            success(req);
+        }
+    );
+};

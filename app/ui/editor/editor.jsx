@@ -1,11 +1,9 @@
 import './editorpage.css';
 import React from 'react'; 
 import { connect } from 'react-redux';
-
-// import PlazaSelect from './plazaselect/plazaselect.jsx';  
+  
 import Control from './control/control';  
 import Detail from './detail/detail.jsx';
-// import Submit from './submit/submit.jsx';
 import Access from './access/access';
 import RightBar from './rightbar/rightbar';
 import Logo from '../utils/headlogo/headlogo';
@@ -23,11 +21,6 @@ import STATUSCONF from '../../config/status';
 class EditorPage extends React.Component{
 	constructor(props) {
 		super(props);
-
-// console.log(this.props.params.plazaId)
-
-
-
 		this.preDeleteStore = null;
 		this.newNameLabel = this.newNameLabel.bind(this);
 		this.initFeatureClick = this.initFeatureClick.bind(this);
@@ -127,7 +120,7 @@ class EditorPage extends React.Component{
 			zoom : 20,
 			editable : true,
 			regionInteractive : true,
-			baseAPI : 'http://yunjin.intra.sit.ffan.com/mapeditor/map'
+			baseAPI : window.mapBaseAPI
 		});
 		this.props.dispatch({
 			type : ADD_MAP,
@@ -178,15 +171,6 @@ class EditorPage extends React.Component{
 				}
 			});
 		});
-
-		// map.on('editable:editing', event => {
-		// 	if(this.props.control.activeType != '') {
-		// 		this.props.dispatch({
-		// 			type: SET_STATUS,
-		// 			status : STATUSCONF.start
-		// 		});
-		// 	}
-		// });
 
 		map.on('editable:dragend', event => {
 			const region = event.layer;

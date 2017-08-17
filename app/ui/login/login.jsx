@@ -1,6 +1,7 @@
 import './loginpage.css';
 import React from 'react'; 
 import { connect } from 'react-redux';
+import * as Service from '../../services/index';
 import { Form, Icon, Input, Button, Checkbox } from 'antd';
 import { SET_USERINFO } from '../../action/actionTypes';
 import md5 from 'js-md5';
@@ -26,13 +27,8 @@ class Login extends React.Component{
 			console.log(values)
 			values.password = md5.hex(values.password);
 			if (!err) {
-				$.ajax({
-					'url' : preAjaxUrl + '/mapeditor/user/v1/login?phone=' + values.phone + '&password=' + values.password,
-					'type' : 'POST',
-					'dataType' : 'json'
-				}).done( req => {
+				Service.userLogin(values, (req) => {
 					if(req.status == 200) {
-						//页面跳转
 						localStorage.setItem("userData",JSON.stringify(req.data));
 						this.props.setUser(req.data);
 					}
@@ -119,12 +115,6 @@ class LoginPage extends React.Component{
 
 		this.setUser = this.setUser.bind(this);
 	}
-
-	// componentDidMount() {
-	// 	if(this.props.map.ffmap) {
-	// 		this.props.map.ffmap.destroy();
-	// 	}
-	// }
 
 	setUser(data) {
 		this.props.dispatch({

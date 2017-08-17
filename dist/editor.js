@@ -58073,7 +58073,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	          _react2.default.createElement('i', { className: 's-icon' })
 	        ),
 	        _react2.default.createElement(_merge2.default, { newNameLabel: this.props.newNameLabel, initFeatureClick: this.props.initFeatureClick }),
-	        _react2.default.createElement(_split2.default, { newNameLabel: this.props.newNameLabel, initFeatureClick: this.props.initFeatureClick }),
 	        _react2.default.createElement(_floor2.default, null)
 	      );
 	    }
@@ -63982,7 +63981,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	
 	// module
-	exports.push([module.id, ".floor-wrap {\n  display: inline-block;\n}\n\n.floor-wrap .ant-select-selection {\n  border: 0;\n}\n\n.floor-wrap .ant-select-focused .ant-select-selection, \n.floor-wrap .ant-select-selection:focus, \n.floor-wrap .ant-select-selection:active,\n.floor-wrap .ant-select-open .ant-select-selection {\n  outline: none;\n  box-shadow: none;\n}", "", {"version":3,"sources":["/./app/ui/editor/floor/floor.css"],"names":[],"mappings":"AAAA;EACE,sBAAsB;CACvB;;AAED;EACE,UAAU;CACX;;AAED;;;;EAIE,cAAc;EACd,iBAAiB;CAClB","file":"floor.css","sourcesContent":[".floor-wrap {\n  display: inline-block;\n}\n\n.floor-wrap .ant-select-selection {\n  border: 0;\n}\n\n.floor-wrap .ant-select-focused .ant-select-selection, \n.floor-wrap .ant-select-selection:focus, \n.floor-wrap .ant-select-selection:active,\n.floor-wrap .ant-select-open .ant-select-selection {\n  outline: none;\n  box-shadow: none;\n}"],"sourceRoot":"webpack://"}]);
+	exports.push([module.id, ".floor-wrap {\n  display: inline-block;\n}\n.floor-wrap .ant-select-selection__rendered {\n  padding: 0 5px;\n}\n\n.floor-wrap .ant-select-selection {\n  border: 0;\n}\n\n.floor-wrap .ant-select-focused .ant-select-selection, \n.floor-wrap .ant-select-selection:focus, \n.floor-wrap .ant-select-selection:active,\n.floor-wrap .ant-select-open .ant-select-selection {\n  outline: none;\n  box-shadow: none;\n}", "", {"version":3,"sources":["/./app/ui/editor/floor/floor.css"],"names":[],"mappings":"AAAA;EACE,sBAAsB;CACvB;AACD;EACE,eAAe;CAChB;;AAED;EACE,UAAU;CACX;;AAED;;;;EAIE,cAAc;EACd,iBAAiB;CAClB","file":"floor.css","sourcesContent":[".floor-wrap {\n  display: inline-block;\n}\n.floor-wrap .ant-select-selection__rendered {\n  padding: 0 5px;\n}\n\n.floor-wrap .ant-select-selection {\n  border: 0;\n}\n\n.floor-wrap .ant-select-focused .ant-select-selection, \n.floor-wrap .ant-select-selection:focus, \n.floor-wrap .ant-select-selection:active,\n.floor-wrap .ant-select-open .ant-select-selection {\n  outline: none;\n  box-shadow: none;\n}"],"sourceRoot":"webpack://"}]);
 	
 	// exports
 
@@ -66662,16 +66661,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    }
 	                }
 	
-	                if (obj.coordinates) {
-	                    coords = obj.coordinates;
+	                // if(obj.coordinates) {
+	                //     coords = obj.coordinates;
+	                // }
+	                // else {
+	                coordsList = FMap.Utils.getOriginalByLatlngs(obj.getLatLngs());
+	                if (coordsList[0].length > 1) {
+	                    coords = coordsList[0];
 	                } else {
-	                    coordsList = FMap.Utils.getOriginalByLatlngs(obj.getLatLngs());
-	                    if (coordsList[0].length > 1) {
-	                        coords = coordsList[0];
-	                    } else {
-	                        coords = coordsList[0][0];
-	                    }
+	                    coords = coordsList[0][0];
 	                }
+	                // }
 	            }
 	
 	            centerPointXY = FMap.Utils.toOriginalCoordinates(centerPoint);
