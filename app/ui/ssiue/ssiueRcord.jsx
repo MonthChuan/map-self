@@ -1,10 +1,10 @@
-import './plazalistpage.css';
+import '../plazalist/plazalistpage.css';
 import React from 'react';
 import { connect } from 'react-redux';
 // import Header from './header/header.jsx';
-import Plazatable from './plazatable/plazatable.jsx';
+import Plazatable from '../plazalist/plazatable/plazatable.jsx';
 
-import Logo from '../utils/headlogo/headlogo';
+import Logo from '..//utils/headlogo/headlogo';
 import HeadUser from '../utils/headuser/headuser';
 
 /**
@@ -19,10 +19,10 @@ class PlazaList extends React.Component{
     componentDidMount() {}
     render() {
 		return (
-			<div id="plazalist" className="mid">
+			<div id="ssiue" className="mid">
 				<div className="page-header">
 					<div className="page-header-main clearfix">
-						<Logo title="母库管理" />
+						<Logo title="发布记录" />
 						<HeadUser />
 					</div>
 				</div>

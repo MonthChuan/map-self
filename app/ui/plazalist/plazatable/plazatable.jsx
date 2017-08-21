@@ -2,7 +2,7 @@ import './plazatablepage.css';
 import React from 'react';
 import { connect } from 'react-redux';
 import EditHistory from '../editHistory/editHistory.jsx';
-import { Modal, Table, Icon , Input , Checkbox } from 'antd';
+import { Modal, Table, Icon , Input , Checkbox , Button } from 'antd';
 import { $ajax, $get, $post } from '../../../services/ajax.js';
 import * as Service from '../../../services/plazalistsv.js';
 const Search = Input.Search;
@@ -15,6 +15,8 @@ class Plazatable extends React.Component{
 			data:[],
 			pagination: {},
     		loading: false,
+			columns: this.columns,
+			
     	}
 		//筛选条件
 		this.item={
@@ -26,7 +28,8 @@ class Plazatable extends React.Component{
 			userName:"",
 		};
 		//列名
-		this.columns = [{
+			//发布页表头
+			this.ssiueColumns = [{
 			  title: '广场ID',
  			  dataIndex: 'plazaId',
 			  key: 'plazaId',
@@ -42,22 +45,75 @@ class Plazatable extends React.Component{
 			  key: 'state',
 			  //render: text => {return text==0?"已完成":"编辑中"} ,
 			  sorter: (a, b) => a.state - b.state,
-			}, 
-			{
-			  title: '最新编辑',
-			  dataIndex: 'editor',
-			  key: 'editor',
-			  
 			}, {
-			  title: '最近审核',
-			  dataIndex: 'verifier',
-			  key: 'verifier',
+				title: '用户名',
+				dataindex: 'user',
+				key: 'user',
+
+				 },{
+				title: '用户id',
+				dataIndex: 'userId',
+				key: 'userId',
 			},
-			{
-			  title: '编辑/审核备注',
-			  dataIndex: 'remark',
-			  key: 'remark',
+			 {
+			  title: '开始时间',
+			  dataIndex: 'time',
+			  key: 'time',
+			 
+			},
+		
+			 {
+			  title: '结束时间',
+			  dataIndex: 'time',
+			  key: 'endtime',
+			 
+			},{
+			  title: '操作',
+			  key: 'action',
+			  render: (text, record) => (
+			    <span>
+			      <span className="editHistory" onClick={this.showModal.bind(this,record.plazaId,record.plazaName)}>发布</span>
+				 <span className="ant-divider" />
+			      <a href={"#/"+record.plazaId +"/skim/"+record.plazaName} target="_blank" >出入库记录</a>
+			      <span className="ant-divider" />
+			      <a href={"#/"+record.plazaId +"/skim/"+record.plazaName} target="_blank" >查看地图</a>
+			      <span className="ant-divider" />
+					<a href="#" onClick={this.editPlaza.bind(this,record.plazaId,record.plazaName)}>解锁</a>
+			      <span className="ant-divider" />
+					<a href="#" onClick={this.verifyPlaza.bind(this,record.plazaId,record.plazaName)}>加锁</a>
+			   </span>
+			  ),
+        }];
+			//列表页表头
+			this.columns = [{
+			  title: '广场ID',
+ 			  dataIndex: 'plazaId',
+			  key: 'plazaId',
+			  sorter: (a, b) => a.plazaId - b.plazaId,
 			}, {
+			  title: '广场名称',
+			  dataIndex: 'plazaName',
+			  key: 'plazaName',
+			  sorter: (a, b) => a.plazaName.length - b.plazaName.length,
+			}, {
+			  title: '状态',
+			  dataIndex: 'state',
+			  key: 'state',
+			  //render: text => {return text==0?"已完成":"编辑中"} ,
+			  sorter: (a, b) => a.state - b.state,
+			}, {
+				title: '锁定用户',
+				dataindex: 'user',
+				key: 'user',
+
+				 },{
+				title: '锁定id',
+				dataIndex: 'userId',
+				key: 'userId',
+			},
+			
+		
+			 {
 			  title: '更新时间',
 			  dataIndex: 'time',
 			  key: 'time',
@@ -67,13 +123,15 @@ class Plazatable extends React.Component{
 			  key: 'action',
 			  render: (text, record) => (
 			    <span>
-			      <span className="editHistory" onClick={this.showModal.bind(this,record.plazaId,record.plazaName)}>编辑历史</span>
+			      <span className="editHistory" onClick={this.showModal.bind(this,record.plazaId,record.plazaName)}>发布</span>
+				 <span className="ant-divider" />
+			      <a href={"#/"+record.plazaId +"/skim/"+record.plazaName} target="_blank" >出入库记录</a>
 			      <span className="ant-divider" />
-			      <a href={"#/"+record.plazaId +"/skim/"+record.plazaName} target="_blank" >查看</a>
+			      <a href={"#/"+record.plazaId +"/skim/"+record.plazaName} target="_blank" >查看地图</a>
 			      <span className="ant-divider" />
-					<a href="#" onClick={this.editPlaza.bind(this,record.plazaId,record.plazaName)}>编辑</a>
+					<a href="#" onClick={this.editPlaza.bind(this,record.plazaId,record.plazaName)}>解锁</a>
 			      <span className="ant-divider" />
-					<a href="#" onClick={this.verifyPlaza.bind(this,record.plazaId,record.plazaName)}>审核</a>
+					<a href="#" onClick={this.verifyPlaza.bind(this,record.plazaId,record.plazaName)}>加锁</a>
 			   </span>
 			  ),
         }];
@@ -138,6 +196,7 @@ class Plazatable extends React.Component{
 
 	handleCancel(){
    	 	this.setState({ visible: false });
+
     }
 	handleTableChange(pagination){
 		const pager = this.state.pagination;
@@ -301,6 +360,10 @@ class Plazatable extends React.Component{
 		this.item.pageSize=10;
 		this.item.startPage=1;
 	    this.fetch(this.item);
+	
+		
+
+			
 	}
 	inEditChange(e) {
     	this.item.editing=!this.item.editing;
@@ -344,13 +407,49 @@ class Plazatable extends React.Component{
 		formatData.startPage=1;
 		this.fetch(formatData);
 	}
+	// componentWillReceiveprops() {
+	// 		var table = document.getElementsByTagName('Table')[0];
+		
+	// 	var reg = /(ssiue)$/;
+	// 	var bool = reg.test(this.str)
+	// 	if(true) {
+			
+	// 		this.columns = this.ssiueColumns;
+			
+	// 	}
+	// }
+	//判断不同页面的不同显隐
+	ssiueHidd() {
+		this.str = window.location.href;
+		var reg = /(ssiue)$/;
+		var bool = reg.test(this.str)
+		var showArr = document.getElementsByClassName("show");
+		console.log(showArr);
+		if(bool == true) {
+			alert(1);
+			
+			
+			for(var i=0;i<showArr.length;i++) {
+				showArr[i].classList.add('hidd');
+			}
+			this.setState();
+			return true;
+		}
+
+		
+	}
+	//判断不同页面改变table组件的属性
+	componentWillMount() {
+		this.ssiueHidd();
+	}
+	
 	render() {
 		return (
 			<div id="plazatable">
 				<div className="filter-item">
-					<Checkbox defaultChecked="true" onChange={this.inEditChange}>编辑中</Checkbox>
-					<Checkbox defaultChecked="true" onChange={this.inReviewChange}>审核中</Checkbox>
-					<Checkbox defaultChecked="true" onChange={this.myPlazaChange}>我的广场</Checkbox>
+					<Checkbox defaultChecked="true" onChange={this.inEditChange} className="show">未锁定</Checkbox>
+					<Checkbox defaultChecked="true" onChange={this.inReviewChange} className="show">已锁定</Checkbox>
+				
 			  		<Search
 						id="plazaIdS"
 			  		 placeholder="广场ID"
@@ -369,6 +468,8 @@ class Plazatable extends React.Component{
 				    style={{ width: 200 }}
 				    onSearch={value => this.userNameSearch(value)}
 				 	/>
+					 <Button onClick={this.showConfirm} className="quit-btn issue-btn show" type="primary">发布中</Button>
+					 <a href="#/ssiue" target="_blank"><Button onClick={this.showConfirm} className="quit-btn issue-btn show" type="primary">发布记录</Button></a>
 				</div>
 				<EditHistory
 					ref="editHis"
@@ -381,7 +482,8 @@ class Plazatable extends React.Component{
 					dataHistory={this.state.dataHistory}
 					paginationHistory={this.state.paginationHistory}
 				/>
-				<Table columns={this.columns}
+			
+						<Table columns={this.columns}
 				       //rowKey={record => record.registered}
 					   rowKey={record => record.plazaId}
 				       dataSource={this.state.data}
@@ -389,6 +491,8 @@ class Plazatable extends React.Component{
 				       loading={this.state.loading}
 				       onChange={this.handleTableChange}
       			/>
+				
+			
       		</div>
 		);
 	}

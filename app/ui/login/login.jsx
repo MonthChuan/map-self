@@ -9,7 +9,7 @@ const FormItem = Form.Item;
 
 class Login extends React.Component{
 	constructor(props) {
-		super(props);
+		super(props);  //这样写的目的是让this.props可用
 		this.state = {
 			reqMessage : ''
 		};

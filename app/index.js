@@ -11,13 +11,15 @@ import editorReducers from './reducers';
 import LoginPage from './ui/login/login.jsx';
 import EditorPage from './ui/editor/editor.jsx';
 import PlazaList from './ui/plazalist/PlazaList';
-
+import Ssiue from './ui/ssiue/ssiueRcord.jsx'
+ 
 // create root component
 const Root = ({ store }) => (
 <Provider store={store}>
     <Router history={hashHistory}>
     <Route path="/login" component={LoginPage}/>
     <Route path="/plazalist" component={PlazaList}/>
+    <Route path="/ssiue" component={Ssiue}/>
     <Redirect from="/" to="/plazalist" />
     <Route path="/:plazaId/:key/:plazaName" component={EditorPage}/>
     </Router>

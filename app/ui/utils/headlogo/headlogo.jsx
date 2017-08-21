@@ -26,7 +26,7 @@ class HeadLogo extends React.Component{
 		return (
 			<div className="page-header-logo">
 				<span className="logo-txt">飞凡地图</span>
-				<span className="logo-txt2">室内地图编辑平台</span>
+				<span className="logo-txt2">地图数据管理平台</span>
 				{title}
 			</div>
 		);

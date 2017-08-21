@@ -29,3 +29,24 @@
 .ant-table-pagination{
 	margin-right: 10px;
 }
+.issue-btn{
+	margin-left: 20px;
+}
+.ant-table-thead > tr > th:nth-child(4) span{
+	display:block;
+	cursor: pointer;
+	border-radius: 5px;
+	background-color: pink;
+	
+}
+.ant-table-thead > tr > th:nth-child(5) span{
+	display:block;
+	cursor: pointer;
+	border-radius: 5px;
+	background-color: pink;
+	
+}
+
+.hidd{
+	display: none;
+}

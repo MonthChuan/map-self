@@ -17,7 +17,7 @@ const server = new WebpackDevServer(compiler, {
   stats: {
     colors: true
   },
-  port : 8080
+  port : 3001
   ,
   proxy: {
     '/mapeditor': {
@@ -30,4 +30,4 @@ const server = new WebpackDevServer(compiler, {
   }
 });
 
-server.listen(8080);
+server.listen(8081);
